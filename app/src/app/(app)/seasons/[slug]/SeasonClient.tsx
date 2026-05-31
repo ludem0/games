@@ -3,7 +3,16 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import type { Role } from '@/lib/types'
+import CubeSimply from '@/components/CubeSimply'
+import CubeZero from '@/components/CubeZero'
+import CubeGambit from '@/components/CubeGambit'
 import styles from './season.module.css'
+
+const CUBES: Record<string, React.ComponentType> = {
+  simply: CubeSimply,
+  zero: CubeZero,
+  gambit: CubeGambit,
+}
 
 interface Props {
   slug: string
@@ -11,7 +20,6 @@ interface Props {
   status: 'done' | 'active' | 'soon'
   statusLabel: string
   accent: string
-  Cube: React.ComponentType
   role: Role
   username: string
   initialParticipants: string[]
@@ -19,9 +27,10 @@ interface Props {
 }
 
 export default function SeasonClient({
-  slug, name, status, statusLabel, accent, Cube,
+  slug, name, status, statusLabel, accent,
   role, username, initialParticipants, allPlayers,
 }: Props) {
+  const Cube = CUBES[slug] ?? CubeSimply
   const [participants, setParticipants] = useState(initialParticipants)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)

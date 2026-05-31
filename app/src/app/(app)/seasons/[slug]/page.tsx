@@ -2,21 +2,17 @@ import { cookies } from 'next/headers'
 import { redirect, notFound } from 'next/navigation'
 import { verifyToken, getUsers } from '@/lib/auth'
 import { getParticipants } from '@/lib/seasons'
-import CubeSimply from '@/components/CubeSimply'
-import CubeZero from '@/components/CubeZero'
-import CubeGambit from '@/components/CubeGambit'
 import SeasonClient from './SeasonClient'
 
 const SEASONS: Record<string, {
   name: string
   status: 'done' | 'active' | 'soon'
   statusLabel: string
-  Cube: React.ComponentType
   accent: string
 }> = {
-  simply: { name: 'PG: Simply',        status: 'done',   statusLabel: 'Завершён', Cube: CubeSimply, accent: '#FFE033' },
-  zero:   { name: 'PG: Zero',          status: 'done',   statusLabel: 'Завершён', Cube: CubeZero,   accent: '#E0E0E0' },
-  gambit: { name: 'PG: Puzzle Gambit', status: 'active', statusLabel: 'Идёт',     Cube: CubeGambit, accent: '#B026FF' },
+  simply: { name: 'PG: Simply',        status: 'done',   statusLabel: 'Завершён', accent: '#FFE033' },
+  zero:   { name: 'PG: Zero',          status: 'done',   statusLabel: 'Завершён', accent: '#E0E0E0' },
+  gambit: { name: 'PG: Puzzle Gambit', status: 'active', statusLabel: 'Идёт',     accent: '#B026FF' },
 }
 
 export default async function SeasonPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -42,7 +38,6 @@ export default async function SeasonPage({ params }: { params: Promise<{ slug: s
       status={season.status}
       statusLabel={season.statusLabel}
       accent={season.accent}
-      Cube={season.Cube}
       role={user.role}
       username={user.username}
       initialParticipants={participants}
