@@ -1,63 +1,48 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import type { Leaderboard, LeaderboardRow } from '@/lib/seasons'
 import styles from './season.module.css'
 
 interface Props {
   slug: string
   accent: string
   isAdmin: boolean
-  initialLeaderboard: Leaderboard
+  initialRanks: string[]
+  participants: string[]
 }
 
-const MEDALS = ['🥇', '🥈', '🥉']
+const RANK_STYLES = [
+  { label: '1', color: '#FFD700', glow: 'rgba(255,215,0,0.25)', border: 'rgba(255,215,0,0.5)' },
+  { label: '2', color: '#C0C0C0', glow: 'rgba(192,192,192,0.2)', border: 'rgba(192,192,192,0.4)' },
+  { label: '3', color: '#CD7F32', glow: 'rgba(205,127,50,0.2)', border: 'rgba(205,127,50,0.4)' },
+]
 
-export default function LeaderboardSection({ slug, accent, isAdmin, initialLeaderboard }: Props) {
-  const [lb, setLb] = useState<Leaderboard>(initialLeaderboard)
+export default function LeaderboardSection({ slug, accent, isAdmin, initialRanks, participants }: Props) {
+  const [ranks, setRanks] = useState<string[]>(initialRanks)
   const [editing, setEditing] = useState(false)
-  const [newCol, setNewCol] = useState('')
   const [saving, setSaving] = useState(false)
   const dragIdx = useRef<number | null>(null)
 
-  function updateValue(rowIdx: number, colIdx: number, val: string) {
-    setLb(prev => {
-      const rows = prev.rows.map((r, ri) =>
-        ri === rowIdx
-          ? { ...r, values: r.values.map((v, ci) => ci === colIdx ? (parseInt(val) || 0) : v) }
-          : r
-      )
-      return { ...prev, rows }
-    })
+  const unranked = participants.filter(p => !ranks.includes(p))
+
+  function addToRanks(username: string) {
+    setRanks(prev => [...prev, username])
   }
 
-  function addColumn() {
-    const name = newCol.trim()
-    if (!name) return
-    setLb(prev => ({
-      columns: [...prev.columns, name],
-      rows: prev.rows.map(r => ({ ...r, values: [...r.values, 0] })),
-    }))
-    setNewCol('')
-  }
-
-  function removeColumn(colIdx: number) {
-    setLb(prev => ({
-      columns: prev.columns.filter((_, i) => i !== colIdx),
-      rows: prev.rows.map(r => ({ ...r, values: r.values.filter((_, i) => i !== colIdx) })),
-    }))
+  function removeFromRanks(username: string) {
+    setRanks(prev => prev.filter(u => u !== username))
   }
 
   function onDragStart(idx: number) { dragIdx.current = idx }
 
   function onDragEnter(idx: number) {
     if (dragIdx.current === null || dragIdx.current === idx) return
-    setLb(prev => {
-      const rows = [...prev.rows]
-      const [moved] = rows.splice(dragIdx.current!, 1)
-      rows.splice(idx, 0, moved)
+    setRanks(prev => {
+      const next = [...prev]
+      const [moved] = next.splice(dragIdx.current!, 1)
+      next.splice(idx, 0, moved)
       dragIdx.current = idx
-      return { ...prev, rows }
+      return next
     })
   }
 
@@ -66,16 +51,21 @@ export default function LeaderboardSection({ slug, accent, isAdmin, initialLeade
     await fetch(`/api/seasons/${slug}/leaderboard`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(lb),
+      body: JSON.stringify({ ranks }),
     })
     setSaving(false)
     setEditing(false)
   }
 
-  const isEmpty = lb.columns.length === 0
+  function handleCancel() {
+    setRanks(initialRanks)
+    setEditing(false)
+  }
+
+  const initials = (name: string) => name.slice(0, 2).toUpperCase()
 
   return (
-    <section className={styles.participantsSection} style={{ marginTop: 16 }}>
+    <section className={styles.lbSection}>
       <div className={styles.participantsHeader}>
         <span className={styles.participantsLabel}>ЛИДЕРБОРД</span>
         {isAdmin && !editing && (
@@ -88,86 +78,62 @@ export default function LeaderboardSection({ slug, accent, isAdmin, initialLeade
             <button className={styles.saveBtn2} onClick={handleSave} disabled={saving}>
               {saving ? '...' : 'Сохранить'}
             </button>
-            <button className={styles.cancelBtn2} onClick={() => setEditing(false)}>
-              Отмена
-            </button>
+            <button className={styles.cancelBtn2} onClick={handleCancel}>Отмена</button>
           </div>
         )}
       </div>
 
-      {editing && (
-        <div className={styles.addColRow}>
-          <input
-            className={styles.inputSm2}
-            placeholder="Название колонки"
-            value={newCol}
-            onChange={e => setNewCol(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && addColumn()}
-          />
-          <button className={styles.addBtn} onClick={addColumn}>+ Колонка</button>
+      {ranks.length === 0 && !editing && (
+        <p className={styles.noParticipants}>Места не расставлены</p>
+      )}
+
+      {ranks.length > 0 && (
+        <div className={styles.rankList}>
+          {ranks.map((username, idx) => {
+            const rs = RANK_STYLES[idx]
+            return (
+              <div
+                key={username}
+                className={`${styles.rankRow} ${editing ? styles.rankRowDrag : ''}`}
+                draggable={editing}
+                onDragStart={() => onDragStart(idx)}
+                onDragEnter={() => onDragEnter(idx)}
+                onDragOver={e => e.preventDefault()}
+                style={rs ? { boxShadow: `0 0 20px ${rs.glow}, inset 0 0 0 1px ${rs.border}` } : {}}
+              >
+                <span className={styles.rankNum} style={{ color: rs?.color ?? 'var(--muted)' }}>
+                  {idx + 1}
+                </span>
+                <span className={styles.rankAvatar} style={{ background: `${accent}22`, color: accent, borderColor: `${accent}55` }}>
+                  {initials(username)}
+                </span>
+                <span className={styles.rankName}>{username}</span>
+                {editing && (
+                  <button className={styles.rankRemoveBtn} onClick={() => removeFromRanks(username)}>
+                    ✕
+                  </button>
+                )}
+                {editing && <span className={styles.dragHandle}>⠿</span>}
+              </div>
+            )
+          })}
         </div>
       )}
 
-      {isEmpty && !editing ? (
-        <p className={styles.noParticipants}>Лидерборд не настроен</p>
-      ) : lb.rows.length === 0 ? (
-        <p className={styles.noParticipants}>Нет участников</p>
-      ) : (
-        <div className={styles.lbWrap}>
-          <table className={styles.lbTable}>
-            <thead>
-              <tr>
-                <th className={styles.lbTh}>#</th>
-                <th className={styles.lbTh}>Игрок</th>
-                {lb.columns.map((col, ci) => (
-                  <th key={ci} className={styles.lbTh}>
-                    {editing ? (
-                      <span className={styles.colHead}>
-                        {col}
-                        <button className={styles.removeColBtn} onClick={() => removeColumn(ci)}>×</button>
-                      </span>
-                    ) : col}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {lb.rows.map((row, ri) => (
-                <tr
-                  key={row.username}
-                  className={`${styles.lbRow} ${editing ? styles.lbRowDraggable : ''}`}
-                  draggable={editing}
-                  onDragStart={() => onDragStart(ri)}
-                  onDragEnter={() => onDragEnter(ri)}
-                  onDragOver={e => e.preventDefault()}
-                >
-                  <td className={styles.lbTd}>
-                    <span className={styles.medal}>{MEDALS[ri] ?? ri + 1}</span>
-                  </td>
-                  <td className={`${styles.lbTd} ${styles.lbName}`}>
-                    <span className={styles.lbAvatar} style={{ background: `${accent}22`, color: accent, borderColor: `${accent}55` }}>
-                      {row.username.slice(0, 2).toUpperCase()}
-                    </span>
-                    {row.username}
-                  </td>
-                  {row.values.map((val, ci) => (
-                    <td key={ci} className={styles.lbTd}>
-                      {editing ? (
-                        <input
-                          className={styles.lbInput}
-                          type="number"
-                          value={val}
-                          onChange={e => updateValue(ri, ci, e.target.value)}
-                        />
-                      ) : (
-                        <span className={ri === 0 ? styles.topVal : ''}>{val}</span>
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {editing && unranked.length > 0 && (
+        <div className={styles.unrankedSection}>
+          <span className={styles.unrankedLabel}>Не в списке</span>
+          <div className={styles.unrankedList}>
+            {unranked.map(username => (
+              <button key={username} className={styles.unrankedChip} onClick={() => addToRanks(username)}>
+                <span className={styles.chipAvatar} style={{ background: `${accent}22`, color: accent }}>
+                  {initials(username)}
+                </span>
+                {username}
+                <span className={styles.chipPlus}>+</span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </section>

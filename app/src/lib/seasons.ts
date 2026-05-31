@@ -3,22 +3,23 @@ import { join } from 'path'
 
 const SEASONS_PATH = join(process.cwd(), 'seasons.json')
 
-export interface LeaderboardRow { username: string; values: number[] }
-export interface Leaderboard { columns: string[]; rows: LeaderboardRow[] }
-export interface SeasonData { participants: string[]; leaderboard: Leaderboard }
+export interface SeasonData { participants: string[]; ranks: string[] }
 
-const EMPTY_SEASON: SeasonData = { participants: [], leaderboard: { columns: [], rows: [] } }
+const EMPTY_SEASON: SeasonData = { participants: [], ranks: [] }
 
 function readAll(): Record<string, SeasonData> {
   try {
     const raw = JSON.parse(readFileSync(SEASONS_PATH, 'utf-8'))
-    // migrate old format: { simply: string[] } → { simply: SeasonData }
     const result: Record<string, SeasonData> = {}
     for (const [slug, val] of Object.entries(raw)) {
       if (Array.isArray(val)) {
-        result[slug] = { participants: val as string[], leaderboard: { columns: [], rows: [] } }
+        result[slug] = { participants: val as string[], ranks: [] }
       } else {
-        result[slug] = val as SeasonData
+        const v = val as Record<string, unknown>
+        result[slug] = {
+          participants: (v.participants as string[]) ?? [],
+          ranks: (v.ranks as string[]) ?? [],
+        }
       }
     }
     return result
@@ -48,32 +49,22 @@ export function getParticipants(slug: string): string[] {
 export function addParticipant(slug: string, username: string): void {
   const season = getSeason(slug)
   if (season.participants.includes(username)) return
-  const newRow: LeaderboardRow = { username, values: season.leaderboard.columns.map(() => 0) }
-  saveSeason(slug, {
-    participants: [...season.participants, username],
-    leaderboard: {
-      ...season.leaderboard,
-      rows: [...season.leaderboard.rows, newRow],
-    },
-  })
+  saveSeason(slug, { ...season, participants: [...season.participants, username] })
 }
 
 export function removeParticipant(slug: string, username: string): void {
   const season = getSeason(slug)
   saveSeason(slug, {
     participants: season.participants.filter(u => u !== username),
-    leaderboard: {
-      ...season.leaderboard,
-      rows: season.leaderboard.rows.filter(r => r.username !== username),
-    },
+    ranks: season.ranks.filter(u => u !== username),
   })
 }
 
-export function getLeaderboard(slug: string): Leaderboard {
-  return getSeason(slug).leaderboard
+export function getRanks(slug: string): string[] {
+  return getSeason(slug).ranks
 }
 
-export function saveLeaderboard(slug: string, leaderboard: Leaderboard): void {
+export function saveRanks(slug: string, ranks: string[]): void {
   const season = getSeason(slug)
-  saveSeason(slug, { ...season, leaderboard })
+  saveSeason(slug, { ...season, ranks })
 }
