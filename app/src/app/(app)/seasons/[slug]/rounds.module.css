@@ -216,6 +216,90 @@
   color: #F97316;
 }
 
+/* Round ranking table */
+
+.rankTable {
+  margin-top: 14px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.rankTableHead {
+  display: grid;
+  grid-template-columns: 28px 1fr 60px 60px;
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.03);
+  font-size: 0.6rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  gap: 8px;
+}
+
+.rankTableRow {
+  display: grid;
+  grid-template-columns: 28px 1fr 60px 60px;
+  padding: 9px 12px;
+  gap: 8px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  align-items: center;
+  transition: background 150ms;
+}
+.rankTableRow:hover { background: rgba(255,255,255,0.02); }
+
+.rankTableTop {
+  background: rgba(255,215,0,0.05);
+}
+
+.rankTableNum {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.rankTableTop .rankTableNum { color: #FFD700; }
+
+.rankTableName {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.rankTableAvatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.rankTablePts {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text);
+  text-align: right;
+}
+.rankTableTop .rankTablePts { color: #FFD700; }
+
+.rankTablePsi {
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-align: right;
+}
+
+.psiUnit {
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+
 /* DM vs row */
 
 .vsRow {
@@ -412,6 +496,24 @@
   background: rgba(255,255,255,0.02);
   border-radius: 8px;
 }
+
+.pointsInput {
+  width: 70px;
+  padding: 4px 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  text-align: center;
+  outline: none;
+  margin-left: auto;
+}
+.pointsInput::-webkit-outer-spin-button,
+.pointsInput::-webkit-inner-spin-button { -webkit-appearance: none; }
+.pointsInput::placeholder { color: var(--muted); font-weight: 400; }
 
 .roleAvatar {
   width: 28px;

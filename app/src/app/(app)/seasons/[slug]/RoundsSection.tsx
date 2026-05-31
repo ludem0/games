@@ -10,6 +10,7 @@ interface Props {
   isAdmin: boolean
   initialRounds: Round[]
   participants: string[]
+  psigems: Record<string, number>
 }
 
 type MMRole = 'winner' | 'loser' | 'none'
@@ -18,6 +19,7 @@ interface FormState {
   mmName: string
   mmParticipants: string[]
   mmRoles: Record<string, MMRole>
+  mmPoints: Record<string, number>
   dmName: string
   dmWinner: string
   dmEliminated: string
@@ -28,13 +30,14 @@ const INIT_FORM: FormState = {
   mmName: '',
   mmParticipants: [],
   mmRoles: {},
+  mmPoints: {},
   dmName: '',
   dmWinner: '',
   dmEliminated: '',
   step: 1,
 }
 
-export default function RoundsSection({ slug, accent, isAdmin, initialRounds, participants }: Props) {
+export default function RoundsSection({ slug, accent, isAdmin, initialRounds, participants, psigems }: Props) {
   const [rounds, setRounds] = useState<Round[]>(initialRounds)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState<FormState>(INIT_FORM)
@@ -76,6 +79,7 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
       participants: form.mmParticipants,
       winners,
       losers,
+      points: form.mmPoints,
     }
     const dm: DeathMatch = {
       name: form.dmName,
@@ -126,6 +130,7 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
             accent={accent}
             isAdmin={isAdmin}
             initials={initials}
+            psigems={psigems}
             onDelete={() => handleDelete(round.id)}
           />
         ))}
@@ -174,7 +179,7 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
 
               {form.mmParticipants.length > 0 && (
                 <>
-                  <p className={styles.hint}>Отметь роли:</p>
+                  <p className={styles.hint}>Роли и очки:</p>
                   <div className={styles.roleGrid}>
                     {form.mmParticipants.map(p => (
                       <div key={p} className={styles.roleRow}>
@@ -182,6 +187,14 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
                           {initials(p)}
                         </span>
                         <span className={styles.roleName}>{p}</span>
+                        <input
+                          className={styles.pointsInput}
+                          type="number"
+                          min={0}
+                          placeholder="Очки"
+                          value={form.mmPoints[p] ?? ''}
+                          onChange={e => setForm(f => ({ ...f, mmPoints: { ...f.mmPoints, [p]: parseInt(e.target.value) || 0 } }))}
+                        />
                         <div className={styles.roleBtns}>
                           <button
                             className={`${styles.roleBtn} ${form.mmRoles[p] === 'winner' ? styles.roleBtnWin : ''}`}
@@ -264,11 +277,12 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
   )
 }
 
-function RoundCard({ round, accent, isAdmin, initials, onDelete }: {
+function RoundCard({ round, accent, isAdmin, initials, psigems, onDelete }: {
   round: Round
   accent: string
   isAdmin: boolean
   initials: (n: string) => string
+  psigems: Record<string, number>
   onDelete: () => void
 }) {
   const mm = round.mainMatch
@@ -322,6 +336,33 @@ function RoundCard({ round, accent, isAdmin, initials, onDelete }: {
             <span className={styles.summaryWin}>🏆 {mm.winners.join(', ')}</span>
             <span className={styles.summaryLose}>⚔️ → Death Match: {mm.losers.join(', ')}</span>
           </div>
+
+          {/* Round ranking table */}
+          {mm.points && Object.keys(mm.points).length > 0 && (() => {
+            const ranked = [...mm.participants]
+              .filter(p => mm.points![p] !== undefined)
+              .sort((a, b) => (mm.points![b] ?? 0) - (mm.points![a] ?? 0))
+            return (
+              <div className={styles.rankTable}>
+                <div className={styles.rankTableHead}>
+                  <span>#</span><span>Игрок</span><span>Очки</span><span>Ψ</span>
+                </div>
+                {ranked.map((p, i) => (
+                  <div key={p} className={`${styles.rankTableRow} ${i === 0 ? styles.rankTableTop : ''}`}>
+                    <span className={styles.rankTableNum}>{i + 1}</span>
+                    <span className={styles.rankTableName}>
+                      <span className={styles.rankTableAvatar} style={{ background: `${accent}18`, color: accent }}>
+                        {initials(p)}
+                      </span>
+                      {p}
+                    </span>
+                    <span className={styles.rankTablePts}>{mm.points![p]}</span>
+                    <span className={styles.rankTablePsi}>{psigems[p] ?? 1} <span className={styles.psiUnit}>Ψ</span></span>
+                  </div>
+                ))}
+              </div>
+            )
+          })()}
         </div>
       </div>
 
