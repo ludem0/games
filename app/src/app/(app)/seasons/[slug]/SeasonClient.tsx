@@ -8,7 +8,6 @@ import CubeZero from '@/components/CubeZero'
 import CubeGambit from '@/components/CubeGambit'
 import LeaderboardSection from './LeaderboardSection'
 import RoundsSection from './RoundsSection'
-import PsigemsSection from './PsigemsSection'
 import type { Round } from '@/lib/seasons'
 import styles from './season.module.css'
 
@@ -28,14 +27,13 @@ interface Props {
   username: string
   initialParticipants: string[]
   allPlayers: string[]
-  initialRanks: string[]
   initialRounds: Round[]
   initialPsigems: Record<string, number>
 }
 
 export default function SeasonClient({
   slug, name, status, statusLabel, accent,
-  role, username, initialParticipants, allPlayers, initialRanks, initialRounds, initialPsigems,
+  role, username, initialParticipants, allPlayers, initialRounds, initialPsigems,
 }: Props) {
   const Cube = CUBES[slug] ?? CubeSimply
   const [participants, setParticipants] = useState(initialParticipants)
@@ -148,19 +146,12 @@ export default function SeasonClient({
         {/* Two-column: leaderboard + rounds */}
         <div className={styles.twoCol}>
           <div className={styles.colLeft}>
-            <PsigemsSection
+            <LeaderboardSection
               slug={slug}
               accent={accent}
               isAdmin={role === 'admin'}
               participants={participants}
               initialPsigems={initialPsigems}
-            />
-            <LeaderboardSection
-              slug={slug}
-              accent={accent}
-              isAdmin={role === 'admin'}
-              initialRanks={initialRanks}
-              participants={participants}
             />
           </div>
           <div className={styles.colRight}>

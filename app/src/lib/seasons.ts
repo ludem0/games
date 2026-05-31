@@ -9,6 +9,7 @@ export interface MainMatch {
   winners: string[]
   losers: string[]
   points?: Record<string, number>
+  columnName?: string
 }
 
 export interface DeathMatch {
@@ -16,6 +17,8 @@ export interface DeathMatch {
   participants: string[]
   winner: string
   eliminated: string
+  points?: Record<string, number>
+  columnName?: string
 }
 
 export interface Round {

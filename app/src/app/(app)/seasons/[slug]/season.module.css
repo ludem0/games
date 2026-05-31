@@ -339,6 +339,52 @@
 }
 .playerCard:hover .removeBtn { opacity: 1; }
 
+/* Psigem controls in leaderboard */
+.psiControls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.psiBtn {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 150ms;
+}
+.psiBtn:hover { background: rgba(255,255,255,0.1); }
+
+.psiVal {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  min-width: 28px;
+  text-align: center;
+  color: var(--text);
+}
+
+.psiDisplay {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text);
+  margin-left: auto;
+}
+
+.psiUnit {
+  font-size: 0.7rem;
+  opacity: 0.5;
+}
+
 /* ── LEADERBOARD ── */
 
 .rankList {

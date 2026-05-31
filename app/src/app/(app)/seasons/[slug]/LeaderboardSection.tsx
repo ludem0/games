@@ -1,141 +1,99 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import styles from './season.module.css'
 
 interface Props {
   slug: string
   accent: string
   isAdmin: boolean
-  initialRanks: string[]
   participants: string[]
+  initialPsigems: Record<string, number>
 }
 
-const RANK_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32']
-
-export default function LeaderboardSection({ slug, accent, isAdmin, initialRanks, participants }: Props) {
-  const [ranks, setRanks] = useState<string[]>(initialRanks)
+export default function LeaderboardSection({ slug, accent, isAdmin, participants, initialPsigems }: Props) {
+  const [psigems, setPsigems] = useState<Record<string, number>>(initialPsigems)
   const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState<Record<string, number>>(initialPsigems)
   const [saving, setSaving] = useState(false)
-  const dragIdx = useRef<number | null>(null)
 
-  const unranked = participants.filter(p => !ranks.includes(p))
   const initials = (n: string) => n.slice(0, 2).toUpperCase()
 
-  function addToRanks(username: string) {
-    setRanks(prev => [...prev, username])
-  }
+  const sorted = [...participants].sort((a, b) => (psigems[b] ?? 1) - (psigems[a] ?? 1))
+  const MEDALS = ['#FFD700', '#C0C0C0', '#CD7F32']
 
-  function removeFromRanks(username: string) {
-    setRanks(prev => prev.filter(u => u !== username))
-  }
-
-  function onDragStart(idx: number) { dragIdx.current = idx }
-
-  function onDragEnter(idx: number) {
-    if (dragIdx.current === null || dragIdx.current === idx) return
-    setRanks(prev => {
-      const next = [...prev]
-      const [moved] = next.splice(dragIdx.current!, 1)
-      next.splice(idx, 0, moved)
-      dragIdx.current = idx
-      return next
-    })
+  function startEdit() { setDraft({ ...psigems }); setEditing(true) }
+  function adjust(name: string, delta: number) {
+    setDraft(prev => ({ ...prev, [name]: Math.max(0, (prev[name] ?? 1) + delta) }))
   }
 
   async function handleSave() {
     setSaving(true)
-    await fetch(`/api/seasons/${slug}/leaderboard`, {
+    const res = await fetch(`/api/seasons/${slug}/psigems`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ranks }),
+      body: JSON.stringify(draft),
     })
+    if (res.ok) setPsigems(await res.json())
     setSaving(false)
     setEditing(false)
   }
 
-  function handleCancel() {
-    setRanks(initialRanks)
-    setEditing(false)
-  }
-
-  const rankRowClass = (i: number) =>
-    `${styles.rankRow} ${i === 0 ? styles.rankRow1 : i === 1 ? styles.rankRow2 : i === 2 ? styles.rankRow3 : ''} ${editing ? styles.rankRowDrag : ''}`
+  if (participants.length === 0) return null
 
   return (
     <div className={styles.sectionCard}>
       <div className={styles.sectionHeader}>
         <span className={styles.sectionLabel}>ЛИДЕРБОРД</span>
         {isAdmin && !editing && (
-          <button className={styles.btnOutline} onClick={() => setEditing(true)}>Редактировать</button>
+          <button className={styles.btnOutline} onClick={startEdit}>Ψ Редактировать</button>
         )}
         {isAdmin && editing && (
           <div style={{ display: 'flex', gap: 8 }}>
             <button className={styles.btnAccent} onClick={handleSave} disabled={saving}>
               {saving ? '...' : 'Сохранить'}
             </button>
-            <button className={styles.btnOutline} onClick={handleCancel}>Отмена</button>
+            <button className={styles.btnOutline} onClick={() => setEditing(false)}>Отмена</button>
           </div>
         )}
       </div>
 
-      {ranks.length === 0 && !editing && (
-        <p className={styles.noContent}>Места не расставлены</p>
-      )}
-
-      {ranks.length > 0 && (
-        <div className={styles.rankList}>
-          {ranks.map((username, i) => {
-            const color = RANK_COLORS[i] ?? accent
-            return (
-              <div
-                key={username}
-                className={rankRowClass(i)}
-                draggable={editing}
-                onDragStart={() => onDragStart(i)}
-                onDragEnter={() => onDragEnter(i)}
-                onDragOver={e => e.preventDefault()}
+      <div className={styles.rankList}>
+        {(editing ? participants : sorted).map((name, i) => {
+          const val = editing ? (draft[name] ?? 1) : (psigems[name] ?? 1)
+          const color = editing ? accent : (MEDALS[i] ?? accent)
+          return (
+            <div
+              key={name}
+              className={`${styles.rankRow} ${!editing && i === 0 ? styles.rankRow1 : !editing && i === 1 ? styles.rankRow2 : !editing && i === 2 ? styles.rankRow3 : ''}`}
+            >
+              <span className={`${styles.rankNum} ${!editing && i === 0 ? styles.rankNum1 : ''}`} style={{ color }}>
+                {editing ? '–' : i + 1}
+              </span>
+              <span
+                className={`${styles.rankAvatar} ${!editing && i === 0 ? styles.rankAvatar1 : ''}`}
+                style={{ background: `${color}18`, color, borderColor: `${color}45` }}
               >
-                <span className={`${styles.rankNum} ${i === 0 ? styles.rankNum1 : ''}`} style={{ color }}>
-                  {i + 1}
-                </span>
-                <span
-                  className={`${styles.rankAvatar} ${i === 0 ? styles.rankAvatar1 : ''}`}
-                  style={{ background: `${color}18`, color, borderColor: `${color}45` }}
-                >
-                  {initials(username)}
-                </span>
-                <span className={`${styles.rankName} ${i === 0 ? styles.rankName1 : ''}`}>
-                  {username}
-                </span>
-                {editing && (
-                  <>
-                    <button className={styles.rankRemoveBtn} onClick={() => removeFromRanks(username)}>✕</button>
-                    <span className={styles.dragHandle}>⠿</span>
-                  </>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      )}
+                {initials(name)}
+              </span>
+              <span className={`${styles.rankName} ${!editing && i === 0 ? styles.rankName1 : ''}`}>{name}</span>
 
-      {editing && unranked.length > 0 && (
-        <div className={styles.unrankedSection}>
-          <span className={styles.unrankedLabel}>Не в списке</span>
-          <div className={styles.unrankedList}>
-            {unranked.map(username => (
-              <button key={username} className={styles.unrankedChip} onClick={() => addToRanks(username)}>
-                <span className={styles.chipAvatar} style={{ background: `${accent}22`, color: accent }}>
-                  {initials(username)}
+              {editing ? (
+                <div className={styles.psiControls}>
+                  <button className={styles.psiBtn} onClick={() => adjust(name, -1)}>−</button>
+                  <span className={styles.psiVal}>{draft[name] ?? 1}</span>
+                  <button className={styles.psiBtn} onClick={() => adjust(name, 1)}>+</button>
+                  <span className={styles.psiUnit}>Ψ</span>
+                </div>
+              ) : (
+                <span className={styles.psiDisplay}>
+                  {val}<span className={styles.psiUnit}> Ψ</span>
                 </span>
-                {username}
-                <span className={styles.chipPlus}>+</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+              )}
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }

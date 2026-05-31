@@ -289,6 +289,36 @@
 }
 .rankTableTop .rankTablePts { color: #FFD700; }
 
+/* Row role variants */
+.rowWinner {
+  background: rgba(74,222,128,0.05);
+}
+.rowLoser {
+  background: rgba(239,68,68,0.05);
+}
+.rowNeutral {
+  background: transparent;
+}
+
+.wingIcon {
+  font-size: 0.8rem;
+  margin-left: 4px;
+}
+
+.eliminated {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.formRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.inputFlex { flex: 1; }
+.inputSm { width: 140px; flex-shrink: 0; }
+
 .rankTablePsi {
   font-size: 0.85rem;
   color: var(--muted);
