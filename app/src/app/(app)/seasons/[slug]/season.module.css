@@ -164,11 +164,11 @@
 
 .sectionLabel {
   font-family: 'Poppins', sans-serif;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 5px;
+  letter-spacing: 4px;
   text-transform: uppercase;
-  color: var(--muted);
+  color: rgba(160, 160, 200, 0.9);
 }
 
 /* Buttons */
@@ -264,8 +264,8 @@
 }
 
 .avatar {
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   border: 1px solid;
   display: flex;
@@ -273,7 +273,7 @@
   justify-content: center;
   font-family: 'Poppins', sans-serif;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 1rem;
   transition: box-shadow 200ms;
 }
 
@@ -282,10 +282,11 @@
 }
 
 .playerName {
-  font-size: 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 500;
   color: var(--text);
   text-align: center;
-  max-width: 60px;
+  max-width: 68px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -406,13 +407,13 @@
 .rankName {
   font-family: 'Poppins', sans-serif;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   flex: 1;
   position: relative;
   z-index: 1;
 }
 
-.rankName1 { font-size: 1.1rem; }
+.rankName1 { font-size: 1.25rem; }
 
 .rankRemoveBtn {
   background: none;
