@@ -8,7 +8,7 @@ import CubeGambit from '@/components/CubeGambit'
 import styles from './main.module.css'
 
 const SEASONS = [
-  { id: 1, name: 'PG: Simply',       Cube: CubeSimply, glowColor: 'rgba(0,252,237,0.35)' },
+  { id: 1, name: 'PG: Simply',       Cube: CubeSimply, glowColor: 'rgba(255,220,0,0.35)' },
   { id: 2, name: 'PG: Zero',         Cube: CubeZero,   glowColor: 'rgba(200,200,200,0.25)' },
   { id: 3, name: 'PG: Puzzle Gambit',Cube: CubeGambit, glowColor: 'rgba(176,38,255,0.35)' },
 ]
