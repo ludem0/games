@@ -7,6 +7,8 @@ import CubeSimply from '@/components/CubeSimply'
 import CubeZero from '@/components/CubeZero'
 import CubeGambit from '@/components/CubeGambit'
 import LeaderboardSection from './LeaderboardSection'
+import RoundsSection from './RoundsSection'
+import type { Round } from '@/lib/seasons'
 import styles from './season.module.css'
 
 const CUBES: Record<string, React.ComponentType> = {
@@ -26,11 +28,12 @@ interface Props {
   initialParticipants: string[]
   allPlayers: string[]
   initialRanks: string[]
+  initialRounds: Round[]
 }
 
 export default function SeasonClient({
   slug, name, status, statusLabel, accent,
-  role, username, initialParticipants, allPlayers, initialRanks,
+  role, username, initialParticipants, allPlayers, initialRanks, initialRounds,
 }: Props) {
   const Cube = CUBES[slug] ?? CubeSimply
   const [participants, setParticipants] = useState(initialParticipants)
@@ -146,6 +149,15 @@ export default function SeasonClient({
           accent={accent}
           isAdmin={role === 'admin'}
           initialRanks={initialRanks}
+          participants={participants}
+        />
+
+        {/* Rounds */}
+        <RoundsSection
+          slug={slug}
+          accent={accent}
+          isAdmin={role === 'admin'}
+          initialRounds={initialRounds}
           participants={participants}
         />
       </main>

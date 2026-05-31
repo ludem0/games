@@ -3,9 +3,34 @@ import { join } from 'path'
 
 const SEASONS_PATH = join(process.cwd(), 'seasons.json')
 
-export interface SeasonData { participants: string[]; ranks: string[] }
+export interface MainMatch {
+  name: string
+  participants: string[]
+  winners: string[]
+  losers: string[]
+}
 
-const EMPTY_SEASON: SeasonData = { participants: [], ranks: [] }
+export interface DeathMatch {
+  name: string
+  participants: string[]
+  winner: string
+  eliminated: string
+}
+
+export interface Round {
+  id: string
+  number: number
+  mainMatch: MainMatch
+  deathMatch: DeathMatch | null
+}
+
+export interface SeasonData {
+  participants: string[]
+  ranks: string[]
+  rounds: Round[]
+}
+
+const EMPTY_SEASON: SeasonData = { participants: [], ranks: [], rounds: [] }
 
 function readAll(): Record<string, SeasonData> {
   try {
@@ -13,12 +38,13 @@ function readAll(): Record<string, SeasonData> {
     const result: Record<string, SeasonData> = {}
     for (const [slug, val] of Object.entries(raw)) {
       if (Array.isArray(val)) {
-        result[slug] = { participants: val as string[], ranks: [] }
+        result[slug] = { participants: val as string[], ranks: [], rounds: [] }
       } else {
         const v = val as Record<string, unknown>
         result[slug] = {
           participants: (v.participants as string[]) ?? [],
           ranks: (v.ranks as string[]) ?? [],
+          rounds: (v.rounds as Round[]) ?? [],
         }
       }
     }
@@ -55,6 +81,7 @@ export function addParticipant(slug: string, username: string): void {
 export function removeParticipant(slug: string, username: string): void {
   const season = getSeason(slug)
   saveSeason(slug, {
+    ...season,
     participants: season.participants.filter(u => u !== username),
     ranks: season.ranks.filter(u => u !== username),
   })
@@ -67,4 +94,13 @@ export function getRanks(slug: string): string[] {
 export function saveRanks(slug: string, ranks: string[]): void {
   const season = getSeason(slug)
   saveSeason(slug, { ...season, ranks })
+}
+
+export function getRounds(slug: string): Round[] {
+  return getSeason(slug).rounds
+}
+
+export function saveRounds(slug: string, rounds: Round[]): void {
+  const season = getSeason(slug)
+  saveSeason(slug, { ...season, rounds })
 }

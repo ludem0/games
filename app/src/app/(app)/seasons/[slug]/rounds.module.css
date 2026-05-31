@@ -1,0 +1,578 @@
+.section {
+  width: 100%;
+  max-width: 700px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.sectionLabel {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.btnOutline {
+  padding: 7px 16px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 200ms, color 200ms;
+}
+.btnOutline:hover { border-color: rgba(255,255,255,0.25); color: var(--text); }
+
+.empty {
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.roundsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Round card */
+
+.roundCard {
+  position: relative;
+  background: rgba(16, 16, 26, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.deleteRound {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 150ms, color 150ms;
+  z-index: 10;
+}
+.roundCard:hover .deleteRound { opacity: 1; }
+.deleteRound:hover { color: #EF4444; }
+
+.roundHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.roundNum {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 900;
+  font-size: 0.85rem;
+  letter-spacing: 3px;
+  color: var(--text);
+}
+
+.roundCount {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+/* Match sections */
+
+.matchSection {
+  display: flex;
+}
+
+.mmStripe {
+  width: 4px;
+  background: linear-gradient(to bottom, #4ADE80, #22c55e);
+  flex-shrink: 0;
+}
+
+.dmStripe {
+  width: 4px;
+  background: linear-gradient(to bottom, #EF4444, #dc2626);
+  flex-shrink: 0;
+}
+
+.matchContent {
+  flex: 1;
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+
+.matchTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.matchType {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #4ADE80;
+  background: rgba(74,222,128,0.1);
+  border: 1px solid rgba(74,222,128,0.25);
+  border-radius: 20px;
+  padding: 2px 8px;
+}
+
+.matchTypeDm {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #EF4444;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.25);
+  border-radius: 20px;
+  padding: 2px 8px;
+}
+
+.matchName {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.7);
+  font-style: italic;
+}
+
+/* MM avatars */
+
+.avatarRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.avatarWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  position: relative;
+}
+
+.mmAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  position: relative;
+}
+
+.avatarIcon {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.avatarName {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.7);
+  text-align: center;
+  max-width: 52px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mmSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.summaryWin {
+  font-size: 0.78rem;
+  color: #4ADE80;
+}
+
+.summaryLose {
+  font-size: 0.78rem;
+  color: #F97316;
+}
+
+/* DM vs row */
+
+.vsRow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.vsGroup {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.vsText {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 900;
+  font-size: 1.1rem;
+  color: #EF4444;
+  text-shadow: 0 0 10px rgba(239,68,68,0.5);
+}
+
+.vsPlayer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.vsAvatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1.5px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.vsName {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.vsNameElim {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.vsResult {
+  font-size: 0.7rem;
+  color: #4ADE80;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.vsResultLose {
+  font-size: 0.7rem;
+  color: #EF4444;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Form */
+
+.formCard {
+  background: rgba(16, 16, 26, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  overflow: hidden;
+  margin-top: 16px;
+}
+
+.formHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.formTitle {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.steps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+}
+
+.step { color: var(--muted); }
+.stepActive { color: var(--text); font-weight: 700; }
+.stepDone { color: #4ADE80; }
+.stepArrow { color: var(--muted); }
+
+.formBody {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mmHeader, .dmHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mmBar {
+  width: 3px;
+  height: 16px;
+  background: #4ADE80;
+  border-radius: 2px;
+}
+
+.dmBar {
+  width: 3px;
+  height: 16px;
+  background: #EF4444;
+  border-radius: 2px;
+}
+
+.matchLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text);
+}
+
+.input {
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  width: 100%;
+  transition: border-color 200ms;
+}
+.input:focus { border-color: rgba(255,255,255,0.2); }
+
+.hint {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.chipGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 5px 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  color: var(--text);
+  font-size: 0.82rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 150ms, background 150ms;
+}
+.chip:hover { border-color: rgba(255,255,255,0.18); }
+.chipSelected {
+  background: rgba(0,252,237,0.08);
+  border-color: rgba(0,252,237,0.4);
+  color: var(--neon);
+}
+
+.roleGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.roleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 8px;
+}
+
+.roleAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.roleName {
+  flex: 1;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.roleBtns {
+  display: flex;
+  gap: 6px;
+}
+
+.roleBtn {
+  padding: 4px 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 150ms, border-color 150ms;
+}
+
+.roleBtnWin {
+  background: rgba(74,222,128,0.15);
+  border-color: rgba(74,222,128,0.4);
+}
+
+.roleBtnLose {
+  background: rgba(249,115,22,0.15);
+  border-color: rgba(249,115,22,0.4);
+}
+
+/* DM form */
+
+.dmVs {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.dmPlayer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  min-width: 130px;
+}
+
+.dmAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(239,68,68,0.15);
+  border: 1px solid rgba(239,68,68,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #EF4444;
+}
+
+.dmName {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.dmChoices {
+  display: flex;
+  gap: 6px;
+}
+
+.dmChoice {
+  padding: 5px 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--muted);
+  transition: all 150ms;
+}
+
+.dmChoiceWin {
+  background: rgba(74,222,128,0.15);
+  border-color: rgba(74,222,128,0.4);
+  color: #4ADE80;
+}
+
+.dmChoiceLose {
+  background: rgba(239,68,68,0.15);
+  border-color: rgba(239,68,68,0.4);
+  color: #EF4444;
+}
+
+/* Form actions */
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.btnCancel {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.btnNext {
+  padding: 8px 20px;
+  background: rgba(0,252,237,0.08);
+  border: 1px solid rgba(0,252,237,0.35);
+  border-radius: 8px;
+  color: var(--neon);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 200ms;
+}
+.btnNext:hover:not(:disabled) { background: rgba(0,252,237,0.15); }
+.btnNext:disabled { opacity: 0.35; cursor: default; }
+
+.btnSave {
+  padding: 8px 20px;
+  background: rgba(74,222,128,0.1);
+  border: 1px solid rgba(74,222,128,0.4);
+  border-radius: 8px;
+  color: #4ADE80;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 200ms;
+}
+.btnSave:hover:not(:disabled) { background: rgba(74,222,128,0.2); }
+.btnSave:disabled { opacity: 0.35; cursor: default; }
