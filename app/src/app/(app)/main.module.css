@@ -1,0 +1,213 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 64px;
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.navLogo {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 900;
+  font-size: 1.2rem;
+  color: var(--neon);
+  text-shadow: 0 0 12px rgba(0, 252, 237, 0.6);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.username {
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.badgeAdmin {
+  background: rgba(255, 42, 109, 0.15);
+  border: 1px solid rgba(255, 42, 109, 0.5);
+  color: var(--neon-hot);
+}
+
+.badgePlayer {
+  background: rgba(0, 252, 237, 0.1);
+  border: 1px solid rgba(0, 252, 237, 0.4);
+  color: var(--neon);
+}
+
+.badgeViewer {
+  background: rgba(176, 38, 255, 0.1);
+  border: 1px solid rgba(176, 38, 255, 0.4);
+  color: var(--neon-purple);
+}
+
+.logoutBtn {
+  padding: 8px 18px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: border-color 200ms, color 200ms;
+}
+
+.logoutBtn:hover {
+  border-color: var(--neon-hot);
+  color: var(--neon-hot);
+}
+
+.hero {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 80px 24px 60px;
+  background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(0, 252, 237, 0.07) 0%, transparent 70%);
+}
+
+.heroTitle {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 900;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  line-height: 1.1;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.heroTitle span {
+  color: var(--neon);
+  text-shadow: 0 0 30px rgba(0, 252, 237, 0.6), 0 0 60px rgba(0, 252, 237, 0.2);
+}
+
+.heroSub {
+  font-size: 1rem;
+  color: var(--muted);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.section {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+.sectionTitle {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--muted);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  transition: transform 300ms ease-out, border-color 300ms, box-shadow 300ms;
+  cursor: default;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0, 252, 237, 0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 252, 237, 0.08);
+}
+
+.cardIcon {
+  font-size: 2.5rem;
+}
+
+.cardTitle {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.cardBadge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--surface2);
+  border-radius: 20px;
+  padding: 4px 12px;
+}
+
+.footer {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 16px;
+  }
+
+  .username {
+    display: none;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    padding: 48px 16px 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logoutBtn {
+    padding: 6px 12px;
+    font-size: 0.7rem;
+  }
+}
