@@ -41,8 +41,7 @@ export default function LoginPage() {
     <main className={styles.page}>
       <div className={styles.card}>
         <div className={styles.logo}>
-          <div className={styles.logoText}>GameZone</div>
-          <div className={styles.logoSub}>Психологические игры</div>
+          <div className={styles.logoText}>PG</div>
         </div>
 
         <form className={styles.form} onSubmit={handleSubmit}>

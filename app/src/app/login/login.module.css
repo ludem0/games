@@ -27,19 +27,11 @@
 .logoText {
   font-family: 'Poppins', sans-serif;
   font-weight: 900;
-  font-size: 2rem;
+  font-size: 3.5rem;
   color: var(--neon);
   text-shadow: 0 0 20px rgba(0, 252, 237, 0.8), 0 0 40px rgba(0, 252, 237, 0.4);
-  letter-spacing: 2px;
+  letter-spacing: 6px;
   text-transform: uppercase;
-}
-
-.logoSub {
-  font-size: 0.75rem;
-  color: var(--muted);
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  margin-top: 4px;
 }
 
 .form {
