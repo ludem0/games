@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import styles from './season.module.css'
 
 interface Props {
@@ -17,10 +17,26 @@ export default function LeaderboardSection({ slug, accent, isAdmin, participants
   const [draft, setDraft] = useState<Record<string, number>>(initialPsigems)
   const [saving, setSaving] = useState(false)
 
+  // Real-time polling every 5 seconds when not editing
+  useEffect(() => {
+    if (editing) return
+    const interval = setInterval(async () => {
+      const res = await fetch(`/api/seasons/${slug}/psigems`)
+      if (res.ok) setPsigems(await res.json())
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [slug, editing])
+
   const initials = (n: string) => n.slice(0, 2).toUpperCase()
 
   const sorted = [...participants].sort((a, b) => (psigems[b] ?? 1) - (psigems[a] ?? 1))
   const MEDALS = ['#FFD700', '#C0C0C0', '#CD7F32']
+
+  function getRank(name: string): number {
+    const val = psigems[name] ?? 1
+    const first = sorted.findIndex(p => (psigems[p] ?? 1) === val)
+    return first + 1
+  }
 
   function startEdit() { setDraft({ ...psigems }); setEditing(true) }
   function adjust(name: string, delta: number) {
@@ -61,22 +77,23 @@ export default function LeaderboardSection({ slug, accent, isAdmin, participants
       <div className={styles.rankList}>
         {(editing ? participants : sorted).map((name, i) => {
           const val = editing ? (draft[name] ?? 1) : (psigems[name] ?? 1)
-          const color = editing ? accent : (MEDALS[i] ?? accent)
+          const rank = editing ? null : getRank(name)
+          const color = editing ? accent : (rank === 1 ? MEDALS[0] : rank === 2 ? MEDALS[1] : rank === 3 ? MEDALS[2] : accent)
           return (
             <div
               key={name}
-              className={`${styles.rankRow} ${!editing && i === 0 ? styles.rankRow1 : !editing && i === 1 ? styles.rankRow2 : !editing && i === 2 ? styles.rankRow3 : ''}`}
+              className={`${styles.rankRow} ${!editing && rank === 1 ? styles.rankRow1 : !editing && rank === 2 ? styles.rankRow2 : !editing && rank === 3 ? styles.rankRow3 : ''}`}
             >
-              <span className={`${styles.rankNum} ${!editing && i === 0 ? styles.rankNum1 : ''}`} style={{ color }}>
-                {editing ? '–' : i + 1}
+              <span className={`${styles.rankNum} ${!editing && rank === 1 ? styles.rankNum1 : ''}`} style={{ color }}>
+                {editing ? '–' : rank}
               </span>
               <span
-                className={`${styles.rankAvatar} ${!editing && i === 0 ? styles.rankAvatar1 : ''}`}
+                className={`${styles.rankAvatar} ${!editing && rank === 1 ? styles.rankAvatar1 : ''}`}
                 style={{ background: `${color}18`, color, borderColor: `${color}45` }}
               >
                 {initials(name)}
               </span>
-              <span className={`${styles.rankName} ${!editing && i === 0 ? styles.rankName1 : ''}`}>{name}</span>
+              <span className={`${styles.rankName} ${!editing && rank === 1 ? styles.rankName1 : ''}`}>{name}</span>
 
               {editing ? (
                 <div className={styles.psiControls}>

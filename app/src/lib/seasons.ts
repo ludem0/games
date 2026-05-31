@@ -21,11 +21,18 @@ export interface DeathMatch {
   columnName?: string
 }
 
+export interface FinalGame {
+  name: string
+  winner: string
+}
+
 export interface Round {
   id: string
   number: number
+  type?: 'final'
   mainMatch: MainMatch
   deathMatch: DeathMatch | null
+  finalGames?: FinalGame[]
 }
 
 export interface SeasonData {

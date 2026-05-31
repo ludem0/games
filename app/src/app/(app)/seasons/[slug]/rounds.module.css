@@ -382,6 +382,168 @@
   text-align: center;
 }
 
+/* Final round */
+.finalCard {
+  border-color: rgba(255,215,0,0.3);
+  box-shadow: 0 0 20px rgba(255,215,0,0.08);
+}
+
+.finalStripe {
+  width: 4px;
+  background: linear-gradient(to bottom, #FFD700, #B8860B);
+  flex-shrink: 0;
+}
+
+.finalChampionHeader {
+  font-size: 0.8rem;
+  color: #FFD700;
+  font-weight: 600;
+}
+
+.finalPlayers {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.finalGamesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.finalGame {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(255,215,0,0.04);
+  border: 1px solid rgba(255,215,0,0.12);
+  border-radius: 10px;
+}
+
+.finalGameNum {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #FFD700;
+  white-space: nowrap;
+}
+
+.finalGameName {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-style: italic;
+  flex: 1;
+}
+
+.finalGameBtns {
+  display: flex;
+  gap: 8px;
+}
+
+.finalPlayerBtn {
+  padding: 5px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 150ms;
+}
+.finalPlayerBtn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+.finalPlayerBtnWin {
+  background: rgba(74,222,128,0.15);
+  border-color: rgba(74,222,128,0.5);
+  color: #22c55e;
+  font-weight: 700;
+}
+
+.finalScore {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.finalScoreItem {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.finalChampion {
+  color: #FFD700 !important;
+}
+
+.finalWinnerLabel {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #FFD700;
+  margin-left: auto;
+}
+
+.addGameRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.roleRowSimple {
+  grid-template-columns: 28px 1fr 90px !important;
+}
+
+/* Final display in card */
+.finalGamesDisplay {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.finalGameDisplay {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.finalGameDisplayNum {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #FFD700;
+  min-width: 50px;
+}
+
+.finalGameDisplayWinner {
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-left: auto;
+}
+
+.finalScoreDisplay {
+  display: flex;
+  gap: 20px;
+  padding-top: 12px;
+  flex-wrap: wrap;
+}
+
+.finalScoreDisplayItem {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.champion {
+  color: #FFD700 !important;
+  font-weight: 700;
+}
+
 .rankTablePsi {
   font-size: 0.85rem;
   color: var(--muted);
