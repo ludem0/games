@@ -39,31 +39,39 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: radial-gradient(rgba(255,255,255,0.12) 1px, transparent 1px);
-  background-size: 28px 28px;
+  background-image: radial-gradient(rgba(0,252,237,0.18) 1px, transparent 1px);
+  background-size: 30px 30px;
   pointer-events: none;
   z-index: 0;
+  animation: gridPulse 8s ease-in-out infinite alternate;
 }
 
-/* Animated gradient orbs */
+/* Gradient orbs */
 body::after {
   content: '';
   position: fixed;
-  inset: 0;
+  inset: -20%;
   background:
-    radial-gradient(ellipse 55% 45% at 10% 15%, rgba(0,252,237,0.13) 0%, transparent 65%),
-    radial-gradient(ellipse 50% 40% at 90% 80%, rgba(176,38,255,0.12) 0%, transparent 65%),
-    radial-gradient(ellipse 40% 35% at 75% 5%,  rgba(255,42,109,0.08) 0%, transparent 65%),
-    radial-gradient(ellipse 35% 30% at 20% 85%, rgba(255,200,0,0.07)  0%, transparent 65%);
+    radial-gradient(ellipse 60% 50% at 5% 10%,  rgba(0,252,237,0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 45% at 95% 85%,  rgba(176,38,255,0.16) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 40% at 80% 5%,   rgba(255,42,109,0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 35% at 15% 90%,  rgba(255,200,0,0.09)  0%, transparent 55%),
+    radial-gradient(ellipse 50% 50% at 50% 50%,  rgba(0,100,200,0.05)  0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
-  animation: orbShift 12s ease-in-out infinite alternate;
+  animation: orbDrift 16s ease-in-out infinite alternate;
 }
 
-@keyframes orbShift {
-  0%   { opacity: 1; transform: scale(1); }
-  50%  { opacity: 0.75; transform: scale(1.05); }
-  100% { opacity: 1; transform: scale(1); }
+@keyframes gridPulse {
+  0%   { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+@keyframes orbDrift {
+  0%   { transform: translate(0%, 0%) scale(1); }
+  33%  { transform: translate(2%, -2%) scale(1.04); }
+  66%  { transform: translate(-2%, 2%) scale(0.97); }
+  100% { transform: translate(1%, -1%) scale(1.02); }
 }
 
 a {
