@@ -1,45 +1,43 @@
 export default function CubeZero() {
   return (
-    <svg width="120" height="130" viewBox="0 0 120 130" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Dark metal horns */}
-      <path d="M38 28 L60 16 L82 28 L82 22 L60 10 L38 22 Z" fill="#555" />
-      <path d="M38 22 L38 28 L34 26 L34 20 Z" fill="#333" />
-      <path d="M82 22 L82 28 L86 26 L86 20 Z" fill="#333" />
-      <path d="M34 20 L60 8 L86 20 L60 10 Z" fill="#666" />
+    <svg width="140" height="120" viewBox="0 0 140 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Horns */}
+      <polygon points="44,28 56,21 56,28 44,35" fill="#555" />
+      <polygon points="96,28 84,21 84,28 96,35" fill="#333" />
+      <polygon points="44,35 56,28 70,35 56,42" fill="#666" />
+      <polygon points="96,35 84,28 70,35 84,42" fill="#444" />
 
-      {/* Top face — near white */}
-      <path d="M38 28 L60 40 L82 28 L60 16 Z" fill="#E8E8E8" />
-      <path d="M38 28 L60 40 L82 28 L60 16 Z" fill="url(#topZero)" />
+      {/* Top face */}
+      <polygon points="70,18 96,32 70,46 44,32" fill="#E0E0E0" />
+      <polygon points="70,18 96,32 70,46 44,32" fill="url(#topZ)" />
 
-      {/* Left face — mid grey */}
-      <path d="M38 28 L60 40 L60 90 L38 78 Z" fill="#BDBDBD" />
-      <path d="M38 28 L60 40 L60 90 L38 78 Z" fill="url(#leftZero)" />
+      {/* Left face */}
+      <polygon points="44,32 70,46 70,88 44,74" fill="#B0B0B0" />
+      <polygon points="44,32 70,46 70,88 44,74" fill="url(#leftZ)" />
 
-      {/* Right face — dark grey */}
-      <path d="M82 28 L60 40 L60 90 L82 78 Z" fill="#888" />
-      <path d="M82 28 L60 40 L60 90 L82 78 Z" fill="url(#rightZero)" />
+      {/* Right face */}
+      <polygon points="96,32 70,46 70,88 96,74" fill="#787878" />
+      <polygon points="96,32 70,46 70,88 96,74" fill="url(#rightZ)" />
 
-      {/* Dark bottom frame */}
-      <path d="M38 78 L60 90 L82 78 L82 82 L60 94 L38 82 Z" fill="#444" />
-      <path d="M38 78 L38 82 L34 80 L34 76 Z" fill="#2A2A2A" />
-      <path d="M82 78 L82 82 L86 80 L86 76 Z" fill="#2A2A2A" />
+      {/* Bottom cap */}
+      <polygon points="44,74 70,88 96,74 96,78 70,92 44,78" fill="#3A3A3A" />
 
-      {/* Minimal white gem */}
-      <path d="M55 42 L60 38 L65 42 L60 50 Z" fill="rgba(255,255,255,0.7)" />
-      <path d="M60 50 L55 42 L60 56 Z" fill="rgba(255,255,255,0.25)" />
+      {/* Gem */}
+      <polygon points="65,46 70,40 75,46 70,56" fill="rgba(255,255,255,0.75)" />
+      <polygon points="70,56 65,46 70,62" fill="rgba(255,255,255,0.3)" />
 
       <defs>
-        <linearGradient id="topZero" x1="38" y1="16" x2="82" y2="40" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="white" stopOpacity="0.5" />
-          <stop offset="100%" stopColor="white" stopOpacity="0.05" />
+        <linearGradient id="topZ" x1="44" y1="18" x2="96" y2="46" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="white" stopOpacity="0.55" />
+          <stop offset="100%" stopColor="white" stopOpacity="0" />
         </linearGradient>
-        <linearGradient id="leftZero" x1="38" y1="28" x2="60" y2="90" gradientUnits="userSpaceOnUse">
+        <linearGradient id="leftZ" x1="44" y1="32" x2="44" y2="88" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="white" stopOpacity="0.1" />
-          <stop offset="100%" stopColor="black" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="black" stopOpacity="0.2" />
         </linearGradient>
-        <linearGradient id="rightZero" x1="82" y1="28" x2="60" y2="90" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="black" stopOpacity="0.1" />
-          <stop offset="100%" stopColor="black" stopOpacity="0.3" />
+        <linearGradient id="rightZ" x1="96" y1="32" x2="96" y2="88" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="black" stopOpacity="0.05" />
+          <stop offset="100%" stopColor="black" stopOpacity="0.35" />
         </linearGradient>
       </defs>
     </svg>

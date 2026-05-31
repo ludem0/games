@@ -1,45 +1,43 @@
 export default function CubeSimply() {
   return (
-    <svg width="120" height="130" viewBox="0 0 120 130" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Silver horns / top frame */}
-      <path d="M38 28 L60 16 L82 28 L82 22 L60 10 L38 22 Z" fill="#C0C8D0" />
-      <path d="M38 22 L38 28 L34 26 L34 20 Z" fill="#90989E" />
-      <path d="M82 22 L82 28 L86 26 L86 20 Z" fill="#90989E" />
-      <path d="M34 20 L60 8 L86 20 L60 10 Z" fill="#D8E0E8" />
+    <svg width="140" height="120" viewBox="0 0 140 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Horns (ушки) */}
+      <polygon points="44,28 56,21 56,28 44,35" fill="#B0BCC8" />
+      <polygon points="96,28 84,21 84,28 96,35" fill="#8898A8" />
+      <polygon points="44,35 56,28 70,35 56,42" fill="#C8D4E0" />
+      <polygon points="96,35 84,28 70,35 84,42" fill="#98A8B8" />
 
-      {/* Top face — light blue */}
-      <path d="M38 28 L60 40 L82 28 L60 16 Z" fill="#C8E6FF" />
-      <path d="M38 28 L60 40 L82 28 L60 16 Z" fill="url(#topSimply)" />
+      {/* Top face — light blue diamond */}
+      <polygon points="70,18 96,32 70,46 44,32" fill="#C8E6FF" />
+      <polygon points="70,18 96,32 70,46 44,32" fill="url(#topS)" />
 
       {/* Left face */}
-      <path d="M38 28 L60 40 L60 90 L38 78 Z" fill="#A8CEE8" />
-      <path d="M38 28 L60 40 L60 90 L38 78 Z" fill="url(#leftSimply)" />
+      <polygon points="44,32 70,46 70,88 44,74" fill="#A0C4E0" />
+      <polygon points="44,32 70,46 70,88 44,74" fill="url(#leftS)" />
 
       {/* Right face */}
-      <path d="M82 28 L60 40 L60 90 L82 78 Z" fill="#7BB3D4" />
-      <path d="M82 28 L60 40 L60 90 L82 78 Z" fill="url(#rightSimply)" />
+      <polygon points="96,32 70,46 70,88 96,74" fill="#6EA4C8" />
+      <polygon points="96,32 70,46 70,88 96,74" fill="url(#rightS)" />
 
-      {/* Silver bottom frame */}
-      <path d="M38 78 L60 90 L82 78 L82 82 L60 94 L38 82 Z" fill="#A0A8B0" />
-      <path d="M38 78 L38 82 L34 80 L34 76 Z" fill="#808890" />
-      <path d="M82 78 L82 82 L86 80 L86 76 Z" fill="#808890" />
+      {/* Bottom cap */}
+      <polygon points="44,74 70,88 96,74 96,78 70,92 44,78" fill="#8090A0" />
 
-      {/* Inner crystal gem highlight */}
-      <path d="M55 42 L60 38 L65 42 L60 52 Z" fill="rgba(255,255,255,0.6)" />
-      <path d="M60 52 L55 42 L60 58 Z" fill="rgba(255,255,255,0.3)" />
+      {/* Gem highlight */}
+      <polygon points="65,46 70,40 75,46 70,56" fill="rgba(255,255,255,0.65)" />
+      <polygon points="70,56 65,46 70,62" fill="rgba(255,255,255,0.25)" />
 
       <defs>
-        <linearGradient id="topSimply" x1="38" y1="16" x2="82" y2="40" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="white" stopOpacity="0.4" />
+        <linearGradient id="topS" x1="44" y1="18" x2="96" y2="46" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="white" stopOpacity="0.5" />
           <stop offset="100%" stopColor="white" stopOpacity="0" />
         </linearGradient>
-        <linearGradient id="leftSimply" x1="38" y1="28" x2="60" y2="90" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="white" stopOpacity="0.15" />
-          <stop offset="100%" stopColor="black" stopOpacity="0.1" />
+        <linearGradient id="leftS" x1="44" y1="32" x2="44" y2="88" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="white" stopOpacity="0.12" />
+          <stop offset="100%" stopColor="black" stopOpacity="0.15" />
         </linearGradient>
-        <linearGradient id="rightSimply" x1="82" y1="28" x2="60" y2="90" gradientUnits="userSpaceOnUse">
+        <linearGradient id="rightS" x1="96" y1="32" x2="96" y2="88" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="black" stopOpacity="0.05" />
-          <stop offset="100%" stopColor="black" stopOpacity="0.25" />
+          <stop offset="100%" stopColor="black" stopOpacity="0.3" />
         </linearGradient>
       </defs>
     </svg>
