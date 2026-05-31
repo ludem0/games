@@ -3,6 +3,7 @@ services:
     build: ./app
     volumes:
       - ./users.json:/app/users.json
+      - ./seasons.json:/app/seasons.json
     env_file: .env
     networks:
       - internal
