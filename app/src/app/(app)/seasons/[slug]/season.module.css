@@ -274,6 +274,154 @@
   opacity: 1;
 }
 
+/* Leaderboard */
+
+.addColRow {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.inputSm2 {
+  padding: 8px 12px;
+  background: var(--surface2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  flex: 1;
+}
+
+.inputSm2:focus { border-color: rgba(0, 252, 237, 0.4); }
+
+.saveBtn2 {
+  padding: 7px 16px;
+  background: rgba(0, 252, 237, 0.1);
+  border: 1px solid rgba(0, 252, 237, 0.4);
+  border-radius: 8px;
+  color: var(--neon);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 200ms;
+}
+.saveBtn2:hover { background: rgba(0, 252, 237, 0.2); }
+.saveBtn2:disabled { opacity: 0.5; cursor: default; }
+
+.cancelBtn2 {
+  padding: 7px 14px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.lbWrap {
+  overflow-x: auto;
+}
+
+.lbTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 320px;
+}
+
+.lbTh {
+  text-align: left;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 12px 12px;
+  white-space: nowrap;
+}
+
+.colHead {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.removeColBtn {
+  background: none;
+  border: none;
+  color: var(--neon-hot);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.6;
+  transition: opacity 150ms;
+}
+.removeColBtn:hover { opacity: 1; }
+
+.lbRow {
+  transition: background 150ms;
+}
+.lbRow:hover { background: rgba(255,255,255,0.02); }
+
+.lbRowDraggable {
+  cursor: grab;
+}
+.lbRowDraggable:active { cursor: grabbing; }
+
+.lbTd {
+  padding: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
+.lbName {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.lbAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.medal {
+  font-size: 1.1rem;
+}
+
+.topVal {
+  font-weight: 700;
+  color: var(--neon);
+}
+
+.lbInput {
+  width: 80px;
+  padding: 6px 8px;
+  background: var(--surface2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  text-align: right;
+}
+.lbInput:focus { border-color: rgba(0, 252, 237, 0.4); }
+
 @media (max-width: 768px) {
   .navbar { padding: 0 16px; }
   .participantsSection { padding: 20px; }

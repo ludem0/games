@@ -6,6 +6,8 @@ import type { Role } from '@/lib/types'
 import CubeSimply from '@/components/CubeSimply'
 import CubeZero from '@/components/CubeZero'
 import CubeGambit from '@/components/CubeGambit'
+import LeaderboardSection from './LeaderboardSection'
+import type { Leaderboard } from '@/lib/seasons'
 import styles from './season.module.css'
 
 const CUBES: Record<string, React.ComponentType> = {
@@ -24,11 +26,12 @@ interface Props {
   username: string
   initialParticipants: string[]
   allPlayers: string[]
+  initialLeaderboard: Leaderboard
 }
 
 export default function SeasonClient({
   slug, name, status, statusLabel, accent,
-  role, username, initialParticipants, allPlayers,
+  role, username, initialParticipants, allPlayers, initialLeaderboard,
 }: Props) {
   const Cube = CUBES[slug] ?? CubeSimply
   const [participants, setParticipants] = useState(initialParticipants)
@@ -136,6 +139,13 @@ export default function SeasonClient({
             </div>
           )}
         </section>
+
+        <LeaderboardSection
+          slug={slug}
+          accent={accent}
+          isAdmin={role === 'admin'}
+          initialLeaderboard={initialLeaderboard}
+        />
       </main>
     </div>
   )

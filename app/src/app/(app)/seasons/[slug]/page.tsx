@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 import { redirect, notFound } from 'next/navigation'
 import { verifyToken, getUsers } from '@/lib/auth'
-import { getParticipants } from '@/lib/seasons'
+import { getParticipants, getLeaderboard } from '@/lib/seasons'
 import SeasonClient from './SeasonClient'
 
 const SEASONS: Record<string, {
@@ -27,6 +27,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ slug: s
   if (!season) notFound()
 
   const participants = getParticipants(slug)
+  const leaderboard = getLeaderboard(slug)
   const allPlayers = getUsers()
     .filter(u => u.role === 'player')
     .map(u => u.username)
@@ -42,6 +43,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ slug: s
       username={user.username}
       initialParticipants={participants}
       allPlayers={allPlayers}
+      initialLeaderboard={leaderboard}
     />
   )
 }
