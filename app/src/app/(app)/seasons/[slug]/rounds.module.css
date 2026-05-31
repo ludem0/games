@@ -494,6 +494,51 @@
   align-items: center;
 }
 
+.finalGameTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.finalGamePoints {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.finalPointRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.finalPointName {
+  font-size: 0.82rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.finalGameWinnerLabel {
+  font-size: 0.75rem;
+  color: var(--muted);
+  align-self: center;
+}
+
+.finalGameSimpleResult {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 4px 0;
+}
+
+.finalGameDisplayHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
 .roleRowSimple {
   grid-template-columns: 28px 1fr 90px !important;
 }

@@ -28,7 +28,8 @@ interface FormState {
   dmEliminated: string
   dmPoints: Record<string, number>
   dmColumnName: string
-  finalGames: { name: string; winner: string }[]
+  finalGames: FinalGame[]
+  finalColumnName: string
   step: 1 | 2
 }
 
@@ -38,6 +39,7 @@ const INIT_FORM: FormState = {
   mmPsigemDelta: {},
   dmName: '', dmWinner: '', dmEliminated: '', dmPoints: {}, dmColumnName: 'Очки',
   finalGames: [],
+  finalColumnName: 'Очки',
   step: 1,
 }
 
@@ -93,8 +95,16 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
     })
   }
 
+  function setFinalGamePoints(idx: number, player: string, val: string) {
+    setForm(f => {
+      const games = [...f.finalGames]
+      games[idx] = { ...games[idx], points: { ...(games[idx].points ?? {}), [player]: parseInt(val) || 0 } }
+      return { ...f, finalGames: games }
+    })
+  }
+
   function addFinalGame(name: string) {
-    setForm(f => ({ ...f, finalGames: [...f.finalGames, { name, winner: '' }] }))
+    setForm(f => ({ ...f, finalGames: [...f.finalGames, { name, winner: '', points: {}, columnName: f.finalColumnName }] }))
   }
 
   function getFinalWinner(games: { winner: string }[], players: string[]): string | null {
@@ -146,9 +156,10 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
       newPsigems[name] = Math.max(0, (newPsigems[name] ?? 1) + delta)
     }
     const mm: MainMatch = { name: 'Финал', participants: players, winners: [champion], losers: [loser] }
+    const finalGamesWithMeta = form.finalGames.map(g => ({ ...g, columnName: form.finalColumnName }))
     const res = await fetch(`/api/seasons/${slug}/rounds`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'final', mainMatch: mm, deathMatch: null, finalGames: form.finalGames }),
+      body: JSON.stringify({ type: 'final', mainMatch: mm, deathMatch: null, finalGames: finalGamesWithMeta }),
     })
     if (res.ok) { const r = await res.json(); setRounds(prev => [...prev, r]); setCollapsed(prev => new Set([...prev, r.id])) }
     await fetch(`/api/seasons/${slug}/psigems`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newPsigems) })
@@ -201,15 +212,30 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
             <span className={styles.finalPlayers}>{availableParticipants.join(' vs ')}</span>
           </div>
           <div className={styles.formBody}>
+            <input className={`${styles.input} ${styles.inputNarrow}`} placeholder="Название столбца (напр. Очки)"
+              value={form.finalColumnName}
+              onChange={e => setForm(f => ({ ...f, finalColumnName: e.target.value }))} />
+
             <div className={styles.finalGamesSection}>
-              {form.finalGames.map((g, i) => {
-                const wins = Object.fromEntries(availableParticipants.map(p => [p, 0]))
-                for (let j = 0; j <= i; j++) { if (form.finalGames[j]?.winner) wins[form.finalGames[j].winner] = (wins[form.finalGames[j].winner] ?? 0) + 1 }
-                return (
+              {form.finalGames.map((g, i) => (
                   <div key={i} className={styles.finalGame}>
-                    <span className={styles.finalGameNum}>Игра {i + 1}</span>
-                    {g.name && <span className={styles.finalGameName}>"{g.name}"</span>}
+                    <div className={styles.finalGameTop}>
+                      <span className={styles.finalGameNum}>Игра {i + 1}</span>
+                      {g.name && <span className={styles.finalGameName}>"{g.name}"</span>}
+                    </div>
+                    {/* Points per player */}
+                    <div className={styles.finalGamePoints}>
+                      {availableParticipants.map(p => (
+                        <div key={p} className={styles.finalPointRow}>
+                          <span className={styles.finalPointName}>{p}</span>
+                          <input className={styles.pointsInput} type="number" min={0} placeholder="0"
+                            value={g.points?.[p] ?? ''}
+                            onChange={e => setFinalGamePoints(i, p, e.target.value)} />
+                        </div>
+                      ))}
+                    </div>
                     <div className={styles.finalGameBtns}>
+                      <span className={styles.finalGameWinnerLabel}>Победитель:</span>
                       {availableParticipants.map(p => (
                         <button key={p}
                           className={`${styles.finalPlayerBtn} ${g.winner === p ? styles.finalPlayerBtnWin : ''}`}
@@ -219,8 +245,7 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
                       ))}
                     </div>
                   </div>
-                )
-              })}
+                ))}
 
               {/* Score */}
               {form.finalGames.length > 0 && (() => {
@@ -446,13 +471,48 @@ function RoundCard({ round, accent, isAdmin, initials, psigems, isLast, isCollap
               <div className={styles.finalStripe} />
               <div className={styles.matchContent}>
                 <div className={styles.finalGamesDisplay}>
-                  {round.finalGames.map((g, i) => (
-                    <div key={i} className={styles.finalGameDisplay}>
-                      <span className={styles.finalGameDisplayNum}>Игра {i + 1}</span>
-                      {g.name && <span className={styles.matchName}>"{g.name}"</span>}
-                      <span className={styles.finalGameDisplayWinner} style={{ color: '#22c55e' }}>🏆 {g.winner}</span>
-                    </div>
-                  ))}
+                  {round.finalGames.map((g, i) => {
+                    const colName = g.columnName || 'Очки'
+                    return (
+                      <div key={i} className={styles.finalGameDisplay}>
+                        <div className={styles.finalGameDisplayHeader}>
+                          <span className={styles.finalGameDisplayNum}>Игра {i + 1}</span>
+                          {g.name && <span className={styles.matchName}>"{g.name}"</span>}
+                        </div>
+                        {/* Points table per game */}
+                        {g.points && Object.keys(g.points).length > 0 && (
+                          <div className={styles.rankTable} style={{ marginTop: 8 }}>
+                            <div className={styles.rankTableHead}>
+                              <span>#</span><span>Игрок</span><span>{colName}</span><span></span>
+                            </div>
+                            {mm.participants
+                              .sort((a, b) => (g.points![b] ?? 0) - (g.points![a] ?? 0))
+                              .map((p, ri) => (
+                                <div key={p} className={`${styles.rankTableRow} ${g.winner === p ? styles.rowWinner : styles.rowNeutral}`}>
+                                  <span className={styles.rankTableNum}>{ri + 1}</span>
+                                  <span className={styles.rankTableName}>
+                                    <span className={styles.rankTableAvatar} style={
+                                      g.winner === p ? { background: 'rgba(34,197,94,0.25)', color: '#22c55e' }
+                                                     : { background: `${accent}15`, color: accent }
+                                    }>{initials(p)}</span>
+                                    {p}
+                                    {g.winner === p && <span className={styles.wingIcon}>🪶</span>}
+                                  </span>
+                                  <span className={styles.rankTablePts}>{g.points![p] ?? '—'}</span>
+                                  <span />
+                                </div>
+                              ))}
+                          </div>
+                        )}
+                        {(!g.points || Object.keys(g.points).length === 0) && (
+                          <div className={styles.finalGameSimpleResult}>
+                            <span style={{ color: '#22c55e' }}>🏆 {g.winner}</span>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                  {/* Overall score */}
                   <div className={styles.finalScoreDisplay}>
                     {mm.participants.map(p => (
                       <span key={p} className={`${styles.finalScoreDisplayItem} ${mm.winners[0] === p ? styles.champion : ''}`}>

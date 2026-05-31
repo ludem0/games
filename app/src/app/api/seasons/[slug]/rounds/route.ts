@@ -27,8 +27,10 @@ export async function POST(req: NextRequest, { params }: Params) {
   const newRound: Round = {
     id: `r${Date.now()}`,
     number: rounds.length + 1,
+    ...(body.type ? { type: body.type } : {}),
     mainMatch: body.mainMatch,
     deathMatch: body.deathMatch ?? null,
+    ...(body.finalGames ? { finalGames: body.finalGames } : {}),
   }
   saveRounds(slug, [...rounds, newRound])
   return NextResponse.json(newRound, { status: 201 })

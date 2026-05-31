@@ -24,6 +24,8 @@ export interface DeathMatch {
 export interface FinalGame {
   name: string
   winner: string
+  points?: Record<string, number>
+  columnName?: string
 }
 
 export interface Round {
