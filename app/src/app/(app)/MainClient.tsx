@@ -37,6 +37,9 @@ export default function MainClient({ username, role }: Props) {
       <nav className={styles.navbar}>
         <div className={styles.navLogo}>PG</div>
         <div className={styles.navRight}>
+          {role === 'admin' && (
+            <Link href="/admin" className={styles.adminLink}>Игроки</Link>
+          )}
           <div className={styles.userInfo}>
             <span className={styles.username}>{username}</span>
             <span className={`${styles.badge} ${badge.cls}`}>{badge.label}</span>

@@ -65,6 +65,24 @@
   color: var(--neon-purple);
 }
 
+.adminLink {
+  padding: 8px 18px;
+  background: transparent;
+  border: 1px solid rgba(255, 42, 109, 0.3);
+  border-radius: 8px;
+  color: var(--neon-hot);
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: border-color 200ms, background 200ms;
+  text-decoration: none;
+}
+
+.adminLink:hover {
+  border-color: var(--neon-hot);
+  background: rgba(255, 42, 109, 0.1);
+}
+
 .logoutBtn {
   padding: 8px 18px;
   background: transparent;

@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import type { User } from './types'
 
@@ -9,6 +9,10 @@ const USERS_PATH = join(process.cwd(), 'users.json')
 export function getUsers(): User[] {
   const raw = readFileSync(USERS_PATH, 'utf-8')
   return JSON.parse(raw)
+}
+
+export function saveUsers(users: User[]): void {
+  writeFileSync(USERS_PATH, JSON.stringify(users, null, 2), 'utf-8')
 }
 
 export function findUser(username: string, password: string): User | null {

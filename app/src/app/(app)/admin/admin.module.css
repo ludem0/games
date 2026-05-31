@@ -1,0 +1,299 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 64px;
+  background: rgba(10, 10, 10, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.navLeft {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.navLogo {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 900;
+  font-size: 1.4rem;
+  color: var(--neon);
+  text-shadow: 0 0 12px rgba(0, 252, 237, 0.6);
+  letter-spacing: 4px;
+  text-decoration: none;
+}
+
+.navTitle {
+  font-size: 0.8rem;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.username {
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.logoutBtn {
+  padding: 8px 18px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: border-color 200ms, color 200ms;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.logoutBtn:hover {
+  border-color: var(--neon-hot);
+  color: var(--neon-hot);
+}
+
+.main {
+  position: relative;
+  z-index: 1;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 48px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 32px;
+}
+
+.sectionTitle {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+
+.addForm {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.input {
+  flex: 1;
+  min-width: 140px;
+  padding: 10px 14px;
+  background: var(--surface2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 200ms;
+}
+
+.input:focus {
+  border-color: rgba(0, 252, 237, 0.4);
+}
+
+.select {
+  padding: 10px 14px;
+  background: var(--surface2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+}
+
+.addBtn {
+  padding: 10px 24px;
+  background: rgba(0, 252, 237, 0.1);
+  border: 1px solid rgba(0, 252, 237, 0.4);
+  border-radius: 8px;
+  color: var(--neon);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 200ms;
+}
+
+.addBtn:hover {
+  background: rgba(0, 252, 237, 0.2);
+}
+
+.error {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: var(--neon-hot);
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 12px 12px;
+}
+
+.table td {
+  padding: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+}
+
+.tdName {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.roleBadge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.role_admin {
+  background: rgba(255, 42, 109, 0.15);
+  border: 1px solid rgba(255, 42, 109, 0.5);
+  color: var(--neon-hot);
+}
+
+.role_player {
+  background: rgba(0, 252, 237, 0.1);
+  border: 1px solid rgba(0, 252, 237, 0.4);
+  color: var(--neon);
+}
+
+.role_viewer {
+  background: rgba(176, 38, 255, 0.1);
+  border: 1px solid rgba(176, 38, 255, 0.4);
+  color: var(--neon-purple);
+}
+
+.inlineForm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inputSm {
+  padding: 6px 10px;
+  background: var(--surface2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  width: 160px;
+}
+
+.inputSm:focus {
+  border-color: rgba(0, 252, 237, 0.4);
+}
+
+.saveBtn {
+  padding: 6px 12px;
+  background: rgba(0, 252, 237, 0.1);
+  border: 1px solid rgba(0, 252, 237, 0.3);
+  border-radius: 6px;
+  color: var(--neon);
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.cancelBtn {
+  padding: 6px 10px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pwBtn {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 200ms, color 200ms;
+}
+
+.pwBtn:hover {
+  border-color: rgba(0, 252, 237, 0.4);
+  color: var(--neon);
+}
+
+.deleteBtn {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid rgba(255, 42, 109, 0.3);
+  border-radius: 6px;
+  color: var(--neon-hot);
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: inherit;
+  opacity: 0.6;
+  transition: opacity 200ms;
+}
+
+.deleteBtn:hover {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .navbar { padding: 0 16px; }
+  .navTitle { display: none; }
+  .addForm { flex-direction: column; }
+  .input { min-width: unset; width: 100%; }
+  .table th:nth-child(3),
+  .table td:nth-child(3) { display: none; }
+}
