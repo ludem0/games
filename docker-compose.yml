@@ -2,7 +2,7 @@ services:
   app:
     build: ./app
     volumes:
-      - ./users.json:/app/users.json:ro
+      - ./users.json:/app/users.json
     env_file: .env
     networks:
       - internal
