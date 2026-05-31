@@ -17,13 +17,14 @@ export default function LeaderboardSection({ slug, accent, isAdmin, participants
   const [draft, setDraft] = useState<Record<string, number>>(initialPsigems)
   const [saving, setSaving] = useState(false)
 
-  // Real-time polling every 5 seconds when not editing
+  // Polling every 8s, paused when tab is hidden or editing
   useEffect(() => {
     if (editing) return
     const interval = setInterval(async () => {
+      if (document.hidden) return
       const res = await fetch(`/api/seasons/${slug}/psigems`)
       if (res.ok) setPsigems(await res.json())
-    }, 5000)
+    }, 8000)
     return () => clearInterval(interval)
   }, [slug, editing])
 
