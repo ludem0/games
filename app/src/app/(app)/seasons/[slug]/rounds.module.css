@@ -75,9 +75,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px 12px;
+  padding: 14px 20px;
   border-bottom: 1px solid rgba(255,255,255,0.05);
+  user-select: none;
 }
+.roundHeader:hover { background: rgba(255,255,255,0.02); }
 
 .roundNum {
   font-family: 'Poppins', sans-serif;
@@ -291,33 +293,94 @@
 
 /* Row role variants */
 .rowWinner {
-  background: rgba(74,222,128,0.05);
+  background: rgba(34,197,94,0.1);
+  border-top-color: rgba(34,197,94,0.15) !important;
 }
 .rowLoser {
-  background: rgba(239,68,68,0.05);
+  background: rgba(239,68,68,0.1);
+  border-top-color: rgba(239,68,68,0.15) !important;
 }
-.rowNeutral {
-  background: transparent;
-}
+.rowNeutral { background: transparent; }
 
 .wingIcon {
   font-size: 0.8rem;
   margin-left: 4px;
+  filter: brightness(0) invert(1); /* white */
 }
 
 .eliminated {
   text-decoration: line-through;
-  opacity: 0.5;
+  opacity: 0.45;
 }
 
-.formRow {
+.inputNarrow {
+  max-width: 220px;
+}
+
+/* Collapse toggle */
+.roundHeaderLeft {
   display: flex;
-  gap: 10px;
   align-items: center;
+  gap: 10px;
 }
 
-.inputFlex { flex: 1; }
-.inputSm { width: 140px; flex-shrink: 0; }
+.roundHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.collapseIcon {
+  font-size: 0.6rem;
+  color: var(--muted);
+  transition: transform 150ms;
+}
+
+/* Psigem inline controls in form */
+.roleHead {
+  display: grid;
+  grid-template-columns: 28px 1fr 70px 90px 70px;
+  gap: 8px;
+  padding: 4px 12px;
+  font-size: 0.6rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.roleHeadCell { text-align: center; }
+
+.psiInline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+}
+
+.psiSmBtn {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 150ms;
+}
+.psiSmBtn:hover { background: rgba(255,255,255,0.1); }
+
+.psiSmVal {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  min-width: 20px;
+  text-align: center;
+}
 
 .rankTablePsi {
   font-size: 0.85rem;
@@ -519,9 +582,10 @@
 }
 
 .roleRow {
-  display: flex;
+  display: grid;
+  grid-template-columns: 28px 1fr 70px 90px 70px;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   padding: 8px 12px;
   background: rgba(255,255,255,0.02);
   border-radius: 8px;
