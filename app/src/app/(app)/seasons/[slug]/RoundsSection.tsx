@@ -100,7 +100,7 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mainMatch: mm, deathMatch: dm }),
     })
-    if (res.ok) setRounds(prev => [...prev, await res.json()])
+    if (res.ok) { const r = await res.json(); setRounds(prev => [...prev, r]) }
     setSaving(false)
     setShowForm(false)
     setForm(INIT_FORM)
