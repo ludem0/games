@@ -72,10 +72,32 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 56px 24px 80px;
+  padding: 56px 32px 80px;
   position: relative;
   z-index: 1;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.fullWidth {
+  max-width: 100%;
+}
+
+.twoCol {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.colLeft, .colRight {
+  display: flex;
+  flex-direction: column;
   gap: 16px;
+  width: 100%;
 }
 
 /* Hero: cube + title + badge */
@@ -153,6 +175,10 @@
   border-radius: 20px;
   padding: 28px 32px;
   backdrop-filter: blur(10px);
+}
+
+.sectionCard.fullWidth {
+  max-width: 100%;
 }
 
 .sectionHeader {
@@ -516,8 +542,15 @@
 }
 .inputSm:focus { border-color: rgba(0, 252, 237, 0.35); }
 
+@media (max-width: 900px) {
+  .twoCol {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
   .navbar { padding: 0 16px; }
+  .content { padding: 40px 16px 60px; }
   .sectionCard { padding: 20px; border-radius: 16px; }
   .participantsGrid { gap: 14px; }
   .name { font-size: 1.8rem; }

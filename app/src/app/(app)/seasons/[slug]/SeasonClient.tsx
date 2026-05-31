@@ -95,8 +95,8 @@ export default function SeasonClient({
           </span>
         </div>
 
-        {/* Participants */}
-        <div className={styles.sectionCard}>
+        {/* Participants — full width */}
+        <div className={`${styles.sectionCard} ${styles.fullWidth}`}>
           <div className={styles.sectionHeader}>
             <span className={styles.sectionLabel}>УЧАСТНИКИ</span>
             {role === 'admin' && (
@@ -143,23 +143,27 @@ export default function SeasonClient({
           )}
         </div>
 
-        {/* Leaderboard */}
-        <LeaderboardSection
-          slug={slug}
-          accent={accent}
-          isAdmin={role === 'admin'}
-          initialRanks={initialRanks}
-          participants={participants}
-        />
-
-        {/* Rounds */}
-        <RoundsSection
-          slug={slug}
-          accent={accent}
-          isAdmin={role === 'admin'}
-          initialRounds={initialRounds}
-          participants={participants}
-        />
+        {/* Two-column: leaderboard + rounds */}
+        <div className={styles.twoCol}>
+          <div className={styles.colLeft}>
+            <LeaderboardSection
+              slug={slug}
+              accent={accent}
+              isAdmin={role === 'admin'}
+              initialRanks={initialRanks}
+              participants={participants}
+            />
+          </div>
+          <div className={styles.colRight}>
+            <RoundsSection
+              slug={slug}
+              accent={accent}
+              isAdmin={role === 'admin'}
+              initialRounds={initialRounds}
+              participants={participants}
+            />
+          </div>
+        </div>
       </main>
     </div>
   )
