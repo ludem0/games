@@ -5,20 +5,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 32px;
+  padding: 0 40px;
   height: 64px;
-  background: rgba(10, 10, 10, 0.85);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(8, 8, 16, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .navLogo {
   font-family: 'Poppins', sans-serif;
   font-weight: 900;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   color: var(--neon);
-  text-shadow: 0 0 12px rgba(0, 252, 237, 0.6);
-  letter-spacing: 4px;
+  text-shadow: 0 0 20px rgba(0, 252, 237, 0.8), 0 0 40px rgba(0, 252, 237, 0.3);
+  letter-spacing: 6px;
 }
 
 .navRight {
@@ -34,14 +34,14 @@
 }
 
 .username {
-  font-size: 0.9rem;
-  color: var(--text);
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 
 .badge {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 2px;
   text-transform: uppercase;
   padding: 3px 10px;
   border-radius: 20px;
@@ -66,31 +66,32 @@
 }
 
 .adminLink {
-  padding: 8px 18px;
+  padding: 7px 16px;
   background: transparent;
   border: 1px solid rgba(255, 42, 109, 0.3);
   border-radius: 8px;
   color: var(--neon-hot);
-  font-size: 0.8rem;
-  letter-spacing: 1px;
+  font-size: 0.75rem;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  transition: border-color 200ms, background 200ms;
+  transition: border-color 200ms, background 200ms, box-shadow 200ms;
   text-decoration: none;
 }
 
 .adminLink:hover {
   border-color: var(--neon-hot);
-  background: rgba(255, 42, 109, 0.1);
+  background: rgba(255, 42, 109, 0.08);
+  box-shadow: 0 0 16px rgba(255, 42, 109, 0.2);
 }
 
 .logoutBtn {
-  padding: 8px 18px;
+  padding: 7px 16px;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   color: var(--muted);
-  font-size: 0.8rem;
-  letter-spacing: 1px;
+  font-size: 0.75rem;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   transition: border-color 200ms, color 200ms;
   cursor: pointer;
@@ -98,11 +99,11 @@
 }
 
 .logoutBtn:hover {
-  border-color: var(--neon-hot);
+  border-color: rgba(255, 42, 109, 0.5);
   color: var(--neon-hot);
 }
 
-/* Seasons */
+/* Main content */
 
 .content {
   position: relative;
@@ -112,65 +113,116 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 24px;
+  padding: 64px 24px;
 }
 
 .seasonsLabel {
   font-family: 'Poppins', sans-serif;
   font-weight: 700;
-  font-size: 0.75rem;
-  letter-spacing: 5px;
+  font-size: 0.65rem;
+  letter-spacing: 8px;
   color: var(--muted);
   text-transform: uppercase;
-  margin-bottom: 40px;
+  margin-bottom: 52px;
+  position: relative;
 }
+
+.seasonsLabel::before,
+.seasonsLabel::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.15));
+}
+
+.seasonsLabel::before { right: calc(100% + 16px); transform: scaleX(-1); }
+.seasonsLabel::after  { left:  calc(100% + 16px); }
 
 .seasonsGrid {
   display: flex;
-  gap: 32px;
+  gap: 24px;
   flex-wrap: wrap;
   justify-content: center;
 }
 
+/* Season card */
+
 .seasonCard {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  padding: 36px 28px;
+  gap: 0;
+  width: 240px;
+  min-height: 320px;
   background: var(--surface);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
   text-decoration: none;
   cursor: pointer;
-  transition: transform 300ms ease-out, box-shadow 300ms ease-out, border-color 300ms;
-  min-width: 200px;
+  overflow: hidden;
+  transition: transform 350ms cubic-bezier(.22,.68,0,1.2), border-color 350ms, box-shadow 350ms;
 }
+
+/* Ambient glow layer inside card (on hover) */
+.seasonCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 120% 70% at 50% 100%, var(--glow, rgba(0,252,237,0.2)) 0%, transparent 65%);
+  opacity: 0;
+  transition: opacity 350ms;
+  z-index: 0;
+}
+
+.seasonCard:hover::before { opacity: 1; }
 
 .seasonCard:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.5), 0 0 30px var(--glow, rgba(0,252,237,0.2));
-  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-10px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6), 0 0 40px var(--glow, rgba(0,252,237,0.15));
 }
 
+/* Cube area — top 60% of card */
 .cubeWrap {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 120px;
-  height: 120px;
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
-  transition: filter 300ms;
+  width: 100%;
+  flex: 1;
+  padding: 40px 0 20px;
+  filter: drop-shadow(0 8px 20px rgba(0,0,0,0.6));
+  transition: filter 350ms, transform 350ms;
+  transform: scale(1.2);
 }
 
 .seasonCard:hover .cubeWrap {
-  filter: drop-shadow(0 6px 20px rgba(0,0,0,0.6)) drop-shadow(0 0 12px var(--glow, rgba(0,252,237,0.3)));
+  filter: drop-shadow(0 12px 32px rgba(0,0,0,0.7)) drop-shadow(0 0 20px var(--glow, rgba(0,252,237,0.4)));
+  transform: scale(1.3) translateY(-4px);
+}
+
+/* Bottom info area */
+.cardBottom {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 20px 20px 24px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  background: rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
 .seasonName {
   font-family: 'Poppins', sans-serif;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--text);
   letter-spacing: 0.5px;
   text-align: center;
@@ -180,17 +232,17 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 2.5px;
   text-transform: uppercase;
   padding: 3px 10px;
   border-radius: 20px;
 }
 
 .status_done {
-  background: rgba(100, 200, 100, 0.1);
-  border: 1px solid rgba(100, 200, 100, 0.3);
+  background: rgba(100, 200, 100, 0.08);
+  border: 1px solid rgba(100, 200, 100, 0.25);
   color: #7CCC7C;
 }
 
@@ -201,8 +253,8 @@
 }
 
 .dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: #FFB800;
   animation: pulse 1.4s ease-in-out infinite;
@@ -210,27 +262,12 @@
 
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.4; transform: scale(0.7); }
+  50%       { opacity: 0.3; transform: scale(0.6); }
 }
 
 @media (max-width: 768px) {
-  .navbar {
-    padding: 0 16px;
-  }
-
-  .username {
-    display: none;
-  }
-
-  .seasonsGrid {
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .seasonCard {
-    width: 100%;
-    max-width: 280px;
-    padding: 28px 24px;
-  }
+  .navbar { padding: 0 16px; }
+  .username { display: none; }
+  .seasonsGrid { flex-direction: column; align-items: center; gap: 16px; }
+  .seasonCard { width: 100%; max-width: 300px; min-height: 280px; }
 }

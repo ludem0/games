@@ -9,9 +9,9 @@ import CubeGambit from '@/components/CubeGambit'
 import styles from './main.module.css'
 
 const SEASONS = [
-  { id: 'simply', name: 'PG: Simply',        Cube: CubeSimply, glowColor: 'rgba(255,220,0,0.35)',    status: 'done',   statusLabel: 'Завершён' },
-  { id: 'zero',   name: 'PG: Zero',          Cube: CubeZero,   glowColor: 'rgba(200,200,200,0.25)',  status: 'done',   statusLabel: 'Завершён' },
-  { id: 'gambit', name: 'PG: Puzzle Gambit', Cube: CubeGambit, glowColor: 'rgba(176,38,255,0.35)',   status: 'active', statusLabel: 'Идёт'     },
+  { id: 'simply', name: 'PG: Simply',        Cube: CubeSimply, glowColor: 'rgba(255,220,0,0.4)',   status: 'done',   statusLabel: 'Завершён' },
+  { id: 'zero',   name: 'PG: Zero',          Cube: CubeZero,   glowColor: 'rgba(200,200,200,0.3)', status: 'done',   statusLabel: 'Завершён' },
+  { id: 'gambit', name: 'PG: Puzzle Gambit', Cube: CubeGambit, glowColor: 'rgba(176,38,255,0.45)', status: 'active', statusLabel: 'Идёт'     },
 ]
 
 const BADGE_MAP: Record<Role, { label: string; cls: string }> = {
@@ -59,11 +59,13 @@ export default function MainClient({ username, role }: Props) {
               style={{ '--glow': glowColor } as React.CSSProperties}
             >
               <div className={styles.cubeWrap}><Cube /></div>
-              <div className={styles.seasonName}>{name}</div>
-              <span className={`${styles.statusBadge} ${styles[`status_${status}`]}`}>
-                {status === 'active' && <span className={styles.dot} />}
-                {statusLabel}
-              </span>
+              <div className={styles.cardBottom}>
+                <div className={styles.seasonName}>{name}</div>
+                <span className={`${styles.statusBadge} ${styles[`status_${status}`]}`}>
+                  {status === 'active' && <span className={styles.dot} />}
+                  {statusLabel}
+                </span>
+              </div>
             </Link>
           ))}
         </div>

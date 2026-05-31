@@ -56,10 +56,7 @@ export default function SeasonClient({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: player }),
     })
-    if (res.ok) {
-      const d = await res.json()
-      setParticipants(d.participants)
-    }
+    if (res.ok) setParticipants((await res.json()).participants)
   }
 
   async function handleRemove(player: string) {
@@ -68,16 +65,16 @@ export default function SeasonClient({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: player }),
     })
-    if (res.ok) {
-      const d = await res.json()
-      setParticipants(d.participants)
-    }
+    if (res.ok) setParticipants((await res.json()).participants)
   }
 
-  const initials = (name: string) => name.slice(0, 2).toUpperCase()
+  const initials = (n: string) => n.slice(0, 2).toUpperCase()
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} style={{ '--accent': accent } as React.CSSProperties}>
+      {/* Ambient glow unique to this season */}
+      <div className={styles.ambientGlow} />
+
       <nav className={styles.navbar}>
         <Link href="/" className={styles.back}>← Seasons</Link>
         <div className={styles.navLogo}>PG</div>
@@ -85,20 +82,24 @@ export default function SeasonClient({
       </nav>
 
       <main className={styles.content}>
-        <div className={styles.cubeWrap}><Cube /></div>
-        <h1 className={styles.name} style={{ color: accent }}>{name}</h1>
-        <span className={`${styles.badge} ${styles[`badge_${status}`]}`}>
-          {status === 'active' && <span className={styles.dot} />}
-          {statusLabel}
-        </span>
+        {/* Hero */}
+        <div className={styles.hero}>
+          <div className={styles.cubeWrap}><Cube /></div>
+          <h1 className={styles.name} style={{ color: accent }}>{name}</h1>
+          <span className={`${styles.badge} ${styles[`badge_${status}`]}`}>
+            {status === 'active' && <span className={styles.dot} />}
+            {statusLabel}
+          </span>
+        </div>
 
-        <section className={styles.participantsSection}>
-          <div className={styles.participantsHeader}>
-            <span className={styles.participantsLabel}>УЧАСТНИКИ</span>
+        {/* Participants */}
+        <div className={styles.sectionCard}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionLabel}>УЧАСТНИКИ</span>
             {role === 'admin' && (
               <div className={styles.addWrap} ref={dropdownRef}>
                 <button
-                  className={styles.addBtn}
+                  className={styles.btnOutline}
                   onClick={() => setDropdownOpen(v => !v)}
                   disabled={available.length === 0}
                 >
@@ -121,13 +122,13 @@ export default function SeasonClient({
           </div>
 
           {participants.length === 0 ? (
-            <p className={styles.noParticipants}>Участники не назначены</p>
+            <p className={styles.noContent}>Участники не назначены</p>
           ) : (
             <div className={styles.participantsGrid}>
               {participants.map(p => (
                 <div key={p} className={styles.playerCard}>
-                  <div className={styles.avatar} style={{ background: `${accent}22`, borderColor: `${accent}55` }}>
-                    <span style={{ color: accent }}>{initials(p)}</span>
+                  <div className={styles.avatar} style={{ background: `${accent}18`, borderColor: `${accent}45`, color: accent }}>
+                    {initials(p)}
                   </div>
                   <span className={styles.playerName}>{p}</span>
                   {role === 'admin' && (
@@ -137,14 +138,15 @@ export default function SeasonClient({
               ))}
             </div>
           )}
-        </section>
+        </div>
 
+        {/* Leaderboard */}
         <LeaderboardSection
           slug={slug}
           accent={accent}
           isAdmin={role === 'admin'}
           initialRanks={initialRanks}
-          participants={initialParticipants}
+          participants={participants}
         />
       </main>
     </div>

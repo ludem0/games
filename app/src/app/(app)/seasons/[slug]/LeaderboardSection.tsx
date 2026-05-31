@@ -11,11 +11,7 @@ interface Props {
   participants: string[]
 }
 
-const RANK_STYLES = [
-  { label: '1', color: '#FFD700', glow: 'rgba(255,215,0,0.25)', border: 'rgba(255,215,0,0.5)' },
-  { label: '2', color: '#C0C0C0', glow: 'rgba(192,192,192,0.2)', border: 'rgba(192,192,192,0.4)' },
-  { label: '3', color: '#CD7F32', glow: 'rgba(205,127,50,0.2)', border: 'rgba(205,127,50,0.4)' },
-]
+const RANK_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32']
 
 export default function LeaderboardSection({ slug, accent, isAdmin, initialRanks, participants }: Props) {
   const [ranks, setRanks] = useState<string[]>(initialRanks)
@@ -24,6 +20,7 @@ export default function LeaderboardSection({ slug, accent, isAdmin, initialRanks
   const dragIdx = useRef<number | null>(null)
 
   const unranked = participants.filter(p => !ranks.includes(p))
+  const initials = (n: string) => n.slice(0, 2).toUpperCase()
 
   function addToRanks(username: string) {
     setRanks(prev => [...prev, username])
@@ -62,58 +59,61 @@ export default function LeaderboardSection({ slug, accent, isAdmin, initialRanks
     setEditing(false)
   }
 
-  const initials = (name: string) => name.slice(0, 2).toUpperCase()
+  const rankRowClass = (i: number) =>
+    `${styles.rankRow} ${i === 0 ? styles.rankRow1 : i === 1 ? styles.rankRow2 : i === 2 ? styles.rankRow3 : ''} ${editing ? styles.rankRowDrag : ''}`
 
   return (
-    <section className={styles.lbSection}>
-      <div className={styles.participantsHeader}>
-        <span className={styles.participantsLabel}>ЛИДЕРБОРД</span>
+    <div className={styles.sectionCard}>
+      <div className={styles.sectionHeader}>
+        <span className={styles.sectionLabel}>ЛИДЕРБОРД</span>
         {isAdmin && !editing && (
-          <button className={styles.addBtn} onClick={() => setEditing(true)}>
-            Редактировать
-          </button>
+          <button className={styles.btnOutline} onClick={() => setEditing(true)}>Редактировать</button>
         )}
         {isAdmin && editing && (
           <div style={{ display: 'flex', gap: 8 }}>
-            <button className={styles.saveBtn2} onClick={handleSave} disabled={saving}>
+            <button className={styles.btnAccent} onClick={handleSave} disabled={saving}>
               {saving ? '...' : 'Сохранить'}
             </button>
-            <button className={styles.cancelBtn2} onClick={handleCancel}>Отмена</button>
+            <button className={styles.btnOutline} onClick={handleCancel}>Отмена</button>
           </div>
         )}
       </div>
 
       {ranks.length === 0 && !editing && (
-        <p className={styles.noParticipants}>Места не расставлены</p>
+        <p className={styles.noContent}>Места не расставлены</p>
       )}
 
       {ranks.length > 0 && (
         <div className={styles.rankList}>
-          {ranks.map((username, idx) => {
-            const rs = RANK_STYLES[idx]
+          {ranks.map((username, i) => {
+            const color = RANK_COLORS[i] ?? accent
             return (
               <div
                 key={username}
-                className={`${styles.rankRow} ${editing ? styles.rankRowDrag : ''}`}
+                className={rankRowClass(i)}
                 draggable={editing}
-                onDragStart={() => onDragStart(idx)}
-                onDragEnter={() => onDragEnter(idx)}
+                onDragStart={() => onDragStart(i)}
+                onDragEnter={() => onDragEnter(i)}
                 onDragOver={e => e.preventDefault()}
-                style={rs ? { boxShadow: `0 0 20px ${rs.glow}, inset 0 0 0 1px ${rs.border}` } : {}}
               >
-                <span className={styles.rankNum} style={{ color: rs?.color ?? 'var(--muted)' }}>
-                  {idx + 1}
+                <span className={`${styles.rankNum} ${i === 0 ? styles.rankNum1 : ''}`} style={{ color }}>
+                  {i + 1}
                 </span>
-                <span className={styles.rankAvatar} style={{ background: `${accent}22`, color: accent, borderColor: `${accent}55` }}>
+                <span
+                  className={`${styles.rankAvatar} ${i === 0 ? styles.rankAvatar1 : ''}`}
+                  style={{ background: `${color}18`, color, borderColor: `${color}45` }}
+                >
                   {initials(username)}
                 </span>
-                <span className={styles.rankName}>{username}</span>
+                <span className={`${styles.rankName} ${i === 0 ? styles.rankName1 : ''}`}>
+                  {username}
+                </span>
                 {editing && (
-                  <button className={styles.rankRemoveBtn} onClick={() => removeFromRanks(username)}>
-                    ✕
-                  </button>
+                  <>
+                    <button className={styles.rankRemoveBtn} onClick={() => removeFromRanks(username)}>✕</button>
+                    <span className={styles.dragHandle}>⠿</span>
+                  </>
                 )}
-                {editing && <span className={styles.dragHandle}>⠿</span>}
               </div>
             )
           })}
@@ -136,6 +136,6 @@ export default function LeaderboardSection({ slug, accent, isAdmin, initialRanks
           </div>
         </div>
       )}
-    </section>
+    </div>
   )
 }
