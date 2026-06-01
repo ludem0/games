@@ -1,11 +1,34 @@
+/* ─── Page & animated background ─── */
+
 .page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   background: var(--bg);
+  position: relative;
+  overflow-x: hidden;
 }
 
-/* Navbar */
+.bgLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 25%, rgba(0,252,237,0.055) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 45% at 85% 75%, rgba(176,38,255,0.065) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 40% at 60% 10%, rgba(255,42,109,0.035) 0%, transparent 60%);
+  animation: bgDrift 16s ease-in-out infinite alternate;
+}
+
+@keyframes bgDrift {
+  0%   { opacity: 0.7; transform: scale(1) translateX(0); }
+  50%  { opacity: 1;   transform: scale(1.05) translateX(1%); }
+  100% { opacity: 0.8; transform: scale(1.1) translateX(-1%) translateY(1%); }
+}
+
+/* ─── Navbar ─── */
+
 .navbar {
   position: sticky;
   top: 0;
@@ -15,8 +38,8 @@
   justify-content: space-between;
   padding: 0 40px;
   height: 64px;
-  background: rgba(8, 8, 16, 0.85);
-  backdrop-filter: blur(20px);
+  background: rgba(6, 6, 14, 0.88);
+  backdrop-filter: blur(24px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -25,7 +48,7 @@
   font-weight: 900;
   font-size: 1.5rem;
   color: var(--neon);
-  text-shadow: 0 0 20px rgba(0, 252, 237, 0.8), 0 0 40px rgba(0, 252, 237, 0.3);
+  text-shadow: 0 0 20px rgba(0, 252, 237, 0.9), 0 0 50px rgba(0, 252, 237, 0.3);
   letter-spacing: 6px;
 }
 
@@ -38,46 +61,54 @@
 }
 .back:hover { color: var(--text); }
 
-/* Tabs */
+/* ─── Tabs ─── */
+
 .tabs {
+  position: relative;
+  z-index: 2;
   display: flex;
-  gap: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   padding: 0 40px;
-  background: rgba(8, 8, 16, 0.4);
+  background: rgba(6, 6, 14, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .tab {
-  padding: 14px 24px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 2px;
+  padding: 15px 26px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 2.5px;
   text-transform: uppercase;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.35);
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
   cursor: pointer;
-  transition: color 200ms, border-color 200ms;
+  transition: color 200ms, border-color 200ms, text-shadow 200ms;
   font-family: inherit;
   margin-bottom: -1px;
 }
-.tab:hover { color: var(--text); }
+.tab:hover { color: rgba(255,255,255,0.7); }
+
 .tabActive {
   color: var(--neon);
   border-bottom-color: var(--neon);
+  text-shadow: 0 0 12px rgba(0,252,237,0.5);
 }
 
-/* Content */
+/* ─── Content ─── */
+
 .content {
+  position: relative;
+  z-index: 2;
   padding: 40px;
-  max-width: 900px;
+  max-width: 980px;
   margin: 0 auto;
   width: 100%;
   flex: 1;
 }
 
-/* Avatar */
+/* ─── Avatars ─── */
+
 .avatarImg {
   border-radius: 50%;
   object-fit: cover;
@@ -90,12 +121,14 @@
   justify-content: center;
   font-weight: 700;
   letter-spacing: 1px;
-  color: var(--muted);
-  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255,255,255,0.5);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255,255,255,0.1);
   flex-shrink: 0;
 }
 
-/* Custom dropdown */
+/* ─── Custom dropdown ─── */
+
 .dropdownWrap {
   position: relative;
   display: inline-block;
@@ -115,36 +148,28 @@
   cursor: pointer;
   font-family: inherit;
   min-width: 200px;
-  transition: border-color 200ms, background 200ms;
+  transition: border-color 200ms, background 200ms, box-shadow 200ms;
 }
 .dropdownBtn:hover {
-  border-color: rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(0, 252, 237, 0.3);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 12px rgba(0,252,237,0.08);
 }
 
-.dropdownAvatar {
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.dropdownArrow {
-  margin-left: auto;
-  font-size: 0.6rem;
-  color: var(--muted);
-}
+.dropdownAvatar { border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.dropdownArrow { margin-left: auto; font-size: 0.55rem; color: var(--muted); }
 
 .dropdownList {
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
   min-width: 100%;
-  background: #0d0d1a;
+  background: #09091a;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
   overflow: hidden;
-  z-index: 200;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  z-index: 300;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
   max-height: 320px;
   overflow-y: auto;
 }
@@ -157,63 +182,86 @@
   padding: 10px 14px;
   background: none;
   border: none;
-  color: var(--text);
+  color: rgba(255,255,255,0.75);
   font-size: 0.85rem;
   cursor: pointer;
   font-family: inherit;
   text-align: left;
-  transition: background 150ms;
+  transition: background 150ms, color 150ms;
 }
-.dropdownItem:hover { background: rgba(255, 255, 255, 0.06); }
+.dropdownItem:hover { background: rgba(255,255,255,0.06); color: var(--text); }
 .dropdownItemActive { color: var(--neon); }
+.dropdownItemAvatar { border-radius: 50%; object-fit: cover; flex-shrink: 0; }
 
-.dropdownItemAvatar {
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
+/* ─── Score hero ─── */
 
-/* Score hero */
 .scoreHero {
   display: flex;
   align-items: center;
   gap: 32px;
   margin-bottom: 36px;
   padding: 28px 32px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
+  backdrop-filter: blur(8px);
+  position: relative;
+  overflow: hidden;
 }
 
-.scoreRing { flex-shrink: 0; }
+.scoreHero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 0% 50%, rgba(0,252,237,0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.scoreRing { flex-shrink: 0; position: relative; z-index: 1; }
 
 .scoreLabels {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
+  position: relative;
+  z-index: 1;
 }
 
 .scoreName {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--text);
+  font-size: 1.6rem;
+  font-weight: 800;
   font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #fff 30%, rgba(0,252,237,0.8) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
 }
 
 .scoreDesc {
-  font-size: 0.7rem;
-  letter-spacing: 2px;
+  font-size: 0.65rem;
+  letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--muted);
 }
 
 .scoreTier {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 600;
   color: var(--neon);
-  margin-top: 4px;
+  text-shadow: 0 0 10px rgba(0,252,237,0.4);
 }
 
-/* Stat grid */
+.avgPlacement {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.5);
+  margin-top: 2px;
+}
+.avgPlacement strong { color: var(--text); }
+.placementSeasons { color: var(--muted); font-size: 0.75rem; }
+
+/* ─── Stat grid ─── */
+
 .statGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -224,66 +272,95 @@
 .statBlock {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 14px;
-  padding: 18px 20px;
+  border-radius: 16px;
+  padding: 20px 22px;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  transition: border-color 200ms;
+  transition: border-color 220ms, box-shadow 220ms;
+  position: relative;
+  overflow: hidden;
 }
-.statBlock:hover { border-color: rgba(255, 255, 255, 0.14); }
+.statBlock:hover {
+  border-color: rgba(255,255,255,0.13);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
 
-.statBlockHighlight {
-  border-color: rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
+.statBlockNeon {
+  border-color: rgba(0,252,237,0.15);
+  background: rgba(0,252,237,0.03);
 }
+.statBlockNeon:hover { border-color: rgba(0,252,237,0.3); box-shadow: 0 4px 24px rgba(0,252,237,0.08); }
+
+.statBlockHot {
+  border-color: rgba(255,42,109,0.15);
+  background: rgba(255,42,109,0.03);
+}
+.statBlockHot:hover { border-color: rgba(255,42,109,0.3); box-shadow: 0 4px 24px rgba(255,42,109,0.08); }
 
 .statBlockLabel {
-  font-size: 0.65rem;
-  letter-spacing: 1.5px;
+  font-size: 0.62rem;
+  letter-spacing: 1.8px;
   text-transform: uppercase;
   color: var(--muted);
 }
 
 .statBlockValue {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 2.2rem;
+  font-weight: 800;
   color: var(--text);
   font-variant-numeric: tabular-nums;
   line-height: 1;
-  margin: 4px 0;
+  margin: 6px 0 2px;
+  font-family: 'Poppins', sans-serif;
 }
 
-.statBlockValueNeon { color: var(--neon); text-shadow: 0 0 12px rgba(0,252,237,0.4); }
-.statBlockValueHot  { color: var(--neon-hot); text-shadow: 0 0 12px rgba(255,42,109,0.4); }
+.statBlockFrac {
+  font-size: 1rem;
+  font-weight: 400;
+  opacity: 0.45;
+}
+
+.statBlockValueNeon {
+  color: var(--neon);
+  text-shadow: 0 0 16px rgba(0,252,237,0.45);
+}
+.statBlockValueHot {
+  color: var(--neon-hot);
+  text-shadow: 0 0 16px rgba(255,42,109,0.45);
+}
 
 .statBlockSub {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--muted);
 }
 
-/* Section label */
+/* ─── Section label ─── */
+
 .sectionLabel {
-  font-size: 0.65rem;
-  letter-spacing: 2.5px;
-  color: var(--muted);
+  font-size: 0.62rem;
+  letter-spacing: 3px;
   text-transform: uppercase;
   margin-bottom: 16px;
+  background: linear-gradient(90deg, var(--neon), var(--neon-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
 }
 
-/* Season cards */
-.seasonCards {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
+/* ─── Season cards ─── */
+
+.seasonCards { display: flex; flex-direction: column; gap: 10px; }
 
 .seasonCard {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 14px;
   padding: 18px 22px;
+  transition: border-color 200ms;
 }
+.seasonCard:hover { border-color: rgba(255,255,255,0.12); }
 
 .seasonCardHeader {
   display: flex;
@@ -299,13 +376,13 @@
 }
 
 .seasonCardRank {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: var(--neon);
-  background: rgba(0, 252, 237, 0.08);
-  border: 1px solid rgba(0, 252, 237, 0.2);
+  background: rgba(0, 252, 237, 0.07);
+  border: 1px solid rgba(0, 252, 237, 0.18);
   border-radius: 20px;
-  padding: 2px 12px;
+  padding: 3px 12px;
 }
 
 .seasonCardStats {
@@ -318,27 +395,28 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   padding: 10px 6px;
   background: rgba(255, 255, 255, 0.03);
-  border-radius: 8px;
+  border-radius: 10px;
 }
 
 .seasonStatVal {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--text);
   font-variant-numeric: tabular-nums;
 }
 
 .seasonStatLbl {
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   letter-spacing: 1px;
   color: var(--muted);
   text-transform: uppercase;
 }
 
-/* No data */
+/* ─── No data ─── */
+
 .noData {
   text-align: center;
   padding: 80px 0;
@@ -347,10 +425,11 @@
 }
 
 /* ─── Ranking tab ─── */
+
 .rankingSection {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 40px;
 }
 
 /* Podium */
@@ -358,16 +437,15 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: 8px;
-  padding: 16px 0 0;
+  gap: 10px;
+  padding: 24px 0 0;
 }
 
 .podiumSlot {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0;
-  width: 140px;
+  width: 150px;
 }
 
 .podiumMeta {
@@ -375,111 +453,118 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
-.podiumAvatar {
+.podiumAvatarWrap {
   border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid rgba(255,255,255,0.15);
+  border: 2.5px solid;
+  padding: 2px;
+  transition: box-shadow 300ms;
 }
-.podiumAvatarLarge {
+
+.podiumAvatarInner {
   border-radius: 50%;
   object-fit: cover;
-  border: 2.5px solid var(--neon);
-  box-shadow: 0 0 16px rgba(0,252,237,0.4);
+  display: block;
 }
 
 .podiumName {
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 700;
   color: var(--text);
   text-align: center;
-  max-width: 120px;
+  max-width: 130px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .podiumScore {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--neon);
-  letter-spacing: 1px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  font-family: 'Poppins', sans-serif;
+  text-shadow: 0 0 12px currentColor;
 }
+
+.podiumPlacement {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.5);
+}
+.podiumPlacementSeasons { color: var(--muted); }
 
 .podiumBlock {
   width: 100%;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid;
   border-bottom: none;
-  border-radius: 10px 10px 0 0;
+  border-radius: 12px 12px 0 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 200ms;
-}
-
-.podiumFirst .podiumBlock {
-  background: rgba(0,252,237,0.06);
-  border-color: rgba(0,252,237,0.2);
-}
-
-.podiumSelf .podiumBlock {
-  border-color: rgba(176,38,255,0.4);
-  background: rgba(176,38,255,0.06);
+  background: rgba(255,255,255,0.03);
+  transition: box-shadow 300ms;
 }
 
 .podiumRankNum {
-  font-size: 1.4rem;
+  font-size: 2rem;
   font-weight: 900;
-  color: rgba(255,255,255,0.12);
   font-family: 'Poppins', sans-serif;
+  opacity: 0.5;
+  text-shadow: 0 0 20px currentColor;
 }
 
-/* Rank list */
-.rankListHeader {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 12px 8px;
-  font-size: 0.6rem;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--muted);
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+.podiumSelf .podiumBlock {
+  background: rgba(176,38,255,0.06);
 }
 
-.rankListCol { flex-shrink: 0; }
-
-.rankList {
+/* Rank table */
+.rankTable {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
+.rankTableHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px 10px;
+  font-size: 0.58rem;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
 .rankRow {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  background: rgba(255, 255, 255, 0.03);
+  gap: 10px;
+  padding: 11px 14px;
+  background: rgba(255, 255, 255, 0.025);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 12px;
   transition: background 150ms, border-color 150ms;
 }
-.rankRow:hover { background: rgba(255,255,255,0.05); }
+.rankRow:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.1);
+}
 
 .rankRowSelf {
   border-color: rgba(176,38,255,0.3);
-  background: rgba(176,38,255,0.05);
+  background: rgba(176,38,255,0.04);
+}
+.rankRowSelf:hover {
+  border-color: rgba(176,38,255,0.5);
+  background: rgba(176,38,255,0.07);
 }
 
 .rankNum {
   width: 28px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  color: var(--muted);
+  color: rgba(255,255,255,0.3);
   text-align: right;
   flex-shrink: 0;
 }
@@ -488,11 +573,13 @@
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
+  width: 30px;
+  height: 30px;
 }
 
 .rankName {
   flex: 1;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 500;
   color: var(--text);
   min-width: 0;
@@ -501,11 +588,64 @@
   white-space: nowrap;
 }
 
+/* Rank cell: main value + sub */
+.rankCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 86px;
+  flex-shrink: 0;
+}
+
+.rankCellMain {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.rankCellNeon {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--neon);
+  text-shadow: 0 0 8px rgba(0,252,237,0.4);
+  font-variant-numeric: tabular-nums;
+}
+
+.rankCellHot {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--neon-hot);
+  text-shadow: 0 0 8px rgba(255,42,109,0.4);
+  font-variant-numeric: tabular-nums;
+}
+
+.rankCellSub {
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.3);
+}
+
+.rankCellCenter {
+  width: 48px;
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 0.82rem;
+}
+
+.rankCellMuted { color: rgba(255,255,255,0.2); }
+
+.streakVal {
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Score bar */
 .rankBarWrap {
-  width: 140px;
-  height: 20px;
+  width: 110px;
+  height: 22px;
   background: rgba(255,255,255,0.05);
-  border-radius: 10px;
+  border-radius: 11px;
   overflow: hidden;
   position: relative;
   flex-shrink: 0;
@@ -515,30 +655,24 @@
 
 .rankBar {
   height: 100%;
-  background: linear-gradient(90deg, rgba(0,252,237,0.4), rgba(0,252,237,0.7));
-  border-radius: 10px;
-  transition: width 600ms cubic-bezier(.22,.68,0,1.2);
+  background: linear-gradient(90deg, rgba(0,252,237,0.55), rgba(176,38,255,0.65));
+  border-radius: 11px;
+  box-shadow: 0 0 8px rgba(0,252,237,0.25);
+  transition: width 700ms cubic-bezier(.22,.68,0,1.2);
 }
 
 .rankScore {
   position: absolute;
   right: 8px;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  color: var(--text);
+  color: rgba(255,255,255,0.9);
   line-height: 1;
+  text-shadow: 0 0 4px rgba(0,0,0,0.8);
 }
 
-.rankStat {
-  width: 60px;
-  text-align: center;
-  font-size: 0.78rem;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-  flex-shrink: 0;
-}
+/* ─── Responsive ─── */
 
-/* Responsive */
 @media (max-width: 700px) {
   .content { padding: 20px 16px; }
   .navbar { padding: 0 16px; }
@@ -547,6 +681,8 @@
   .seasonCardStats { grid-template-columns: repeat(2, 1fr); }
   .scoreHero { flex-direction: column; align-items: flex-start; gap: 20px; }
   .podiumSlot { width: 100px; }
+  .rankTableHead { display: none; }
+  .rankCell { width: 64px; }
   .rankBarWrap { width: 80px; }
-  .rankStat { width: 44px; font-size: 0.7rem; }
+  .rankCellCenter { width: 36px; }
 }

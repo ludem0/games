@@ -34,7 +34,7 @@ function Avatar({ username, size = 40, className }: { username: string; size?: n
     return <img src={url} alt={username} width={size} height={size} className={`${styles.avatarImg} ${className ?? ''}`} />
   }
   return (
-    <div className={`${styles.avatarInitials} ${className ?? ''}`} style={{ width: size, height: size, fontSize: size * 0.28 }}>
+    <div className={`${styles.avatarInitials} ${className ?? ''}`} style={{ width: size, height: size, fontSize: size * 0.3 }}>
       {initials}
     </div>
   )
@@ -44,33 +44,50 @@ function ScoreRing({ score }: { score: number }) {
   const r = 54
   const circ = 2 * Math.PI * r
   const filled = (score / 100) * circ
+  const color = score >= 70 ? '#00FCED' : score >= 40 ? '#B026FF' : '#FF2A6D'
+  const glow = score >= 70 ? 'rgba(0,252,237,0.7)' : score >= 40 ? 'rgba(176,38,255,0.7)' : 'rgba(255,42,109,0.7)'
   return (
     <svg className={styles.scoreRing} width="136" height="136" viewBox="0 0 136 136">
-      <circle cx="68" cy="68" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
+      <circle cx="68" cy="68" r={r} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="9" />
       <circle
         cx="68" cy="68" r={r} fill="none"
-        stroke="var(--neon)" strokeWidth="8"
+        stroke={color} strokeWidth="9"
         strokeLinecap="round"
         strokeDasharray={`${filled} ${circ}`}
         strokeDashoffset={circ / 4}
-        style={{ filter: 'drop-shadow(0 0 8px rgba(0,252,237,0.6))' }}
+        style={{ filter: `drop-shadow(0 0 10px ${glow})` }}
       />
-      <text x="68" y="62" textAnchor="middle" fill="var(--text)" fontSize="28" fontWeight="700" fontFamily="Poppins,sans-serif">
+      <text x="68" y="63" textAnchor="middle" fill="white" fontSize="30" fontWeight="800" fontFamily="Poppins,sans-serif">
         {score}
       </text>
-      <text x="68" y="80" textAnchor="middle" fill="var(--muted)" fontSize="9" letterSpacing="2" fontFamily="inherit">
+      <text x="68" y="80" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="8.5" letterSpacing="2.5" fontFamily="inherit">
         SCORE
       </text>
     </svg>
   )
 }
 
-function rate(wins: number, total: number): string {
-  if (total === 0) return '—'
-  return `${Math.round(wins / total * 100)}%`
+function frac(wins: number, total: number) {
+  if (total === 0) return null
+  return { wins, total, pct: Math.round(wins / total * 100) }
 }
 
-function RankingTab({ allPlayers, allStats, currentUser }: { allPlayers: string[]; allStats: Record<string, PlayerStats>; currentUser: string }) {
+function avgPlacementInfo(stats: PlayerStats) {
+  const valid = stats.seasons.filter(s => s.rank != null)
+  if (valid.length === 0) return null
+  const avg = valid.reduce((a, s) => a + s.rank!, 0) / valid.length
+  const places = valid.map(s => s.rank!)
+  return { avg: Math.round(avg * 10) / 10, places }
+}
+
+const TIER_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32'] // gold, silver, bronze
+const TIER_GLOWS = ['rgba(255,215,0,0.5)', 'rgba(192,192,192,0.4)', 'rgba(205,127,50,0.4)']
+
+function RankingTab({ allPlayers, allStats, currentUser }: {
+  allPlayers: string[]
+  allStats: Record<string, PlayerStats>
+  currentUser: string
+}) {
   const ranked = allPlayers
     .filter(p => allStats[p])
     .map(p => ({ username: p, score: computePerformanceScore(allStats[p]), stats: allStats[p] }))
@@ -83,7 +100,7 @@ function RankingTab({ allPlayers, allStats, currentUser }: { allPlayers: string[
     : top3.length === 2
     ? [top3[1], top3[0]]
     : top3
-  const podiumHeights: Record<number, number> = { 0: 70, 1: 100, 2: 50 }
+  const podiumHeights: Record<number, number> = { 0: 72, 1: 108, 2: 52 }
 
   return (
     <div className={styles.rankingSection}>
@@ -91,23 +108,29 @@ function RankingTab({ allPlayers, allStats, currentUser }: { allPlayers: string[
         <div className={styles.podium}>
           {podiumOrder.map((entry, i) => {
             const realRank = ranked.indexOf(entry) + 1
-            const podiumH = podiumHeights[i] ?? 70
+            const podiumH = podiumHeights[i] ?? 72
+            const color = TIER_COLORS[realRank - 1] ?? '#888'
+            const glow = TIER_GLOWS[realRank - 1] ?? 'rgba(136,136,136,0.3)'
+            const placement = avgPlacementInfo(entry.stats)
             return (
               <div
                 key={entry.username}
-                className={`${styles.podiumSlot} ${entry.username === currentUser ? styles.podiumSelf : ''} ${realRank === 1 ? styles.podiumFirst : ''}`}
+                className={`${styles.podiumSlot} ${entry.username === currentUser ? styles.podiumSelf : ''}`}
               >
                 <div className={styles.podiumMeta}>
-                  <Avatar
-                    username={entry.username}
-                    size={realRank === 1 ? 56 : 44}
-                    className={realRank === 1 ? styles.podiumAvatarLarge : styles.podiumAvatar}
-                  />
+                  <div className={styles.podiumAvatarWrap} style={{ borderColor: color, boxShadow: `0 0 16px ${glow}` }}>
+                    <Avatar username={entry.username} size={realRank === 1 ? 56 : 46} className={styles.podiumAvatarInner} />
+                  </div>
                   <span className={styles.podiumName}>{entry.username}</span>
-                  <span className={styles.podiumScore}>{entry.score}</span>
+                  <span className={styles.podiumScore} style={{ color }}>{entry.score}</span>
+                  {placement && (
+                    <span className={styles.podiumPlacement}>
+                      avg {placement.avg} <span className={styles.podiumPlacementSeasons}>({placement.places.join(', ')})</span>
+                    </span>
+                  )}
                 </div>
-                <div className={styles.podiumBlock} style={{ height: podiumH }}>
-                  <span className={styles.podiumRankNum}>{realRank}</span>
+                <div className={styles.podiumBlock} style={{ height: podiumH, borderColor: color, boxShadow: `0 0 24px ${glow}` }}>
+                  <span className={styles.podiumRankNum} style={{ color }}>{realRank}</span>
                 </div>
               </div>
             )
@@ -115,37 +138,83 @@ function RankingTab({ allPlayers, allStats, currentUser }: { allPlayers: string[
         </div>
       )}
 
-      <div className={styles.rankListHeader}>
-        <span className={styles.rankListCol} style={{ width: 28 }}>#</span>
-        <span className={styles.rankListCol} style={{ flex: 1 }}>Игрок</span>
-        <span className={styles.rankListCol} style={{ width: 140 }}>Score</span>
-        <span className={styles.rankListCol} style={{ width: 60 }}>MM%</span>
-        <span className={styles.rankListCol} style={{ width: 60 }}>DM%</span>
-      </div>
+      <div className={styles.rankTable}>
+        <div className={styles.rankTableHead}>
+          <span style={{ width: 28 }}>#</span>
+          <span style={{ width: 32 }} />
+          <span style={{ flex: 1 }}>Игрок</span>
+          <span style={{ width: 90 }}>Место avg</span>
+          <span style={{ width: 86 }}>MM wins</span>
+          <span style={{ width: 86 }}>DM wins</span>
+          <span style={{ width: 48 }}>MM🔥</span>
+          <span style={{ width: 48 }}>DM⚡</span>
+          <span style={{ width: 110 }}>Score</span>
+        </div>
 
-      <div className={styles.rankList}>
         {rest.map((entry, i) => {
           const rank = i + 4
           const maxScore = ranked[0]?.score ?? 1
           const barW = maxScore > 0 ? (entry.score / maxScore) * 100 : 0
           const s = entry.stats.totals
+          const mm = frac(s.mmWins, s.mmParticipations)
+          const dm = frac(s.dmWins, s.dmParticipations)
+          const placement = avgPlacementInfo(entry.stats)
           return (
             <div key={entry.username} className={`${styles.rankRow} ${entry.username === currentUser ? styles.rankRowSelf : ''}`}>
               <span className={styles.rankNum}>{rank}</span>
-              <Avatar username={entry.username} size={32} className={styles.rankAvatar} />
+              <Avatar username={entry.username} size={30} className={styles.rankAvatar} />
               <span className={styles.rankName}>{entry.username}</span>
+
+              <span className={styles.rankCell}>
+                {placement ? (
+                  <>
+                    <span className={styles.rankCellMain}>{placement.avg}</span>
+                    <span className={styles.rankCellSub}>({placement.places.join(', ')})</span>
+                  </>
+                ) : '—'}
+              </span>
+
+              <span className={styles.rankCell}>
+                {mm ? (
+                  <>
+                    <span className={styles.rankCellNeon}>{mm.wins}/{mm.total}</span>
+                    <span className={styles.rankCellSub}>{mm.pct}%</span>
+                  </>
+                ) : '—'}
+              </span>
+
+              <span className={styles.rankCell}>
+                {dm ? (
+                  <>
+                    <span className={styles.rankCellHot}>{dm.wins}/{dm.total}</span>
+                    <span className={styles.rankCellSub}>{dm.pct}%</span>
+                  </>
+                ) : '—'}
+              </span>
+
+              <span className={styles.rankCellCenter}>
+                {s.mmWinStreak > 0 ? <span className={styles.streakVal}>{s.mmWinStreak}</span> : <span className={styles.rankCellMuted}>—</span>}
+              </span>
+
+              <span className={styles.rankCellCenter}>
+                {s.dmWinStreak > 0 ? <span className={styles.streakVal}>{s.dmWinStreak}</span> : <span className={styles.rankCellMuted}>—</span>}
+              </span>
+
               <div className={styles.rankBarWrap}>
                 <div className={styles.rankBar} style={{ width: `${barW}%` }} />
                 <span className={styles.rankScore}>{entry.score}</span>
               </div>
-              <span className={styles.rankStat}>{rate(s.mmWins, s.mmParticipations)}</span>
-              <span className={styles.rankStat}>{rate(s.dmWins, s.dmParticipations)}</span>
             </div>
           )
         })}
       </div>
     </div>
   )
+}
+
+function rate(wins: number, total: number): string {
+  if (total === 0) return '—'
+  return `${Math.round(wins / total * 100)}%`
 }
 
 export default function StatsClient({ username, role, allStats, allPlayers }: Props) {
@@ -158,6 +227,8 @@ export default function StatsClient({ username, role, allStats, allPlayers }: Pr
 
   return (
     <div className={styles.page}>
+      <div className={styles.bgLayer} aria-hidden />
+
       <nav className={styles.navbar}>
         <Link href="/" className={styles.back}>← Главная</Link>
         <div className={styles.navLogo}>PG</div>
@@ -165,16 +236,10 @@ export default function StatsClient({ username, role, allStats, allPlayers }: Pr
       </nav>
 
       <div className={styles.tabs}>
-        <button
-          className={`${styles.tab} ${tab === 'my' ? styles.tabActive : ''}`}
-          onClick={() => setTab('my')}
-        >
+        <button className={`${styles.tab} ${tab === 'my' ? styles.tabActive : ''}`} onClick={() => setTab('my')}>
           Моя статистика
         </button>
-        <button
-          className={`${styles.tab} ${tab === 'ranking' ? styles.tabActive : ''}`}
-          onClick={() => setTab('ranking')}
-        >
+        <button className={`${styles.tab} ${tab === 'ranking' ? styles.tabActive : ''}`} onClick={() => setTab('ranking')}>
           Рейтинг игроков
         </button>
       </div>
@@ -218,6 +283,15 @@ export default function StatsClient({ username, role, allStats, allPlayers }: Pr
                     <span className={styles.scoreTier}>
                       {score >= 70 ? '🏆 Топ игрок' : score >= 40 ? '⚡ Хорошо' : '📈 Развивается'}
                     </span>
+                    {(() => {
+                      const p = avgPlacementInfo(stats)
+                      return p ? (
+                        <span className={styles.avgPlacement}>
+                          Avg место: <strong>{p.avg}</strong>
+                          <span className={styles.placementSeasons}> ({p.places.join(', ')})</span>
+                        </span>
+                      ) : null
+                    })()}
                   </div>
                 </div>
 
@@ -227,9 +301,12 @@ export default function StatsClient({ username, role, allStats, allPlayers }: Pr
                     <span className={styles.statBlockValue}>{stats.totals.mmParticipations}</span>
                     <span className={styles.statBlockSub}>Win rate: {rate(stats.totals.mmWins, stats.totals.mmParticipations)}</span>
                   </div>
-                  <div className={`${styles.statBlock} ${styles.statBlockHighlight}`}>
+                  <div className={`${styles.statBlock} ${styles.statBlockNeon}`}>
                     <span className={styles.statBlockLabel}>Иммунитеты</span>
-                    <span className={`${styles.statBlockValue} ${styles.statBlockValueNeon}`}>{stats.totals.mmWins}</span>
+                    <span className={`${styles.statBlockValue} ${styles.statBlockValueNeon}`}>
+                      {stats.totals.mmWins}
+                      <span className={styles.statBlockFrac}>/{stats.totals.mmParticipations}</span>
+                    </span>
                     <span className={styles.statBlockSub}>Стрик: {stats.totals.mmWinStreak}</span>
                   </div>
                   <div className={styles.statBlock}>
@@ -237,18 +314,21 @@ export default function StatsClient({ username, role, allStats, allPlayers }: Pr
                     <span className={styles.statBlockValue}>{stats.totals.dmParticipations}</span>
                     <span className={styles.statBlockSub}>Win rate: {rate(stats.totals.dmWins, stats.totals.dmParticipations)}</span>
                   </div>
-                  <div className={`${styles.statBlock} ${styles.statBlockHighlight}`}>
+                  <div className={`${styles.statBlock} ${styles.statBlockHot}`}>
                     <span className={styles.statBlockLabel}>DM побед</span>
-                    <span className={`${styles.statBlockValue} ${styles.statBlockValueHot}`}>{stats.totals.dmWins}</span>
+                    <span className={`${styles.statBlockValue} ${styles.statBlockValueHot}`}>
+                      {stats.totals.dmWins}
+                      <span className={styles.statBlockFrac}>/{stats.totals.dmParticipations}</span>
+                    </span>
                     <span className={styles.statBlockSub}>Стрик: {stats.totals.dmWinStreak}</span>
                   </div>
                   <div className={styles.statBlock}>
-                    <span className={styles.statBlockLabel}>MM стрик</span>
+                    <span className={styles.statBlockLabel}>MM стрик 🔥</span>
                     <span className={styles.statBlockValue}>{stats.totals.mmWinStreak}</span>
                     <span className={styles.statBlockSub}>подряд</span>
                   </div>
                   <div className={styles.statBlock}>
-                    <span className={styles.statBlockLabel}>DM стрик</span>
+                    <span className={styles.statBlockLabel}>DM стрик ⚡</span>
                     <span className={styles.statBlockValue}>{stats.totals.dmWinStreak}</span>
                     <span className={styles.statBlockSub}>подряд</span>
                   </div>
@@ -268,20 +348,20 @@ export default function StatsClient({ username, role, allStats, allPlayers }: Pr
                           </div>
                           <div className={styles.seasonCardStats}>
                             <div className={styles.seasonStat}>
-                              <span className={styles.seasonStatVal}>{s.mmWins}</span>
-                              <span className={styles.seasonStatLbl}>иммун.</span>
+                              <span className={styles.seasonStatVal}>{s.mmWins}/{s.mmParticipations}</span>
+                              <span className={styles.seasonStatLbl}>MM wins</span>
                             </div>
                             <div className={styles.seasonStat}>
                               <span className={styles.seasonStatVal}>{rate(s.mmWins, s.mmParticipations)}</span>
-                              <span className={styles.seasonStatLbl}>MM win%</span>
+                              <span className={styles.seasonStatLbl}>MM%</span>
                             </div>
                             <div className={styles.seasonStat}>
-                              <span className={styles.seasonStatVal}>{s.dmParticipations}</span>
-                              <span className={styles.seasonStatLbl}>DM всего</span>
+                              <span className={styles.seasonStatVal}>{s.dmWins}/{s.dmParticipations}</span>
+                              <span className={styles.seasonStatLbl}>DM wins</span>
                             </div>
                             <div className={styles.seasonStat}>
                               <span className={styles.seasonStatVal}>{rate(s.dmWins, s.dmParticipations)}</span>
-                              <span className={styles.seasonStatLbl}>DM win%</span>
+                              <span className={styles.seasonStatLbl}>DM%</span>
                             </div>
                           </div>
                         </div>

@@ -200,13 +200,10 @@ export function computePerformanceScore(stats: PlayerStats): number {
     ? (totals.dmWins / totals.dmParticipations) * 100
     : null
 
-  const streakBonus = Math.min(Math.max(totals.mmWinStreak, totals.dmWinStreak) / 5, 1) * 100
-
   const components: Array<{ value: number; weight: number }> = [
-    ...(avgRank != null ? [{ value: avgRank, weight: 30 }] : []),
-    ...(dmRate != null ? [{ value: dmRate, weight: 30 }] : []),
-    ...(mmRate != null ? [{ value: mmRate, weight: 25 }] : []),
-    { value: streakBonus, weight: 15 },
+    ...(avgRank != null ? [{ value: avgRank, weight: 40 }] : []),
+    ...(mmRate != null ? [{ value: mmRate, weight: 40 }] : []),
+    ...(dmRate != null ? [{ value: dmRate, weight: 20 }] : []),
   ]
 
   const totalWeight = components.reduce((a, c) => a + c.weight, 0)
