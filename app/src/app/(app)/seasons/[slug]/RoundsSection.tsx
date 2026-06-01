@@ -455,7 +455,6 @@ function RoundCard({ round, accent, isAdmin, initials, psigems, isLast, isCollap
           </span>
         </div>
         <div className={styles.roundHeaderRight}>
-          {!isFinal && <span className={styles.roundCount}>{totalBefore} → {totalAfter} игр.</span>}
           {isFinal && mm.winners[0] && <span className={styles.finalChampionHeader}>🥇 {mm.winners[0]}</span>}
           {isAdmin && isLast && (
             <button className={styles.deleteRound} onClick={e => { e.stopPropagation(); onDelete() }}>✕</button>
