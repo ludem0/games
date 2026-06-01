@@ -151,15 +151,9 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
   function toggleDMParticipant(di: number, p: string) {
     setForm(f => {
       const dms = f.deathMatches.map((dm, i) => {
-        if (i === di) {
-          const has = dm.participants.includes(p)
-          return { ...dm, participants: has ? dm.participants.filter(x => x !== p) : [...dm.participants, p], winner: has && dm.winner === p ? '' : dm.winner, eliminated: has && dm.eliminated === p ? '' : dm.eliminated }
-        }
-        // Remove from other DMs when claiming for this DM
-        if (dm.participants.includes(p)) {
-          return { ...dm, participants: dm.participants.filter(x => x !== p), winner: dm.winner === p ? '' : dm.winner, eliminated: dm.eliminated === p ? '' : dm.eliminated }
-        }
-        return dm
+        if (i !== di) return dm
+        const has = dm.participants.includes(p)
+        return { ...dm, participants: has ? dm.participants.filter(x => x !== p) : [...dm.participants, p], winner: has && dm.winner === p ? '' : dm.winner, eliminated: has && dm.eliminated === p ? '' : dm.eliminated }
       })
       return { ...f, deathMatches: dms }
     })
@@ -451,7 +445,6 @@ function DMMatchesList({ form, losers, accent, initials, addDM, removeDM, setDMN
   return (
     <div className={styles.dmMatchesList}>
       {form.deathMatches.map((dmForm, di) => {
-        const assignedElsewhere = form.deathMatches.flatMap((d, i) => i !== di ? d.participants : [])
         return (
           <div key={di} className={styles.dmMatchBlock}>
             <div className={styles.dmMatchHeader}>
@@ -463,7 +456,7 @@ function DMMatchesList({ form, losers, accent, initials, addDM, removeDM, setDMN
             <div className={styles.chipGrid}>
               {losers.map(p => (
                 <button key={p}
-                  className={`${styles.chip} ${dmForm.participants.includes(p) ? styles.chipSelected : ''} ${assignedElsewhere.includes(p) ? styles.chipOtherDm : ''}`}
+                  className={`${styles.chip} ${dmForm.participants.includes(p) ? styles.chipSelected : ''}`}
                   onClick={() => toggleDMParticipant(di, p)}>{p}</button>
               ))}
             </div>
