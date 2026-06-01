@@ -64,9 +64,34 @@ export default function LeaderboardSection({ slug, accent, isAdmin, participants
 
   const MEDALS = ['#FFD700', '#C0C0C0', '#CD7F32']
 
+  // Group active players by psigem value for tie detection
+  function buildPsiGroups(players: string[]): string[][] {
+    const map = new Map<number, string[]>()
+    const groups: string[][] = []
+    for (const p of players) {
+      const psi = psigems[p] ?? 1
+      if (!map.has(psi)) { map.set(psi, []); groups.push(map.get(psi)!) }
+      map.get(psi)!.push(p)
+    }
+    return groups
+  }
+
+  const activeGroups: string[][] = finalRound
+    ? [
+        ...(champion ? [[champion]] : []),
+        ...(runnerUp ? [[runnerUp]] : []),
+        ...buildPsiGroups(active.filter(p => p !== champion && p !== runnerUp).sort((a, b) => (psigems[b] ?? 1) - (psigems[a] ?? 1))),
+      ]
+    : buildPsiGroups(activeSorted)
+
   function getRank(name: string): number {
     if (!eliminatedSet.has(name)) {
-      return activeSorted.indexOf(name) + 1
+      let rank = 1
+      for (const group of activeGroups) {
+        if (group.includes(name)) return rank
+        rank += group.length
+      }
+      return rank
     }
     let rank = activeSorted.length + 1
     for (const group of eliminatedGroupsReversed) {
@@ -77,7 +102,16 @@ export default function LeaderboardSection({ slug, accent, isAdmin, participants
   }
 
   function getRankDisplay(name: string): string {
-    if (!eliminatedSet.has(name)) return String(getRank(name))
+    if (!eliminatedSet.has(name)) {
+      let rank = 1
+      for (const group of activeGroups) {
+        if (group.includes(name)) {
+          return group.length === 1 ? String(rank) : `${rank}–${rank + group.length - 1}`
+        }
+        rank += group.length
+      }
+      return String(rank)
+    }
     let rank = activeSorted.length + 1
     for (const group of eliminatedGroupsReversed) {
       if (group.includes(name)) {
