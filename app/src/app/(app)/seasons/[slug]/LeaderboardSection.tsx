@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import type { Round } from '@/lib/seasons'
 import styles from './season.module.css'
 
 interface Props {
@@ -9,10 +10,12 @@ interface Props {
   isAdmin: boolean
   participants: string[]
   initialPsigems: Record<string, number>
+  initialRounds: Round[]
 }
 
-export default function LeaderboardSection({ slug, accent, isAdmin, participants, initialPsigems }: Props) {
+export default function LeaderboardSection({ slug, accent, isAdmin, participants, initialPsigems, initialRounds }: Props) {
   const [psigems, setPsigems] = useState<Record<string, number>>(initialPsigems)
+  const [rounds, setRounds] = useState<Round[]>(initialRounds)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<Record<string, number>>(initialPsigems)
   const [saving, setSaving] = useState(false)
@@ -22,21 +25,39 @@ export default function LeaderboardSection({ slug, accent, isAdmin, participants
     if (editing) return
     const interval = setInterval(async () => {
       if (document.hidden) return
-      const res = await fetch(`/api/seasons/${slug}/psigems`)
-      if (res.ok) setPsigems(await res.json())
+      const [psiRes, rndRes] = await Promise.all([
+        fetch(`/api/seasons/${slug}/psigems`),
+        fetch(`/api/seasons/${slug}/rounds`),
+      ])
+      if (psiRes.ok) setPsigems(await psiRes.json())
+      if (rndRes.ok) setRounds(await rndRes.json())
     }, 8000)
     return () => clearInterval(interval)
   }, [slug, editing])
 
   const initials = (n: string) => n.slice(0, 2).toUpperCase()
 
-  const sorted = [...participants].sort((a, b) => (psigems[b] ?? 1) - (psigems[a] ?? 1))
+  // Eliminated players in chronological order (index 0 = first eliminated)
+  const eliminatedOrdered = rounds
+    .filter(r => r.deathMatch?.eliminated)
+    .map(r => r.deathMatch!.eliminated)
+
+  const eliminatedSet = new Set(eliminatedOrdered)
+  const active = participants.filter(p => !eliminatedSet.has(p))
+  const activeSorted = [...active].sort((a, b) => (psigems[b] ?? 1) - (psigems[a] ?? 1))
+  // Most recently eliminated ranks higher → reverse chronological order
+  const eliminatedSorted = [...eliminatedOrdered].reverse()
+  const sorted = [...activeSorted, ...eliminatedSorted]
+
   const MEDALS = ['#FFD700', '#C0C0C0', '#CD7F32']
 
   function getRank(name: string): number {
     const val = psigems[name] ?? 1
-    const first = sorted.findIndex(p => (psigems[p] ?? 1) === val)
-    return first + 1
+    if (!eliminatedSet.has(name)) {
+      const first = activeSorted.findIndex(p => (psigems[p] ?? 1) === val)
+      return first + 1
+    }
+    return activeSorted.length + eliminatedSorted.indexOf(name) + 1
   }
 
   function startEdit() { setDraft({ ...psigems }); setEditing(true) }

@@ -135,6 +135,10 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
     for (const [name, delta] of Object.entries(form.mmPsigemDelta)) {
       newPsigems[name] = Math.max(0, (newPsigems[name] ?? 1) + delta)
     }
+    // DM loss: all eliminated player's psigems transfer to the winner
+    const eliminatedPsi = newPsigems[form.dmEliminated] ?? 1
+    newPsigems[form.dmWinner] = (newPsigems[form.dmWinner] ?? 1) + eliminatedPsi
+    newPsigems[form.dmEliminated] = 0
     const mm: MainMatch = { name: form.mmName, participants: form.mmParticipants, winners, losers, points: form.mmPoints, columnName: form.mmColumnName || 'Очки' }
     const dm: DeathMatch = { name: form.dmName, participants: losers, winner: form.dmWinner, eliminated: form.dmEliminated, points: form.dmPoints, columnName: form.dmColumnName || 'Очки' }
     const [roundRes, psiRes] = await Promise.all([

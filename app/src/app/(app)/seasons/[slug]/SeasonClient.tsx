@@ -152,6 +152,7 @@ export default function SeasonClient({
               isAdmin={role === 'admin'}
               participants={participants}
               initialPsigems={initialPsigems}
+              initialRounds={initialRounds}
             />
           </div>
           <div className={styles.colRight}>
