@@ -979,6 +979,14 @@
 .btnSave:hover:not(:disabled) { background: rgba(74,222,128,0.2); }
 .btnSave:disabled { opacity: 0.35; cursor: default; }
 
+/* Colorful match name in card header */
+.matchNameAccent {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.3px;
+}
+
 /* MM multi-game form */
 .mmGamesSection {
   display: flex;
@@ -1000,6 +1008,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+}
+
+.mmGameCollapseBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex: 1;
+  text-align: left;
+}
+
+.mmGameCollapseIcon {
+  font-size: 0.55rem;
+  color: var(--muted);
 }
 
 .mmGameNum {
@@ -1020,6 +1046,48 @@
   min-width: 140px;
 }
 
+.mmGameNameLabel {
+  font-size: 0.8rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Column block inside a sub-round */
+.mmColumnBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+}
+
+.mmColumnHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mmColumnHeader .input {
+  flex: 1;
+}
+
+/* Small outline button for add column */
+.btnOutlineSmall {
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 200ms, color 200ms;
+  align-self: flex-start;
+}
+.btnOutlineSmall:hover { border-color: rgba(255,255,255,0.25); color: var(--text); }
+
 .removeGameBtn {
   background: none;
   border: none;
@@ -1036,27 +1104,43 @@
 .mmGamesDisplay {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
   margin-top: 14px;
 }
 
 .mmGameDisplayBlock {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  padding: 10px 12px;
+  background: rgba(74,222,128,0.04);
+  border: 1px solid rgba(74,222,128,0.1);
+  border-radius: 10px;
 }
 
 .mmGameDisplayHeader {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 4px;
+  gap: 8px;
+  padding: 2px 0;
+  user-select: none;
+}
+.mmGameDisplayHeader:hover { opacity: 0.8; }
+
+.mmSubRoundCollapseIcon {
+  font-size: 0.55rem;
+  color: var(--muted);
 }
 
 .mmGameDisplayNum {
   font-family: 'Poppins', sans-serif;
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   color: #4ADE80;
-  min-width: 50px;
+}
+
+.mmSubRoundNameDisplay {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent);
 }

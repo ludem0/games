@@ -3,10 +3,16 @@ import { join } from 'path'
 
 const SEASONS_PATH = join(process.cwd(), 'seasons.json')
 
+export interface MMGameColumn {
+  name: string
+  points?: Record<string, number>
+}
+
 export interface MMGame {
   name: string
   columnName?: string
   points?: Record<string, number>
+  columns?: MMGameColumn[]
 }
 
 export interface MainMatch {

@@ -15,10 +15,15 @@ interface Props {
 
 type MMRole = 'winner' | 'loser' | 'none'
 
+interface MMColumnForm {
+  name: string
+  points: Record<string, number>
+}
+
 interface MMGameForm {
   name: string
-  columnName: string
-  points: Record<string, number>
+  collapsed: boolean
+  columns: MMColumnForm[]
 }
 
 interface FormState {
@@ -44,7 +49,7 @@ const INIT_FORM: FormState = {
   mmParticipants: [],
   mmRoles: {},
   mmPsigemDelta: {},
-  mmGames: [{ name: '', columnName: 'Очки', points: {} }],
+  mmGames: [{ name: '', collapsed: false, columns: [{ name: 'Очки', points: {} }] }],
   dmName: '',
   dmWinner: '',
   dmEliminated: '',
@@ -115,24 +120,12 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
     setForm(f => ({ ...f, mmPsigemDelta: { ...f.mmPsigemDelta, [name]: (f.mmPsigemDelta[name] ?? 0) + delta } }))
   }
 
+  // MM game/round management
   function addMMGame() {
-    setForm(f => ({ ...f, mmGames: [...f.mmGames, { name: '', columnName: 'Очки', points: {} }] }))
-  }
-
-  function updateMMGame(idx: number, field: 'name' | 'columnName', val: string) {
-    setForm(f => {
-      const games = [...f.mmGames]
-      games[idx] = { ...games[idx], [field]: val }
-      return { ...f, mmGames: games }
-    })
-  }
-
-  function setMMGamePoints(idx: number, player: string, val: string) {
-    setForm(f => {
-      const games = [...f.mmGames]
-      games[idx] = { ...games[idx], points: { ...games[idx].points, [player]: parseInt(val) || 0 } }
-      return { ...f, mmGames: games }
-    })
+    setForm(f => ({
+      ...f,
+      mmGames: [...f.mmGames, { name: '', collapsed: false, columns: [{ name: 'Очки', points: {} }] }],
+    }))
   }
 
   function removeMMGame(idx: number) {
@@ -140,6 +133,61 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
     setForm(f => ({ ...f, mmGames: f.mmGames.filter((_, i) => i !== idx) }))
   }
 
+  function updateMMGameName(idx: number, val: string) {
+    setForm(f => {
+      const games = [...f.mmGames]
+      games[idx] = { ...games[idx], name: val }
+      return { ...f, mmGames: games }
+    })
+  }
+
+  function toggleMMGameCollapse(idx: number) {
+    setForm(f => {
+      const games = [...f.mmGames]
+      games[idx] = { ...games[idx], collapsed: !games[idx].collapsed }
+      return { ...f, mmGames: games }
+    })
+  }
+
+  // Column management within a game
+  function addMMGameColumn(gameIdx: number) {
+    setForm(f => {
+      const games = [...f.mmGames]
+      games[gameIdx] = { ...games[gameIdx], columns: [...games[gameIdx].columns, { name: 'Очки', points: {} }] }
+      return { ...f, mmGames: games }
+    })
+  }
+
+  function removeMMGameColumn(gameIdx: number, colIdx: number) {
+    if (form.mmGames[gameIdx].columns.length <= 1) return
+    setForm(f => {
+      const games = [...f.mmGames]
+      games[gameIdx] = { ...games[gameIdx], columns: games[gameIdx].columns.filter((_, i) => i !== colIdx) }
+      return { ...f, mmGames: games }
+    })
+  }
+
+  function updateMMGameColumnName(gameIdx: number, colIdx: number, val: string) {
+    setForm(f => {
+      const games = [...f.mmGames]
+      const cols = [...games[gameIdx].columns]
+      cols[colIdx] = { ...cols[colIdx], name: val }
+      games[gameIdx] = { ...games[gameIdx], columns: cols }
+      return { ...f, mmGames: games }
+    })
+  }
+
+  function setMMGameColumnPoints(gameIdx: number, colIdx: number, player: string, val: string) {
+    setForm(f => {
+      const games = [...f.mmGames]
+      const cols = [...games[gameIdx].columns]
+      cols[colIdx] = { ...cols[colIdx], points: { ...cols[colIdx].points, [player]: parseInt(val) || 0 } }
+      games[gameIdx] = { ...games[gameIdx], columns: cols }
+      return { ...f, mmGames: games }
+    })
+  }
+
+  // Final game management
   function setFinalGameWinner(idx: number, winner: string) {
     setForm(f => {
       const games = [...f.finalGames]
@@ -189,12 +237,16 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
     const eliminatedPsi = newPsigems[form.dmEliminated] ?? 1
     newPsigems[form.dmWinner] = (newPsigems[form.dmWinner] ?? 1) + eliminatedPsi
     newPsigems[form.dmEliminated] = 0
+
     const mm: MainMatch = {
       name: form.mmName,
       participants: form.mmParticipants,
       winners,
       losers,
-      games: form.mmGames.map(g => ({ name: g.name, columnName: g.columnName || 'Очки', points: g.points })),
+      games: form.mmGames.map(g => ({
+        name: g.name,
+        columns: g.columns.map(c => ({ name: c.name, points: c.points })),
+      })),
     }
     const dm: DeathMatch = {
       name: form.dmName,
@@ -449,40 +501,65 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
                     })}
                   </div>
 
-                  <p className={styles.hint}>Игры:</p>
+                  <p className={styles.hint}>Раунды матча:</p>
                   <div className={styles.mmGamesSection}>
                     {form.mmGames.map((game, gi) => (
                       <div key={gi} className={styles.mmGameBlock}>
+                        {/* Sub-round header */}
                         <div className={styles.mmGameHeader}>
-                          <span className={styles.mmGameNum}>Игра {gi + 1}</span>
+                          <button className={styles.mmGameCollapseBtn} onClick={() => toggleMMGameCollapse(gi)}>
+                            <span className={styles.mmGameCollapseIcon}>{game.collapsed ? '▶' : '▼'}</span>
+                            <span className={styles.mmGameNum}>Раунд {gi + 1}</span>
+                            {game.name && <span className={styles.mmGameNameLabel}>{game.name}</span>}
+                          </button>
                           {form.mmGames.length > 1 && (
                             <button className={styles.removeGameBtn} onClick={() => removeMMGame(gi)}>✕</button>
                           )}
                         </div>
-                        <div className={styles.mmGameInputs}>
-                          <input className={styles.input} placeholder="Название игры (необязательно)"
-                            value={game.name} onChange={e => updateMMGame(gi, 'name', e.target.value)} />
-                          <input className={`${styles.input} ${styles.inputNarrow}`} placeholder="Название столбца"
-                            value={game.columnName} onChange={e => updateMMGame(gi, 'columnName', e.target.value)} />
-                        </div>
-                        <div className={styles.roleGrid}>
-                          <div className={styles.roleHead} style={{ gridTemplateColumns: '28px 1fr 90px' }}>
-                            <span /><span />
-                            <span className={styles.roleHeadCell}>{game.columnName || 'Очки'}</span>
-                          </div>
-                          {form.mmParticipants.map(p => (
-                            <div key={p} className={`${styles.roleRow} ${styles.roleRowSimple}`}>
-                              <span className={styles.roleAvatar} style={{ background: `${accent}22`, color: accent }}>{initials(p)}</span>
-                              <span className={styles.roleName}>{p}</span>
-                              <input className={styles.pointsInput} type="number" min={0} placeholder="0"
-                                value={game.points[p] ?? ''}
-                                onChange={e => setMMGamePoints(gi, p, e.target.value)} />
-                            </div>
-                          ))}
-                        </div>
+
+                        {!game.collapsed && (
+                          <>
+                            <input className={styles.input} placeholder="Название раунда (необязательно)"
+                              value={game.name} onChange={e => updateMMGameName(gi, e.target.value)} />
+
+                            {/* Columns */}
+                            {game.columns.map((col, ci) => (
+                              <div key={ci} className={styles.mmColumnBlock}>
+                                <div className={styles.mmColumnHeader}>
+                                  <input className={`${styles.input} ${styles.inputNarrow}`}
+                                    placeholder="Название колонки"
+                                    value={col.name}
+                                    onChange={e => updateMMGameColumnName(gi, ci, e.target.value)} />
+                                  {game.columns.length > 1 && (
+                                    <button className={styles.removeGameBtn} onClick={() => removeMMGameColumn(gi, ci)}>✕</button>
+                                  )}
+                                </div>
+                                <div className={styles.roleGrid}>
+                                  <div className={styles.roleHead} style={{ gridTemplateColumns: '28px 1fr 90px' }}>
+                                    <span /><span />
+                                    <span className={styles.roleHeadCell}>{col.name || 'Очки'}</span>
+                                  </div>
+                                  {form.mmParticipants.map(p => (
+                                    <div key={p} className={`${styles.roleRow} ${styles.roleRowSimple}`}>
+                                      <span className={styles.roleAvatar} style={{ background: `${accent}22`, color: accent }}>{initials(p)}</span>
+                                      <span className={styles.roleName}>{p}</span>
+                                      <input className={styles.pointsInput} type="number" min={0} placeholder="0"
+                                        value={col.points[p] ?? ''}
+                                        onChange={e => setMMGameColumnPoints(gi, ci, p, e.target.value)} />
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+
+                            <button className={styles.btnOutlineSmall} onClick={() => addMMGameColumn(gi)}>
+                              + Добавить колонку
+                            </button>
+                          </>
+                        )}
                       </div>
                     ))}
-                    <button className={styles.btnOutline} onClick={addMMGame}>+ Добавить игру</button>
+                    <button className={styles.btnOutline} onClick={addMMGame}>+ Добавить раунд</button>
                   </div>
                 </>
               )}
@@ -542,6 +619,12 @@ function RoundCard({ round, accent, isAdmin, initials, psigems, isLast, isCollap
   const isFinal = round.type === 'final'
   const mmColName = mm.columnName || 'Очки'
   const dmColName = dm?.columnName || 'Очки'
+
+  // Collapse state per MM sub-round
+  const [collapsedSubRounds, setCollapsedSubRounds] = useState<Set<number>>(new Set())
+  function toggleSubRound(idx: number) {
+    setCollapsedSubRounds(prev => { const n = new Set(prev); n.has(idx) ? n.delete(idx) : n.add(idx); return n })
+  }
 
   function rowRole(p: string): 'winner' | 'loser' | 'none' {
     if (mm.winners.includes(p)) return 'winner'
@@ -642,47 +725,76 @@ function RoundCard({ round, accent, isAdmin, initials, psigems, isLast, isCollap
               <div className={styles.matchContent}>
                 <div className={styles.matchTitleRow}>
                   <span className={styles.matchType}>MAIN MATCH</span>
-                  {mm.name && <span className={styles.matchName}>"{mm.name}"</span>}
+                  {mm.name && <span className={styles.matchNameAccent}>{mm.name}</span>}
                 </div>
 
-                {/* New multi-game format */}
+                {/* New multi-game/round format */}
                 {mm.games && mm.games.length > 0 ? (
                   <div className={styles.mmGamesDisplay}>
                     {mm.games.map((game, gi) => {
-                      const colName = game.columnName || 'Очки'
-                      const gameRanked = game.points && Object.keys(game.points).length > 0
-                        ? [...mm.participants].sort((a, b) => (game.points![b] ?? 0) - (game.points![a] ?? 0))
+                      const isSubCollapsed = collapsedSubRounds.has(gi)
+                      // Normalize columns: new format or backward compat single column
+                      const cols = game.columns && game.columns.length > 0
+                        ? game.columns
+                        : game.columnName
+                          ? [{ name: game.columnName, points: game.points ?? {} }]
+                          : []
+                      const nCols = cols.length
+                      const gridTemplate = `28px 1fr ${Array(nCols).fill('60px').join(' ')} 60px`
+
+                      // Sort by total points across all columns
+                      const gameRanked = nCols > 0 && cols.some(c => c.points && Object.keys(c.points).length > 0)
+                        ? [...mm.participants].sort((a, b) => {
+                            const totalA = cols.reduce((s, c) => s + (c.points?.[a] ?? 0), 0)
+                            const totalB = cols.reduce((s, c) => s + (c.points?.[b] ?? 0), 0)
+                            return totalB - totalA
+                          })
                         : mm.participants
+
                       return (
                         <div key={gi} className={styles.mmGameDisplayBlock}>
-                          <div className={styles.mmGameDisplayHeader}>
-                            <span className={styles.mmGameDisplayNum}>Игра {gi + 1}</span>
-                            {game.name && <span className={styles.matchName}>"{game.name}"</span>}
+                          <div className={styles.mmGameDisplayHeader} onClick={() => toggleSubRound(gi)} style={{ cursor: 'pointer' }}>
+                            <span className={styles.mmSubRoundCollapseIcon}>{isSubCollapsed ? '▶' : '▼'}</span>
+                            <span className={styles.mmGameDisplayNum}>Раунд {gi + 1}</span>
+                            {game.name && <span className={styles.mmSubRoundNameDisplay}>{game.name}</span>}
                           </div>
-                          <div className={styles.rankTable}>
-                            <div className={styles.rankTableHead}>
-                              <span>#</span><span>Игрок</span><span>{colName}</span><span>Ψ</span>
+
+                          {!isSubCollapsed && nCols > 0 && (
+                            <div className={styles.rankTable}>
+                              <div className={styles.rankTableHead} style={{ gridTemplateColumns: gridTemplate }}>
+                                <span>#</span>
+                                <span>Игрок</span>
+                                {cols.map((c, ci) => <span key={ci}>{c.name || 'Очки'}</span>)}
+                                <span>Ψ</span>
+                              </div>
+                              {gameRanked.map((p, ri) => {
+                                const role = rowRole(p)
+                                return (
+                                  <div key={p} className={`${styles.rankTableRow} ${role === 'winner' ? styles.rowWinner : role === 'loser' ? styles.rowLoser : styles.rowNeutral}`}
+                                    style={{ gridTemplateColumns: gridTemplate }}>
+                                    <span className={styles.rankTableNum}>{ri + 1}</span>
+                                    <span className={styles.rankTableName}>
+                                      <span className={styles.rankTableAvatar} style={
+                                        role === 'winner' ? { background: 'rgba(34,197,94,0.25)', color: '#22c55e' }
+                                        : role === 'loser' ? { background: 'rgba(239,68,68,0.25)', color: '#ef4444' }
+                                        : { background: `${accent}15`, color: accent }
+                                      }>{initials(p)}</span>
+                                      {p}
+                                      {role === 'winner' && <span className={styles.wingIcon}>🪶</span>}
+                                    </span>
+                                    {cols.map((c, ci) => (
+                                      <span key={ci} className={styles.rankTablePts}>{c.points?.[p] ?? '—'}</span>
+                                    ))}
+                                    <span className={styles.rankTablePsi}>{psigems[p] ?? 1}<span className={styles.psiUnit}> Ψ</span></span>
+                                  </div>
+                                )
+                              })}
                             </div>
-                            {gameRanked.map((p, ri) => {
-                              const role = rowRole(p)
-                              return (
-                                <div key={p} className={`${styles.rankTableRow} ${role === 'winner' ? styles.rowWinner : role === 'loser' ? styles.rowLoser : styles.rowNeutral}`}>
-                                  <span className={styles.rankTableNum}>{ri + 1}</span>
-                                  <span className={styles.rankTableName}>
-                                    <span className={styles.rankTableAvatar} style={
-                                      role === 'winner' ? { background: 'rgba(34,197,94,0.25)', color: '#22c55e' }
-                                      : role === 'loser' ? { background: 'rgba(239,68,68,0.25)', color: '#ef4444' }
-                                      : { background: `${accent}15`, color: accent }
-                                    }>{initials(p)}</span>
-                                    {p}
-                                    {role === 'winner' && <span className={styles.wingIcon}>🪶</span>}
-                                  </span>
-                                  <span className={styles.rankTablePts}>{game.points?.[p] ?? '—'}</span>
-                                  <span className={styles.rankTablePsi}>{psigems[p] ?? 1}<span className={styles.psiUnit}> Ψ</span></span>
-                                </div>
-                              )
-                            })}
-                          </div>
+                          )}
+
+                          {!isSubCollapsed && nCols === 0 && (
+                            <p style={{ fontSize: '0.8rem', color: 'var(--muted)', padding: '4px 0' }}>Нет данных</p>
+                          )}
                         </div>
                       )
                     })}
