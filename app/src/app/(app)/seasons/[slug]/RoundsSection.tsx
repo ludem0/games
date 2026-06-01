@@ -1136,7 +1136,7 @@ function SubRoundsDisplay({ games, participants, accent, initials, psigems, rowR
         const isCollapsed = collapsedSet.has(gi)
         const cols = game.columns && game.columns.length > 0 ? game.columns : []
         const nCols = cols.length
-        const gridTemplate = `28px 2fr ${Array(nCols).fill('1fr').join(' ')} 55px`
+        const gridTemplate = `28px minmax(80px, 2fr) ${Array(nCols).fill('minmax(80px, 1fr)').join(' ')} 55px`
 
         const gameRanked = nCols > 0 && cols.some(c => c.points && Object.keys(c.points).length > 0)
           ? [...participants].sort((a, b) => {
@@ -1157,7 +1157,11 @@ function SubRoundsDisplay({ games, participants, accent, initials, psigems, rowR
               <div className={styles.rankTable}>
                 <div className={styles.rankTableHead} style={{ gridTemplateColumns: gridTemplate }}>
                   <span>#</span><span>Игрок</span>
-                  {cols.map((c, ci) => <span key={ci}>{c.name || 'Очки'}</span>)}
+                  {cols.map((c, ci) => (
+                    <span key={ci} title={c.name} style={{ textTransform: 'none', letterSpacing: 0, textAlign: 'center', fontSize: '0.7rem', whiteSpace: 'normal', lineHeight: '1.3', fontWeight: 600 }}>
+                      {c.name || 'Очки'}
+                    </span>
+                  ))}
                   <span>Ψ</span>
                 </div>
                 {gameRanked.map((p, ri) => {
@@ -1174,7 +1178,7 @@ function SubRoundsDisplay({ games, participants, accent, initials, psigems, rowR
                         }>{initials(p)}</span>
                         {p}{role === 'winner' && <span className={styles.wingIcon}>🪶</span>}
                       </span>
-                      {cols.map((c, ci) => <span key={ci} className={styles.rankTablePts}>{c.points?.[p] ?? '—'}</span>)}
+                      {cols.map((c, ci) => <span key={ci} className={styles.rankTablePts} style={{ textAlign: 'center' }}>{c.points?.[p] ?? '—'}</span>)}
                       <span className={styles.rankTablePsi}>{psigems[p] ?? 1}<span className={styles.psiUnit}> Ψ</span></span>
                     </div>
                   )
