@@ -43,28 +43,33 @@ export async function POST(req: NextRequest) {
   const payload = await verifyToken(token)
   if (!payload) return NextResponse.json({ error: 'Невалидный токен' }, { status: 401 })
 
-  let formData: FormData
+  let body: { dataUrl?: string; mimeType?: string }
   try {
-    formData = await req.formData()
+    body = await req.json()
   } catch {
     return NextResponse.json({ error: 'Неверный формат запроса' }, { status: 400 })
   }
 
-  const file = formData.get('avatar')
-  if (!file || !(file instanceof File)) {
+  const { dataUrl, mimeType } = body
+  if (!dataUrl || !mimeType) {
     return NextResponse.json({ error: 'Файл не найден' }, { status: 400 })
   }
 
-  if (file.size > MAX_SIZE) {
-    return NextResponse.json({ error: 'Файл превышает 2MB' }, { status: 400 })
-  }
-
-  const ext = ALLOWED_MIME[file.type]
+  const ext = ALLOWED_MIME[mimeType]
   if (!ext) {
     return NextResponse.json({ error: 'Допустимые форматы: JPG, PNG, WebP' }, { status: 400 })
   }
 
-  const buffer = Buffer.from(await file.arrayBuffer())
+  // data:image/jpeg;base64,<data>
+  const base64Data = dataUrl.split(',')[1]
+  if (!base64Data) {
+    return NextResponse.json({ error: 'Неверный формат данных' }, { status: 400 })
+  }
+
+  const buffer = Buffer.from(base64Data, 'base64')
+  if (buffer.length > MAX_SIZE) {
+    return NextResponse.json({ error: 'Файл превышает 2MB' }, { status: 400 })
+  }
 
   ensureDir()
   removeExisting(payload.username)

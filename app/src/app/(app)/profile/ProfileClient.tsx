@@ -45,10 +45,18 @@ export default function ProfileClient({ username, role, initialAvatarExt }: Prop
     setError(null)
     setSuccess(false)
 
-    const fd = new FormData()
-    fd.append('avatar', file)
+    const dataUrl: string = await new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
 
-    const res = await fetch('/api/me/avatar', { method: 'POST', body: fd })
+    const res = await fetch('/api/me/avatar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dataUrl, mimeType: file.type }),
+    })
     const data = await res.json()
 
     if (res.ok) {
