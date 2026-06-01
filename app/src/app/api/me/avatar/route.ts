@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
 
   const users = getUsers()
   const user = users.find(u => u.username === payload.username)
-  const avatarUrl = user?.avatarExt ? `/avatars/${payload.username}.${user.avatarExt}` : null
+  const avatarUrl = user?.avatarExt ? `/api/avatars/${payload.username}` : null
 
   return NextResponse.json({ avatarUrl })
 }
@@ -79,5 +79,5 @@ export async function POST(req: NextRequest) {
   const updated = users.map(u => u.username === payload.username ? { ...u, avatarExt: ext } : u)
   saveUsers(updated)
 
-  return NextResponse.json({ avatarUrl: `/avatars/${payload.username}.${ext}` })
+  return NextResponse.json({ avatarUrl: `/api/avatars/${payload.username}` })
 }

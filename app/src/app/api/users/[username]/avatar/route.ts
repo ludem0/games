@@ -11,7 +11,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ user
   const { username } = await params
   const users = getUsers()
   const user = users.find(u => u.username === username)
-  const avatarUrl = user?.avatarExt ? `/avatars/${username}.${user.avatarExt}` : null
+  const avatarUrl = user?.avatarExt ? `/api/avatars/${username}` : null
 
   return NextResponse.json({ avatarUrl })
 }

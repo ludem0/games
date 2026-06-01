@@ -15,7 +15,7 @@ interface Props {
 
 export default function ProfileClient({ username, role, initialAvatarExt }: Props) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(
-    initialAvatarExt ? `/avatars/${username}.${initialAvatarExt}` : null
+    initialAvatarExt ? `/api/avatars/${username}` : null
   )
   const [preview, setPreview] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
