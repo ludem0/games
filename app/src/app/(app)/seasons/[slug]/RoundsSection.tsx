@@ -15,14 +15,19 @@ interface Props {
 
 type MMRole = 'winner' | 'loser' | 'none'
 
+interface MMGameForm {
+  name: string
+  columnName: string
+  points: Record<string, number>
+}
+
 interface FormState {
   mode: 'regular' | 'final'
   mmName: string
   mmParticipants: string[]
   mmRoles: Record<string, MMRole>
-  mmPoints: Record<string, number>
-  mmColumnName: string
   mmPsigemDelta: Record<string, number>
+  mmGames: MMGameForm[]
   dmName: string
   dmWinner: string
   dmEliminated: string
@@ -35,19 +40,41 @@ interface FormState {
 
 const INIT_FORM: FormState = {
   mode: 'regular',
-  mmName: '', mmParticipants: [], mmRoles: {}, mmPoints: {}, mmColumnName: 'Очки',
+  mmName: '',
+  mmParticipants: [],
+  mmRoles: {},
   mmPsigemDelta: {},
-  dmName: '', dmWinner: '', dmEliminated: '', dmPoints: {}, dmColumnName: 'Очки',
+  mmGames: [{ name: '', columnName: 'Очки', points: {} }],
+  dmName: '',
+  dmWinner: '',
+  dmEliminated: '',
+  dmPoints: {},
+  dmColumnName: 'Очки',
   finalGames: [],
   finalColumnName: 'Очки',
   step: 1,
+}
+
+function recomputePsigems(participants: string[], rounds: Round[]): Record<string, number> {
+  const result: Record<string, number> = Object.fromEntries(participants.map(p => [p, 1]))
+  for (const round of rounds) {
+    for (const [name, delta] of Object.entries(round.mmPsigemDelta ?? {})) {
+      result[name] = Math.max(0, (result[name] ?? 1) + delta)
+    }
+    if (round.deathMatch) {
+      const { winner, eliminated } = round.deathMatch
+      const eliminatedPsi = result[eliminated] ?? 0
+      result[winner] = (result[winner] ?? 1) + eliminatedPsi
+      result[eliminated] = 0
+    }
+  }
+  return result
 }
 
 export default function RoundsSection({ slug, accent, isAdmin, initialRounds, participants, psigems: initialPsigems }: Props) {
   const [rounds, setRounds] = useState<Round[]>(initialRounds)
   const [psigems, setPsigems] = useState(initialPsigems)
   const [showForm, setShowForm] = useState(false)
-  // Collapsed by default — all round IDs
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set(initialRounds.map(r => r.id)))
   const [form, setForm] = useState<FormState>(INIT_FORM)
   const [saving, setSaving] = useState(false)
@@ -88,6 +115,31 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
     setForm(f => ({ ...f, mmPsigemDelta: { ...f.mmPsigemDelta, [name]: (f.mmPsigemDelta[name] ?? 0) + delta } }))
   }
 
+  function addMMGame() {
+    setForm(f => ({ ...f, mmGames: [...f.mmGames, { name: '', columnName: 'Очки', points: {} }] }))
+  }
+
+  function updateMMGame(idx: number, field: 'name' | 'columnName', val: string) {
+    setForm(f => {
+      const games = [...f.mmGames]
+      games[idx] = { ...games[idx], [field]: val }
+      return { ...f, mmGames: games }
+    })
+  }
+
+  function setMMGamePoints(idx: number, player: string, val: string) {
+    setForm(f => {
+      const games = [...f.mmGames]
+      games[idx] = { ...games[idx], points: { ...games[idx].points, [player]: parseInt(val) || 0 } }
+      return { ...f, mmGames: games }
+    })
+  }
+
+  function removeMMGame(idx: number) {
+    if (form.mmGames.length <= 1) return
+    setForm(f => ({ ...f, mmGames: f.mmGames.filter((_, i) => i !== idx) }))
+  }
+
   function setFinalGameWinner(idx: number, winner: string) {
     setForm(f => {
       const games = [...f.finalGames]
@@ -111,16 +163,15 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
   function getFinalWinner(games: { winner: string }[], players: string[]): string | null {
     const wins = Object.fromEntries(players.map(p => [p, 0]))
     for (const g of games) { if (g.winner) wins[g.winner] = (wins[g.winner] ?? 0) + 1 }
-    const champion = players.find(p => wins[p] >= 2)
-    return champion ?? null
+    return players.find(p => wins[p] >= 2) ?? null
   }
 
   function canGoStep2() {
-    return form.mmName.trim() && form.mmParticipants.length > 0 && losers.length > 0 && winners.length > 0
+    return form.mmParticipants.length > 0 && losers.length > 0 && winners.length > 0
   }
 
   function canSaveRegular() {
-    return form.dmName.trim() && form.dmWinner && form.dmEliminated && form.dmWinner !== form.dmEliminated
+    return form.dmName.trim() !== '' && form.dmWinner !== '' && form.dmEliminated !== '' && form.dmWinner !== form.dmEliminated
   }
 
   function canSaveFinal() {
@@ -135,15 +186,35 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
     for (const [name, delta] of Object.entries(form.mmPsigemDelta)) {
       newPsigems[name] = Math.max(0, (newPsigems[name] ?? 1) + delta)
     }
-    // DM loss: all eliminated player's psigems transfer to the winner
     const eliminatedPsi = newPsigems[form.dmEliminated] ?? 1
     newPsigems[form.dmWinner] = (newPsigems[form.dmWinner] ?? 1) + eliminatedPsi
     newPsigems[form.dmEliminated] = 0
-    const mm: MainMatch = { name: form.mmName, participants: form.mmParticipants, winners, losers, points: form.mmPoints, columnName: form.mmColumnName || 'Очки' }
-    const dm: DeathMatch = { name: form.dmName, participants: losers, winner: form.dmWinner, eliminated: form.dmEliminated, points: form.dmPoints, columnName: form.dmColumnName || 'Очки' }
+    const mm: MainMatch = {
+      name: form.mmName,
+      participants: form.mmParticipants,
+      winners,
+      losers,
+      games: form.mmGames.map(g => ({ name: g.name, columnName: g.columnName || 'Очки', points: g.points })),
+    }
+    const dm: DeathMatch = {
+      name: form.dmName,
+      participants: losers,
+      winner: form.dmWinner,
+      eliminated: form.dmEliminated,
+      points: form.dmPoints,
+      columnName: form.dmColumnName || 'Очки',
+    }
     const [roundRes, psiRes] = await Promise.all([
-      fetch(`/api/seasons/${slug}/rounds`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mainMatch: mm, deathMatch: dm }) }),
-      fetch(`/api/seasons/${slug}/psigems`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newPsigems) }),
+      fetch(`/api/seasons/${slug}/rounds`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mainMatch: mm, deathMatch: dm, mmPsigemDelta: form.mmPsigemDelta }),
+      }),
+      fetch(`/api/seasons/${slug}/psigems`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newPsigems),
+      }),
     ])
     if (roundRes.ok) { const r = await roundRes.json(); setRounds(prev => [...prev, r]); setCollapsed(prev => new Set([...prev, r.id])) }
     if (psiRes.ok) setPsigems(await psiRes.json())
@@ -163,7 +234,8 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
     const mm: MainMatch = { name: 'Финал', participants: players, winners: [champion], losers: [loser] }
     const finalGamesWithMeta = form.finalGames.map(g => ({ ...g, columnName: form.finalColumnName }))
     const res = await fetch(`/api/seasons/${slug}/rounds`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type: 'final', mainMatch: mm, deathMatch: null, finalGames: finalGamesWithMeta }),
     })
     if (res.ok) { const r = await res.json(); setRounds(prev => [...prev, r]); setCollapsed(prev => new Set([...prev, r.id])) }
@@ -172,9 +244,17 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
   }
 
   async function handleDelete(round: Round) {
-    if (!confirm(`Удалить Раунд ${round.number}?`)) return
+    if (!confirm(`Удалить ${round.type === 'final' ? 'Финал' : `Раунд ${round.number}`}?`)) return
     await fetch(`/api/seasons/${slug}/rounds/${round.id}`, { method: 'DELETE' })
-    setRounds(prev => prev.filter(r => r.id !== round.id).map((r, i) => ({ ...r, number: i + 1 })))
+    const remaining = rounds.filter(r => r.id !== round.id).map((r, i) => ({ ...r, number: i + 1 }))
+    setRounds(remaining)
+    const recomputed = recomputePsigems(participants, remaining)
+    setPsigems(recomputed)
+    await fetch(`/api/seasons/${slug}/psigems`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(recomputed),
+    })
   }
 
   const [newGameName, setNewGameName] = useState('')
@@ -210,6 +290,7 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
         ))}
       </div>
 
+      {/* Final form */}
       {showForm && form.mode === 'final' && (
         <div className={styles.formCard}>
           <div className={styles.formHeader}>
@@ -223,36 +304,34 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
 
             <div className={styles.finalGamesSection}>
               {form.finalGames.map((g, i) => (
-                  <div key={i} className={styles.finalGame}>
-                    <div className={styles.finalGameTop}>
-                      <span className={styles.finalGameNum}>Игра {i + 1}</span>
-                      {g.name && <span className={styles.finalGameName}>"{g.name}"</span>}
-                    </div>
-                    {/* Points per player */}
-                    <div className={styles.finalGamePoints}>
-                      {availableParticipants.map(p => (
-                        <div key={p} className={styles.finalPointRow}>
-                          <span className={styles.finalPointName}>{p}</span>
-                          <input className={styles.pointsInput} type="number" min={0} placeholder="0"
-                            value={g.points?.[p] ?? ''}
-                            onChange={e => setFinalGamePoints(i, p, e.target.value)} />
-                        </div>
-                      ))}
-                    </div>
-                    <div className={styles.finalGameBtns}>
-                      <span className={styles.finalGameWinnerLabel}>Победитель:</span>
-                      {availableParticipants.map(p => (
-                        <button key={p}
-                          className={`${styles.finalPlayerBtn} ${g.winner === p ? styles.finalPlayerBtnWin : ''}`}
-                          onClick={() => setFinalGameWinner(i, g.winner === p ? '' : p)}>
-                          {p}
-                        </button>
-                      ))}
-                    </div>
+                <div key={i} className={styles.finalGame}>
+                  <div className={styles.finalGameTop}>
+                    <span className={styles.finalGameNum}>Игра {i + 1}</span>
+                    {g.name && <span className={styles.finalGameName}>"{g.name}"</span>}
                   </div>
-                ))}
+                  <div className={styles.finalGamePoints}>
+                    {availableParticipants.map(p => (
+                      <div key={p} className={styles.finalPointRow}>
+                        <span className={styles.finalPointName}>{p}</span>
+                        <input className={styles.pointsInput} type="number" min={0} placeholder="0"
+                          value={g.points?.[p] ?? ''}
+                          onChange={e => setFinalGamePoints(i, p, e.target.value)} />
+                      </div>
+                    ))}
+                  </div>
+                  <div className={styles.finalGameBtns}>
+                    <span className={styles.finalGameWinnerLabel}>Победитель:</span>
+                    {availableParticipants.map(p => (
+                      <button key={p}
+                        className={`${styles.finalPlayerBtn} ${g.winner === p ? styles.finalPlayerBtnWin : ''}`}
+                        onClick={() => setFinalGameWinner(i, g.winner === p ? '' : p)}>
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
 
-              {/* Score */}
               {form.finalGames.length > 0 && (() => {
                 const wins = Object.fromEntries(availableParticipants.map(p => [p, 0]))
                 form.finalGames.forEach(g => { if (g.winner) wins[g.winner] = (wins[g.winner] ?? 0) + 1 })
@@ -269,7 +348,6 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
                 )
               })()}
 
-              {/* Add game button */}
               {form.finalGames.length < 3 && !getFinalWinner(form.finalGames, availableParticipants) && (
                 <div className={styles.addGameRow}>
                   <input className={styles.input} placeholder="Название игры (необязательно)"
@@ -281,7 +359,6 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
               )}
             </div>
 
-            {/* Psigem adjustments */}
             {form.finalGames.length > 0 && (
               <>
                 <p className={styles.hint}>Псигемы:</p>
@@ -314,6 +391,7 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
         </div>
       )}
 
+      {/* Regular round form */}
       {showForm && form.mode === 'regular' && (
         <div className={styles.formCard}>
           <div className={styles.formHeader}>
@@ -328,10 +406,10 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
           {form.step === 1 && (
             <div className={styles.formBody}>
               <div className={styles.mmHeader}><div className={styles.mmBar} /><span className={styles.matchLabel}>MAIN MATCH</span></div>
-              <input className={styles.input} placeholder="Название игры" value={form.mmName}
+
+              <input className={styles.input} placeholder="Название матча (необязательно)" value={form.mmName}
                 onChange={e => setForm(f => ({ ...f, mmName: e.target.value }))} />
-              <input className={`${styles.input} ${styles.inputNarrow}`} placeholder="Название столбца (напр. Очки)" value={form.mmColumnName}
-                onChange={e => setForm(f => ({ ...f, mmColumnName: e.target.value }))} />
+
               <p className={styles.hint}>Участники:</p>
               <div className={styles.chipGrid}>
                 {availableParticipants.map(p => (
@@ -339,25 +417,22 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
                     onClick={() => toggleMMParticipant(p)}>{p}</button>
                 ))}
               </div>
+
               {form.mmParticipants.length > 0 && (
                 <>
-                  <p className={styles.hint}>Роли / {form.mmColumnName || 'Очки'} / Псигемы:</p>
+                  <p className={styles.hint}>Роли / Псигемы:</p>
                   <div className={styles.roleGrid}>
-                    <div className={styles.roleHead}>
+                    <div className={styles.roleHead} style={{ gridTemplateColumns: '28px 1fr 90px 70px' }}>
                       <span /><span />
-                      <span className={styles.roleHeadCell}>{form.mmColumnName || 'Очки'}</span>
                       <span className={styles.roleHeadCell}>Ψ</span>
                       <span className={styles.roleHeadCell}>Роль</span>
                     </div>
                     {form.mmParticipants.map(p => {
                       const curPsi = (psigems[p] ?? 1) + (form.mmPsigemDelta[p] ?? 0)
                       return (
-                        <div key={p} className={styles.roleRow}>
+                        <div key={p} className={styles.roleRow} style={{ gridTemplateColumns: '28px 1fr 90px 70px' }}>
                           <span className={styles.roleAvatar} style={{ background: `${accent}22`, color: accent }}>{initials(p)}</span>
                           <span className={styles.roleName}>{p}</span>
-                          <input className={styles.pointsInput} type="number" min={0} placeholder="0"
-                            value={form.mmPoints[p] ?? ''}
-                            onChange={e => setForm(f => ({ ...f, mmPoints: { ...f.mmPoints, [p]: parseInt(e.target.value) || 0 } }))} />
                           <div className={styles.psiInline}>
                             <button className={styles.psiSmBtn} onClick={() => adjustPsi(p, -1)}>−</button>
                             <span className={styles.psiSmVal}>{curPsi}</span>
@@ -373,8 +448,45 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
                       )
                     })}
                   </div>
+
+                  <p className={styles.hint}>Игры:</p>
+                  <div className={styles.mmGamesSection}>
+                    {form.mmGames.map((game, gi) => (
+                      <div key={gi} className={styles.mmGameBlock}>
+                        <div className={styles.mmGameHeader}>
+                          <span className={styles.mmGameNum}>Игра {gi + 1}</span>
+                          {form.mmGames.length > 1 && (
+                            <button className={styles.removeGameBtn} onClick={() => removeMMGame(gi)}>✕</button>
+                          )}
+                        </div>
+                        <div className={styles.mmGameInputs}>
+                          <input className={styles.input} placeholder="Название игры (необязательно)"
+                            value={game.name} onChange={e => updateMMGame(gi, 'name', e.target.value)} />
+                          <input className={`${styles.input} ${styles.inputNarrow}`} placeholder="Название столбца"
+                            value={game.columnName} onChange={e => updateMMGame(gi, 'columnName', e.target.value)} />
+                        </div>
+                        <div className={styles.roleGrid}>
+                          <div className={styles.roleHead} style={{ gridTemplateColumns: '28px 1fr 90px' }}>
+                            <span /><span />
+                            <span className={styles.roleHeadCell}>{game.columnName || 'Очки'}</span>
+                          </div>
+                          {form.mmParticipants.map(p => (
+                            <div key={p} className={`${styles.roleRow} ${styles.roleRowSimple}`}>
+                              <span className={styles.roleAvatar} style={{ background: `${accent}22`, color: accent }}>{initials(p)}</span>
+                              <span className={styles.roleName}>{p}</span>
+                              <input className={styles.pointsInput} type="number" min={0} placeholder="0"
+                                value={game.points[p] ?? ''}
+                                onChange={e => setMMGamePoints(gi, p, e.target.value)} />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                    <button className={styles.btnOutline} onClick={addMMGame}>+ Добавить игру</button>
+                  </div>
                 </>
               )}
+
               <div className={styles.formActions}>
                 <button className={styles.btnCancel} onClick={() => { setShowForm(false); setForm(INIT_FORM) }}>Отмена</button>
                 <button className={styles.btnNext} disabled={!canGoStep2()} onClick={() => setForm(f => ({ ...f, step: 2 }))}>Далее →</button>
@@ -428,9 +540,6 @@ function RoundCard({ round, accent, isAdmin, initials, psigems, isLast, isCollap
   const mm = round.mainMatch
   const dm = round.deathMatch
   const isFinal = round.type === 'final'
-
-  const totalBefore = mm.participants.length + (dm ? 1 : 0)
-  const totalAfter = dm ? totalBefore - 1 : totalBefore
   const mmColName = mm.columnName || 'Очки'
   const dmColName = dm?.columnName || 'Очки'
 
@@ -444,7 +553,6 @@ function RoundCard({ round, accent, isAdmin, initials, psigems, isLast, isCollap
     ? [...mm.participants].sort((a, b) => (mm.points![b] ?? 0) - (mm.points![a] ?? 0))
     : mm.participants
 
-  // Final wins tally
   const finalWins: Record<string, number> = {}
   if (isFinal && round.finalGames) {
     for (const g of round.finalGames) { if (g.winner) finalWins[g.winner] = (finalWins[g.winner] ?? 0) + 1 }
@@ -483,7 +591,6 @@ function RoundCard({ round, accent, isAdmin, initials, psigems, isLast, isCollap
                           <span className={styles.finalGameDisplayNum}>Игра {i + 1}</span>
                           {g.name && <span className={styles.matchName}>"{g.name}"</span>}
                         </div>
-                        {/* Points table per game */}
                         {g.points && Object.keys(g.points).length > 0 && (
                           <div className={styles.rankTable} style={{ marginTop: 8 }}>
                             <div className={styles.rankTableHead}>
@@ -516,7 +623,6 @@ function RoundCard({ round, accent, isAdmin, initials, psigems, isLast, isCollap
                       </div>
                     )
                   })}
-                  {/* Overall score */}
                   <div className={styles.finalScoreDisplay}>
                     {mm.participants.map(p => (
                       <span key={p} className={`${styles.finalScoreDisplayItem} ${mm.winners[0] === p ? styles.champion : ''}`}>
@@ -529,39 +635,85 @@ function RoundCard({ round, accent, isAdmin, initials, psigems, isLast, isCollap
             </div>
           )}
 
-          {/* Regular: Main Match table */}
+          {/* Regular: Main Match */}
           {!isFinal && (
             <div className={styles.matchSection}>
               <div className={styles.mmStripe} />
               <div className={styles.matchContent}>
                 <div className={styles.matchTitleRow}>
                   <span className={styles.matchType}>MAIN MATCH</span>
-                  <span className={styles.matchName}>"{mm.name}"</span>
+                  {mm.name && <span className={styles.matchName}>"{mm.name}"</span>}
                 </div>
-                <div className={styles.rankTable}>
-                  <div className={styles.rankTableHead}>
-                    <span>#</span><span>Игрок</span><span>{mmColName}</span><span>Ψ</span>
+
+                {/* New multi-game format */}
+                {mm.games && mm.games.length > 0 ? (
+                  <div className={styles.mmGamesDisplay}>
+                    {mm.games.map((game, gi) => {
+                      const colName = game.columnName || 'Очки'
+                      const gameRanked = game.points && Object.keys(game.points).length > 0
+                        ? [...mm.participants].sort((a, b) => (game.points![b] ?? 0) - (game.points![a] ?? 0))
+                        : mm.participants
+                      return (
+                        <div key={gi} className={styles.mmGameDisplayBlock}>
+                          <div className={styles.mmGameDisplayHeader}>
+                            <span className={styles.mmGameDisplayNum}>Игра {gi + 1}</span>
+                            {game.name && <span className={styles.matchName}>"{game.name}"</span>}
+                          </div>
+                          <div className={styles.rankTable}>
+                            <div className={styles.rankTableHead}>
+                              <span>#</span><span>Игрок</span><span>{colName}</span><span>Ψ</span>
+                            </div>
+                            {gameRanked.map((p, ri) => {
+                              const role = rowRole(p)
+                              return (
+                                <div key={p} className={`${styles.rankTableRow} ${role === 'winner' ? styles.rowWinner : role === 'loser' ? styles.rowLoser : styles.rowNeutral}`}>
+                                  <span className={styles.rankTableNum}>{ri + 1}</span>
+                                  <span className={styles.rankTableName}>
+                                    <span className={styles.rankTableAvatar} style={
+                                      role === 'winner' ? { background: 'rgba(34,197,94,0.25)', color: '#22c55e' }
+                                      : role === 'loser' ? { background: 'rgba(239,68,68,0.25)', color: '#ef4444' }
+                                      : { background: `${accent}15`, color: accent }
+                                    }>{initials(p)}</span>
+                                    {p}
+                                    {role === 'winner' && <span className={styles.wingIcon}>🪶</span>}
+                                  </span>
+                                  <span className={styles.rankTablePts}>{game.points?.[p] ?? '—'}</span>
+                                  <span className={styles.rankTablePsi}>{psigems[p] ?? 1}<span className={styles.psiUnit}> Ψ</span></span>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
-                  {mmRanked.map((p, i) => {
-                    const role = rowRole(p)
-                    return (
-                      <div key={p} className={`${styles.rankTableRow} ${role === 'winner' ? styles.rowWinner : role === 'loser' ? styles.rowLoser : styles.rowNeutral}`}>
-                        <span className={styles.rankTableNum}>{i + 1}</span>
-                        <span className={styles.rankTableName}>
-                          <span className={styles.rankTableAvatar} style={
-                            role === 'winner' ? { background: 'rgba(34,197,94,0.25)', color: '#22c55e' }
-                            : role === 'loser' ? { background: 'rgba(239,68,68,0.25)', color: '#ef4444' }
-                            : { background: `${accent}15`, color: accent }
-                          }>{initials(p)}</span>
-                          {p}
-                          {role === 'winner' && <span className={styles.wingIcon}>🪶</span>}
-                        </span>
-                        <span className={styles.rankTablePts}>{mm.points?.[p] ?? '—'}</span>
-                        <span className={styles.rankTablePsi}>{psigems[p] ?? 1}<span className={styles.psiUnit}> Ψ</span></span>
-                      </div>
-                    )
-                  })}
-                </div>
+                ) : (
+                  /* Backward compat: old single-game format */
+                  <div className={styles.rankTable}>
+                    <div className={styles.rankTableHead}>
+                      <span>#</span><span>Игрок</span><span>{mmColName}</span><span>Ψ</span>
+                    </div>
+                    {mmRanked.map((p, i) => {
+                      const role = rowRole(p)
+                      return (
+                        <div key={p} className={`${styles.rankTableRow} ${role === 'winner' ? styles.rowWinner : role === 'loser' ? styles.rowLoser : styles.rowNeutral}`}>
+                          <span className={styles.rankTableNum}>{i + 1}</span>
+                          <span className={styles.rankTableName}>
+                            <span className={styles.rankTableAvatar} style={
+                              role === 'winner' ? { background: 'rgba(34,197,94,0.25)', color: '#22c55e' }
+                              : role === 'loser' ? { background: 'rgba(239,68,68,0.25)', color: '#ef4444' }
+                              : { background: `${accent}15`, color: accent }
+                            }>{initials(p)}</span>
+                            {p}
+                            {role === 'winner' && <span className={styles.wingIcon}>🪶</span>}
+                          </span>
+                          <span className={styles.rankTablePts}>{mm.points?.[p] ?? '—'}</span>
+                          <span className={styles.rankTablePsi}>{psigems[p] ?? 1}<span className={styles.psiUnit}> Ψ</span></span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           )}

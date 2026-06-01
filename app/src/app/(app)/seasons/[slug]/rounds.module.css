@@ -978,3 +978,85 @@
 }
 .btnSave:hover:not(:disabled) { background: rgba(74,222,128,0.2); }
 .btnSave:disabled { opacity: 0.35; cursor: default; }
+
+/* MM multi-game form */
+.mmGamesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mmGameBlock {
+  padding: 14px;
+  background: rgba(74,222,128,0.04);
+  border: 1px solid rgba(74,222,128,0.12);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mmGameHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mmGameNum {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: #4ADE80;
+}
+
+.mmGameInputs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mmGameInputs .input {
+  flex: 1;
+  min-width: 140px;
+}
+
+.removeGameBtn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color 150ms;
+}
+.removeGameBtn:hover { color: #EF4444; }
+
+/* MM multi-game display in card */
+.mmGamesDisplay {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.mmGameDisplayBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mmGameDisplayHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.mmGameDisplayNum {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #4ADE80;
+  min-width: 50px;
+}

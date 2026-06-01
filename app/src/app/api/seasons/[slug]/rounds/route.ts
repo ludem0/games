@@ -31,6 +31,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     mainMatch: body.mainMatch,
     deathMatch: body.deathMatch ?? null,
     ...(body.finalGames ? { finalGames: body.finalGames } : {}),
+    ...(body.mmPsigemDelta ? { mmPsigemDelta: body.mmPsigemDelta } : {}),
   }
   saveRounds(slug, [...rounds, newRound])
   return NextResponse.json(newRound, { status: 201 })
