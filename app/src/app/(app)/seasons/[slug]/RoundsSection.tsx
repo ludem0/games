@@ -806,7 +806,7 @@ function SubRoundsDisplay({ games, participants, accent, initials, psigems, rowR
         const isCollapsed = collapsedSet.has(gi)
         const cols = game.columns && game.columns.length > 0 ? game.columns : []
         const nCols = cols.length
-        const gridTemplate = `28px 1fr ${Array(nCols).fill('60px').join(' ')} 60px`
+        const gridTemplate = `28px 2fr ${Array(nCols).fill('1fr').join(' ')} 55px`
 
         const gameRanked = nCols > 0 && cols.some(c => c.points && Object.keys(c.points).length > 0)
           ? [...participants].sort((a, b) => {
