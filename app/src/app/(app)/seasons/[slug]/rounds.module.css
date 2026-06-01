@@ -56,9 +56,6 @@
 }
 
 .deleteRound {
-  position: absolute;
-  top: 12px;
-  right: 14px;
   background: none;
   border: none;
   color: var(--muted);
@@ -66,10 +63,22 @@
   cursor: pointer;
   opacity: 0;
   transition: opacity 150ms, color 150ms;
-  z-index: 10;
 }
 .roundCard:hover .deleteRound { opacity: 1; }
 .deleteRound:hover { color: #EF4444; }
+
+.editRound {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 150ms, color 150ms;
+  padding: 0 4px;
+}
+.roundCard:hover .editRound { opacity: 1; }
+.editRound:hover { color: var(--accent); }
 
 .roundHeader {
   display: flex;

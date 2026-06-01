@@ -110,6 +110,51 @@ function serializeGames(games: MMGameForm[]) {
   return games.map(g => ({ name: g.name, columns: g.columns.map(c => ({ name: c.name, points: c.points })) }))
 }
 
+function roundToFormState(round: Round): FormState {
+  const mm = round.mainMatch
+  const dm = round.deathMatch
+  const mmRoles: Record<string, MMRole> = {}
+  for (const p of (mm.winners ?? [])) mmRoles[p] = 'winner'
+  for (const p of (mm.losers ?? [])) mmRoles[p] = 'loser'
+
+  function toGameForms(games?: { name: string; columns?: { name: string; points?: Record<string, number> }[]; columnName?: string; points?: Record<string, number> }[]): MMGameForm[] {
+    if (!games || games.length === 0) return [mkGame()]
+    return games.map(g => ({
+      name: g.name,
+      collapsed: false,
+      columns: g.columns && g.columns.length > 0
+        ? g.columns.map(c => ({ name: c.name, points: c.points ?? {} }))
+        : g.columnName ? [{ name: g.columnName, points: g.points ?? {} }]
+        : [{ name: 'Очки', points: {} }]
+    }))
+  }
+
+  const mmGames = mm.games && mm.games.length > 0
+    ? toGameForms(mm.games)
+    : mm.points ? [{ name: '', collapsed: false, columns: [{ name: mm.columnName || 'Очки', points: mm.points }] }]
+    : [mkGame()]
+
+  const dmRounds = dm?.rounds && dm.rounds.length > 0
+    ? toGameForms(dm.rounds)
+    : dm?.points ? [{ name: dm.name || '', collapsed: false, columns: [{ name: dm.columnName || 'Очки', points: dm.points }] }]
+    : [mkGame()]
+
+  return {
+    mode: round.type === 'final' ? 'final' : 'regular',
+    mmName: mm.name,
+    mmParticipants: mm.participants,
+    mmRoles,
+    mmPsigemDelta: round.mmPsigemDelta ?? {},
+    mmGames,
+    dmWinner: dm?.winner ?? '',
+    dmEliminated: dm?.eliminated ?? '',
+    dmRounds,
+    finalGames: round.finalGames ?? [],
+    finalColumnName: round.finalGames?.[0]?.columnName ?? 'Очки',
+    step: 1,
+  }
+}
+
 export default function RoundsSection({ slug, accent, isAdmin, initialRounds, participants, psigems: initialPsigems }: Props) {
   const [rounds, setRounds] = useState<Round[]>(initialRounds)
   const [psigems, setPsigems] = useState(initialPsigems)
@@ -117,6 +162,7 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set(initialRounds.map(r => r.id)))
   const [form, setForm] = useState<FormState>(INIT_FORM)
   const [saving, setSaving] = useState(false)
+  const [editingRoundId, setEditingRoundId] = useState<string | null>(null)
 
   const initials = (n: string) => n.slice(0, 2).toUpperCase()
 
@@ -256,6 +302,59 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
     setSaving(false); setShowForm(false); setForm(INIT_FORM)
   }
 
+  function handleStartEdit(round: Round) {
+    setForm(roundToFormState(round))
+    setEditingRoundId(round.id)
+    setShowForm(false)
+  }
+
+  function handleCancelEdit() {
+    setEditingRoundId(null)
+    setForm(INIT_FORM)
+  }
+
+  async function handleEditSave() {
+    if (!editingRoundId) return
+    setSaving(true)
+    const editLosers = form.mmParticipants.filter(p => form.mmRoles[p] === 'loser')
+    const editWinners = form.mmParticipants.filter(p => form.mmRoles[p] === 'winner')
+
+    let updateBody: Record<string, unknown>
+    if (form.mode === 'regular') {
+      updateBody = {
+        mainMatch: { name: form.mmName, participants: form.mmParticipants, winners: editWinners, losers: editLosers, games: serializeGames(form.mmGames) },
+        deathMatch: { name: form.dmRounds[0]?.name || '', participants: editLosers, winner: form.dmWinner, eliminated: form.dmEliminated, rounds: serializeGames(form.dmRounds) },
+        mmPsigemDelta: form.mmPsigemDelta,
+      }
+    } else {
+      const champion = getFinalWinner(form.finalGames, form.mmParticipants)
+      const loser = form.mmParticipants.find(p => p !== champion)
+      updateBody = {
+        mainMatch: { name: 'Финал', participants: form.mmParticipants, winners: champion ? [champion] : [], losers: loser ? [loser] : [] },
+        deathMatch: null,
+        finalGames: form.finalGames.map(g => ({ ...g, columnName: form.finalColumnName })),
+      }
+    }
+
+    await fetch(`/api/seasons/${slug}/rounds/${editingRoundId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updateBody),
+    })
+
+    const updatedRounds = rounds.map(r => r.id === editingRoundId ? { ...r, ...updateBody } as Round : r)
+    setRounds(updatedRounds)
+    const recomputed = recomputePsigems(participants, updatedRounds)
+    setPsigems(recomputed)
+    await fetch(`/api/seasons/${slug}/psigems`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(recomputed),
+    })
+
+    setSaving(false)
+    setEditingRoundId(null)
+    setForm(INIT_FORM)
+  }
+
   async function handleDelete(round: Round) {
     if (!confirm(`Удалить ${round.type === 'final' ? 'Финал' : `Раунд ${round.number}`}?`)) return
     await fetch(`/api/seasons/${slug}/rounds/${round.id}`, { method: 'DELETE' })
@@ -274,7 +373,7 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
     <div className={styles.section}>
       <div className={styles.sectionHeader}>
         <span className={styles.sectionLabel}>РАУНДЫ</span>
-        {isAdmin && !showForm && !finalExists && (
+        {isAdmin && !showForm && !editingRoundId && !finalExists && (
           <button className={styles.btnOutline}
             onClick={() => { setForm({ ...INIT_FORM, mode: isFinalTime ? 'final' : 'regular' }); setShowForm(true) }}>
             {isFinalTime ? '🏆 Добавить финал' : '+ Добавить раунд'}
@@ -286,18 +385,43 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
 
       <div className={styles.roundsList}>
         {rounds.map((round, idx) => (
-          <RoundCard
-            key={round.id}
-            round={round}
-            accent={accent}
-            isAdmin={isAdmin}
-            initials={initials}
-            psigems={psigems}
-            isLast={idx === rounds.length - 1}
-            isCollapsed={collapsed.has(round.id)}
-            onToggle={() => toggleCollapse(round.id)}
-            onDelete={() => handleDelete(round)}
-          />
+          editingRoundId === round.id ? (
+            <InlineEditForm
+              key={round.id}
+              round={round}
+              form={form}
+              setForm={setForm}
+              accent={accent}
+              initials={initials}
+              psigems={psigems}
+              availableParticipants={availableParticipants}
+              losers={form.mmParticipants.filter(p => form.mmRoles[p] === 'loser')}
+              winners={form.mmParticipants.filter(p => form.mmRoles[p] === 'winner')}
+              saving={saving}
+              mm={mm}
+              dm={dm}
+              adjustPsi={adjustPsi}
+              setRole={setRole}
+              toggleMMParticipant={toggleMMParticipant}
+              getFinalWinner={getFinalWinner}
+              onSave={handleEditSave}
+              onCancel={handleCancelEdit}
+            />
+          ) : (
+            <RoundCard
+              key={round.id}
+              round={round}
+              accent={accent}
+              isAdmin={isAdmin}
+              initials={initials}
+              psigems={psigems}
+              isLast={idx === rounds.length - 1}
+              isCollapsed={collapsed.has(round.id)}
+              onToggle={() => toggleCollapse(round.id)}
+              onDelete={() => handleDelete(round)}
+              onEdit={isAdmin && !editingRoundId ? () => handleStartEdit(round) : undefined}
+            />
+          )
         ))}
       </div>
 
@@ -592,9 +716,212 @@ function GameRoundsForm({ games, players, accent, initials, stripeColor, onAdd, 
   )
 }
 
-function RoundCard({ round, accent, isAdmin, initials, psigems, isLast, isCollapsed, onToggle, onDelete }: {
+// Inline edit form shown in place of a round card
+function InlineEditForm({ round, form, setForm, accent, initials, psigems, availableParticipants, losers, winners, saving, mm, dm, adjustPsi, setRole, toggleMMParticipant, getFinalWinner, onSave, onCancel }: {
+  round: Round
+  form: FormState
+  setForm: React.Dispatch<React.SetStateAction<FormState>>
+  accent: string
+  initials: (n: string) => string
+  psigems: Record<string, number>
+  availableParticipants: string[]
+  losers: string[]
+  winners: string[]
+  saving: boolean
+  mm: (fn: (list: MMGameForm[]) => MMGameForm[]) => void
+  dm: (fn: (list: MMGameForm[]) => MMGameForm[]) => void
+  adjustPsi: (name: string, delta: number) => void
+  setRole: (name: string, role: MMRole) => void
+  toggleMMParticipant: (name: string) => void
+  getFinalWinner: (games: { winner: string }[], players: string[]) => string | null
+  onSave: () => void
+  onCancel: () => void
+}) {
+  const isFinal = round.type === 'final'
+  // For final edit, use form.mmParticipants (loaded from round.mainMatch.participants)
+  const finalPlayers = form.mmParticipants.length > 0 ? form.mmParticipants : availableParticipants
+
+  function canSave() {
+    if (isFinal) {
+      return !!getFinalWinner(form.finalGames, finalPlayers) && form.finalGames.length >= 2
+    }
+    return form.dmWinner !== '' && form.dmEliminated !== '' && form.dmWinner !== form.dmEliminated
+  }
+
+  return (
+    <div className={styles.formCard} style={{ borderColor: 'rgba(176,38,255,0.3)' }}>
+      <div className={styles.formHeader}>
+        <span className={styles.formTitle}>
+          Редактировать {isFinal ? 'Финал' : `Раунд ${round.number}`}
+        </span>
+        {!isFinal && (
+          <div className={styles.steps}>
+            <span className={`${styles.step} ${form.step === 1 ? styles.stepActive : styles.stepDone}`}>1 Main Match</span>
+            <span className={styles.stepArrow}>→</span>
+            <span className={`${styles.step} ${form.step === 2 ? styles.stepActive : ''}`}>2 Death Match</span>
+          </div>
+        )}
+      </div>
+
+      {!isFinal && form.step === 1 && (
+        <div className={styles.formBody}>
+          <div className={styles.mmHeader}><div className={styles.mmBar} /><span className={styles.matchLabel}>MAIN MATCH</span></div>
+          <input className={styles.input} placeholder="Название матча (необязательно)" value={form.mmName}
+            onChange={e => setForm(f => ({ ...f, mmName: e.target.value }))} />
+          <p className={styles.hint}>Участники:</p>
+          <div className={styles.chipGrid}>
+            {participants_for_edit(round).map(p => (
+              <button key={p} className={`${styles.chip} ${form.mmParticipants.includes(p) ? styles.chipSelected : ''}`}
+                onClick={() => toggleMMParticipant(p)}>{p}</button>
+            ))}
+          </div>
+          {form.mmParticipants.length > 0 && (
+            <>
+              <p className={styles.hint}>Роли / Псигемы:</p>
+              <div className={styles.roleGrid}>
+                <div className={styles.roleHead} style={{ gridTemplateColumns: '28px 1fr 90px 70px' }}>
+                  <span /><span /><span className={styles.roleHeadCell}>Ψ</span><span className={styles.roleHeadCell}>Роль</span>
+                </div>
+                {form.mmParticipants.map(p => {
+                  const curPsi = (psigems[p] ?? 1) + (form.mmPsigemDelta[p] ?? 0)
+                  return (
+                    <div key={p} className={styles.roleRow} style={{ gridTemplateColumns: '28px 1fr 90px 70px' }}>
+                      <span className={styles.roleAvatar} style={{ background: `${accent}22`, color: accent }}>{initials(p)}</span>
+                      <span className={styles.roleName}>{p}</span>
+                      <div className={styles.psiInline}>
+                        <button className={styles.psiSmBtn} onClick={() => adjustPsi(p, -1)}>−</button>
+                        <span className={styles.psiSmVal}>{curPsi}</span>
+                        <button className={styles.psiSmBtn} onClick={() => adjustPsi(p, 1)}>+</button>
+                      </div>
+                      <div className={styles.roleBtns}>
+                        <button className={`${styles.roleBtn} ${form.mmRoles[p] === 'winner' ? styles.roleBtnWin : ''}`}
+                          onClick={() => setRole(p, form.mmRoles[p] === 'winner' ? 'none' : 'winner')}>🏆</button>
+                        <button className={`${styles.roleBtn} ${form.mmRoles[p] === 'loser' ? styles.roleBtnLose : ''}`}
+                          onClick={() => setRole(p, form.mmRoles[p] === 'loser' ? 'none' : 'loser')}>⚔️</button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <p className={styles.hint}>Раунды матча:</p>
+              <GameRoundsForm
+                games={form.mmGames} players={form.mmParticipants} accent={accent} initials={initials} stripeColor="#4ADE80"
+                onAdd={() => mm(addGame)}
+                onRemove={idx => mm(l => removeGame(l, idx))}
+                onUpdateName={(idx, val) => mm(l => updateGameName(l, idx, val))}
+                onToggleCollapse={idx => mm(l => toggleGameCollapse(l, idx))}
+                onAddColumn={gi => mm(l => addColumn(l, gi))}
+                onRemoveColumn={(gi, ci) => mm(l => removeColumn(l, gi, ci))}
+                onUpdateColumnName={(gi, ci, val) => mm(l => updateColumnName(l, gi, ci, val))}
+                onSetPoints={(gi, ci, p, val) => mm(l => setColumnPoints(l, gi, ci, p, val))}
+              />
+            </>
+          )}
+          <div className={styles.formActions}>
+            <button className={styles.btnCancel} onClick={onCancel}>Отмена</button>
+            <button className={styles.btnNext}
+              disabled={form.mmParticipants.length === 0 || losers.length === 0 || winners.length === 0}
+              onClick={() => setForm(f => ({ ...f, step: 2 }))}>Далее →</button>
+          </div>
+        </div>
+      )}
+
+      {!isFinal && form.step === 2 && (
+        <div className={styles.formBody}>
+          <div className={styles.dmHeader}><div className={styles.dmBar} /><span className={styles.matchLabel}>DEATH MATCH</span></div>
+          <p className={styles.hint}>Раунды матча:</p>
+          <GameRoundsForm
+            games={form.dmRounds} players={losers} accent={accent} initials={initials} stripeColor="#EF4444"
+            onAdd={() => dm(addGame)}
+            onRemove={idx => dm(l => removeGame(l, idx))}
+            onUpdateName={(idx, val) => dm(l => updateGameName(l, idx, val))}
+            onToggleCollapse={idx => dm(l => toggleGameCollapse(l, idx))}
+            onAddColumn={gi => dm(l => addColumn(l, gi))}
+            onRemoveColumn={(gi, ci) => dm(l => removeColumn(l, gi, ci))}
+            onUpdateColumnName={(gi, ci, val) => dm(l => updateColumnName(l, gi, ci, val))}
+            onSetPoints={(gi, ci, p, val) => dm(l => setColumnPoints(l, gi, ci, p, val))}
+          />
+          <p className={styles.hint}>Результат:</p>
+          <div className={styles.dmVs}>
+            {losers.map(p => (
+              <div key={p} className={styles.dmPlayer}>
+                <span className={styles.dmAvatar}>{initials(p)}</span>
+                <span className={styles.dmName}>{p}</span>
+                <div className={styles.dmChoices}>
+                  <button className={`${styles.dmChoice} ${form.dmWinner === p ? styles.dmChoiceWin : ''}`}
+                    onClick={() => setForm(f => ({ ...f, dmWinner: p, dmEliminated: f.dmEliminated === p ? '' : f.dmEliminated }))}>✓ Выжил</button>
+                  <button className={`${styles.dmChoice} ${form.dmEliminated === p ? styles.dmChoiceLose : ''}`}
+                    onClick={() => setForm(f => ({ ...f, dmEliminated: p, dmWinner: f.dmWinner === p ? '' : f.dmWinner }))}>✗ Вылетел</button>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className={styles.formActions}>
+            <button className={styles.btnCancel} onClick={() => setForm(f => ({ ...f, step: 1 }))}>← Назад</button>
+            <button className={styles.btnSave} disabled={!canSave() || saving} onClick={onSave}>
+              {saving ? '...' : 'Сохранить изменения'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isFinal && (
+        <div className={styles.formBody}>
+          <p className={styles.hint}>Игры финала:</p>
+          {form.finalGames.map((g, i) => (
+            <div key={i} className={styles.finalGame}>
+              <div className={styles.finalGameTop}>
+                <span className={styles.finalGameNum}>Игра {i + 1}</span>
+                {g.name && <span className={styles.finalGameName}>"{g.name}"</span>}
+              </div>
+              <div className={styles.finalGamePoints}>
+                {finalPlayers.map(p => (
+                  <div key={p} className={styles.finalPointRow}>
+                    <span className={styles.finalPointName}>{p}</span>
+                    <input className={styles.pointsInput} type="number" min={0} placeholder="0"
+                      value={g.points?.[p] ?? ''}
+                      onChange={e => setForm(f => {
+                        const games = [...f.finalGames]
+                        games[i] = { ...games[i], points: { ...(games[i].points ?? {}), [p]: parseInt(e.target.value) || 0 } }
+                        return { ...f, finalGames: games }
+                      })} />
+                  </div>
+                ))}
+              </div>
+              <div className={styles.finalGameBtns}>
+                <span className={styles.finalGameWinnerLabel}>Победитель:</span>
+                {finalPlayers.map(p => (
+                  <button key={p}
+                    className={`${styles.finalPlayerBtn} ${g.winner === p ? styles.finalPlayerBtnWin : ''}`}
+                    onClick={() => setForm(f => {
+                      const games = [...f.finalGames]
+                      games[i] = { ...games[i], winner: games[i].winner === p ? '' : p }
+                      return { ...f, finalGames: games }
+                    })}>{p}</button>
+                ))}
+              </div>
+            </div>
+          ))}
+          <div className={styles.formActions}>
+            <button className={styles.btnCancel} onClick={onCancel}>Отмена</button>
+            <button className={styles.btnSave} disabled={!canSave() || saving} onClick={onSave}>
+              {saving ? '...' : 'Сохранить изменения'}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Returns all participants in a round for editing (from mm.participants)
+function participants_for_edit(round: Round): string[] {
+  return round.mainMatch.participants
+}
+
+function RoundCard({ round, accent, isAdmin, initials, psigems, isLast, isCollapsed, onToggle, onDelete, onEdit }: {
   round: Round; accent: string; isAdmin: boolean; initials: (n: string) => string
-  psigems: Record<string, number>; isLast: boolean; isCollapsed: boolean; onToggle: () => void; onDelete: () => void
+  psigems: Record<string, number>; isLast: boolean; isCollapsed: boolean; onToggle: () => void; onDelete: () => void; onEdit?: () => void
 }) {
   const mm = round.mainMatch
   const dm = round.deathMatch
@@ -634,6 +961,9 @@ function RoundCard({ round, accent, isAdmin, initials, psigems, isLast, isCollap
         </div>
         <div className={styles.roundHeaderRight}>
           {isFinal && mm.winners[0] && <span className={styles.finalChampionHeader}>🥇 {mm.winners[0]}</span>}
+          {isAdmin && onEdit && (
+            <button className={styles.editRound} onClick={e => { e.stopPropagation(); onEdit() }}>✎</button>
+          )}
           {isAdmin && isLast && (
             <button className={styles.deleteRound} onClick={e => { e.stopPropagation(); onDelete() }}>✕</button>
           )}
