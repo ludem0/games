@@ -45,9 +45,19 @@ export default function LeaderboardSection({ slug, accent, isAdmin, participants
     })
     .filter(g => g.length > 0)
 
+  const finalRound = rounds.find(r => r.type === 'final')
+  const champion = finalRound?.mainMatch.winners[0] ?? null
+  const runnerUp = finalRound?.mainMatch.losers[0] ?? null
+
   const eliminatedSet = new Set(eliminatedGroups.flat())
   const active = participants.filter(p => !eliminatedSet.has(p))
-  const activeSorted = [...active].sort((a, b) => (psigems[b] ?? 1) - (psigems[a] ?? 1))
+  const activeSorted = finalRound
+    ? [
+        ...(champion ? [champion] : []),
+        ...(runnerUp ? [runnerUp] : []),
+        ...active.filter(p => p !== champion && p !== runnerUp).sort((a, b) => (psigems[b] ?? 1) - (psigems[a] ?? 1)),
+      ]
+    : [...active].sort((a, b) => (psigems[b] ?? 1) - (psigems[a] ?? 1))
   // Reverse: most recently eliminated group shown highest among eliminated
   const eliminatedGroupsReversed = [...eliminatedGroups].reverse()
   const sorted = [...activeSorted, ...eliminatedGroupsReversed.flat()]
@@ -56,9 +66,7 @@ export default function LeaderboardSection({ slug, accent, isAdmin, participants
 
   function getRank(name: string): number {
     if (!eliminatedSet.has(name)) {
-      const val = psigems[name] ?? 1
-      const first = activeSorted.findIndex(p => (psigems[p] ?? 1) === val)
-      return first + 1
+      return activeSorted.indexOf(name) + 1
     }
     let rank = activeSorted.length + 1
     for (const group of eliminatedGroupsReversed) {
