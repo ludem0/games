@@ -604,7 +604,7 @@
 .rankTablePsi {
   font-size: 0.85rem;
   color: var(--muted);
-  text-align: right;
+  text-align: center;
 }
 
 .psiUnit {
