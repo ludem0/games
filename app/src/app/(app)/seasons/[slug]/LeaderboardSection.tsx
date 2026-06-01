@@ -68,6 +68,19 @@ export default function LeaderboardSection({ slug, accent, isAdmin, participants
     return rank
   }
 
+  function getRankDisplay(name: string): string {
+    if (!eliminatedSet.has(name)) return String(getRank(name))
+    let rank = activeSorted.length + 1
+    for (const group of eliminatedGroupsReversed) {
+      if (group.includes(name)) {
+        if (group.length === 1) return String(rank)
+        return `${rank}–${rank + group.length - 1}`
+      }
+      rank += group.length
+    }
+    return String(rank)
+  }
+
   function startEdit() { setDraft({ ...psigems }); setEditing(true) }
   function adjust(name: string, delta: number) {
     setDraft(prev => ({ ...prev, [name]: Math.max(0, (prev[name] ?? 1) + delta) }))
@@ -115,7 +128,7 @@ export default function LeaderboardSection({ slug, accent, isAdmin, participants
               className={`${styles.rankRow} ${!editing && rank === 1 ? styles.rankRow1 : !editing && rank === 2 ? styles.rankRow2 : !editing && rank === 3 ? styles.rankRow3 : ''}`}
             >
               <span className={`${styles.rankNum} ${!editing && rank === 1 ? styles.rankNum1 : ''}`} style={{ color }}>
-                {editing ? '–' : rank}
+                {editing ? '–' : getRankDisplay(name)}
               </span>
               <span
                 className={`${styles.rankAvatar} ${!editing && rank === 1 ? styles.rankAvatar1 : ''}`}
