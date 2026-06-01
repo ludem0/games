@@ -31,15 +31,14 @@ export default async function StatsPage() {
     ...doneSeasonsWithMeta.flatMap(s => s.participants),
   ]))
 
-  const statsTargets = user.role === 'admin' ? allParticipants : [user.username]
-  const allStats = computeAllPlayerStats(statsTargets, doneSeasonsWithMeta)
+  const allStats = computeAllPlayerStats(allParticipants, doneSeasonsWithMeta)
 
   return (
     <StatsClient
       username={user.username}
       role={user.role}
       allStats={allStats}
-      allPlayers={user.role === 'admin' ? allParticipants : []}
+      allPlayers={allParticipants}
     />
   )
 }
