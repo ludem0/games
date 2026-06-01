@@ -18,6 +18,7 @@ type MMRole = 'winner' | 'loser' | 'none'
 interface MMColumnForm { name: string; points: Record<string, number> }
 interface MMGameForm { name: string; collapsed: boolean; columns: MMColumnForm[] }
 interface DMForm {
+  name: string
   participants: string[]
   winner: string
   eliminated: string
@@ -38,7 +39,7 @@ interface FormState {
 }
 
 const mkGame = (): MMGameForm => ({ name: '', collapsed: false, columns: [{ name: 'Очки', points: {} }] })
-const mkDM = (participants: string[] = []): DMForm => ({ participants, winner: '', eliminated: '', rounds: [mkGame()] })
+const mkDM = (participants: string[] = []): DMForm => ({ name: '', participants, winner: '', eliminated: '', rounds: [mkGame()] })
 
 const INIT_FORM: FormState = {
   mode: 'regular',
@@ -98,7 +99,7 @@ function roundToFormState(round: Round): FormState {
   for (const p of mm.losers ?? []) mmRoles[p] = 'loser'
   const mmGames = mm.games?.length ? toGameForms(mm.games) : mm.points ? [{ name: '', collapsed: false, columns: [{ name: mm.columnName || 'Очки', points: mm.points }] }] : []
   const dmForms: DMForm[] = dmsRaw.length > 0
-    ? dmsRaw.map(dm => ({ participants: dm.participants, winner: dm.winner, eliminated: dm.eliminated, rounds: dm.rounds?.length ? toGameForms(dm.rounds) : dm.points ? [{ name: dm.name || '', collapsed: false, columns: [{ name: dm.columnName || 'Очки', points: dm.points }] }] : [mkGame()] }))
+    ? dmsRaw.map(dm => ({ name: dm.name || '', participants: dm.participants, winner: dm.winner, eliminated: dm.eliminated, rounds: dm.rounds?.length ? toGameForms(dm.rounds) : dm.points ? [{ name: '', collapsed: false, columns: [{ name: dm.columnName || 'Очки', points: dm.points }] }] : [mkGame()] }))
     : [mkDM()]
   return {
     mode: round.type === 'final' ? 'final' : 'regular',
@@ -163,6 +164,9 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
       return { ...f, deathMatches: dms }
     })
   }
+  function setDMName(di: number, v: string) {
+    setForm(f => { const dms = [...f.deathMatches]; dms[di] = { ...dms[di], name: v }; return { ...f, deathMatches: dms } })
+  }
   function setDMWinner(di: number, p: string) {
     setForm(f => { const dms = [...f.deathMatches]; dms[di] = { ...dms[di], winner: p, eliminated: dms[di].eliminated === p ? '' : dms[di].eliminated }; return { ...f, deathMatches: dms } })
   }
@@ -203,7 +207,7 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
       }
     }
     const mmData: MainMatch = { name: form.mmName, participants: form.mmParticipants, winners, losers, games: serializeGames(form.mmGames) }
-    const dmArr = form.deathMatches.map(dm => ({ name: dm.rounds[0]?.name || '', participants: dm.participants, winner: dm.winner, eliminated: dm.eliminated, rounds: serializeGames(dm.rounds) }))
+    const dmArr = form.deathMatches.map(dm => ({ name: dm.name, participants: dm.participants, winner: dm.winner, eliminated: dm.eliminated, rounds: serializeGames(dm.rounds) }))
     const [roundRes, psiRes] = await Promise.all([
       fetch(`/api/seasons/${slug}/rounds`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mainMatch: mmData, deathMatch: null, deathMatches: dmArr, mmPsigemDelta: form.mmPsigemDelta }) }),
       fetch(`/api/seasons/${slug}/psigems`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newPsi) }),
@@ -241,7 +245,7 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
       body = {
         mainMatch: { name: form.mmName, participants: form.mmParticipants, winners: editWinners, losers: editLosers, games: serializeGames(form.mmGames) },
         deathMatch: null,
-        deathMatches: form.deathMatches.map(dm => ({ name: dm.rounds[0]?.name || '', participants: dm.participants, winner: dm.winner, eliminated: dm.eliminated, rounds: serializeGames(dm.rounds) })),
+        deathMatches: form.deathMatches.map(dm => ({ name: dm.name, participants: dm.participants, winner: dm.winner, eliminated: dm.eliminated, rounds: serializeGames(dm.rounds) })),
         mmPsigemDelta: form.mmPsigemDelta,
       }
     } else {
@@ -293,7 +297,7 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
       <div className={styles.roundsList}>
         {rounds.map((round, idx) => (
           editingRoundId === round.id ? (
-            <InlineEditForm key={round.id} round={round} form={form} setForm={setForm} accent={accent} initials={initials} psigems={psigems} losers={form.mmParticipants.filter(p => form.mmRoles[p] === 'loser')} winners={form.mmParticipants.filter(p => form.mmRoles[p] === 'winner')} saving={saving} mm={mm} adjustPsi={adjustPsi} setRole={setRole} toggleMMParticipant={toggleMMParticipant} getFinalWinner={getFinalWinner} addDM={addDM} removeDM={removeDM} toggleDMParticipant={toggleDMParticipant} setDMWinner={setDMWinner} setDMEliminated={setDMEliminated} dmRoundsHelper={dmRoundsHelper} goToStep2={goToStep2} onSave={handleEditSave} onCancel={handleCancelEdit} />
+            <InlineEditForm key={round.id} round={round} form={form} setForm={setForm} accent={accent} initials={initials} psigems={psigems} losers={form.mmParticipants.filter(p => form.mmRoles[p] === 'loser')} winners={form.mmParticipants.filter(p => form.mmRoles[p] === 'winner')} saving={saving} mm={mm} adjustPsi={adjustPsi} setRole={setRole} toggleMMParticipant={toggleMMParticipant} getFinalWinner={getFinalWinner} addDM={addDM} removeDM={removeDM} setDMName={setDMName} toggleDMParticipant={toggleDMParticipant} setDMWinner={setDMWinner} setDMEliminated={setDMEliminated} dmRoundsHelper={dmRoundsHelper} goToStep2={goToStep2} onSave={handleEditSave} onCancel={handleCancelEdit} />
           ) : (
             <RoundCard key={round.id} round={round} accent={accent} isAdmin={isAdmin} initials={initials} psigems={psigems} isLast={idx === rounds.length - 1} isCollapsed={collapsed.has(round.id)} onToggle={() => toggleCollapse(round.id)} onDelete={() => handleDelete(round)} onEdit={isAdmin && !editingRoundId ? () => handleStartEdit(round) : undefined} />
           )
@@ -338,7 +342,7 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
           availableParticipants={availableParticipants} losers={losers} winners={winners}
           saving={saving} mm={mm} adjustPsi={adjustPsi} setRole={setRole} toggleMMParticipant={toggleMMParticipant}
           canGoStep2={canGoStep2} canSaveRegular={canSaveRegular}
-          goToStep2={goToStep2} addDM={addDM} removeDM={removeDM}
+          goToStep2={goToStep2} addDM={addDM} removeDM={removeDM} setDMName={setDMName}
           toggleDMParticipant={toggleDMParticipant} setDMWinner={setDMWinner} setDMEliminated={setDMEliminated} dmRoundsHelper={dmRoundsHelper}
           onSave={handleSaveRegular} onCancel={() => { setShowForm(false); setForm(INIT_FORM) }}
         />
@@ -361,14 +365,14 @@ interface RegularFormProps {
   toggleMMParticipant: (name: string) => void
   canGoStep2: () => boolean; canSaveRegular: () => boolean
   goToStep2: () => void
-  addDM: () => void; removeDM: (i: number) => void
+  addDM: () => void; removeDM: (i: number) => void; setDMName: (di: number, v: string) => void
   toggleDMParticipant: (di: number, p: string) => void
   setDMWinner: (di: number, p: string) => void; setDMEliminated: (di: number, p: string) => void
   dmRoundsHelper: (di: number, fn: (l: MMGameForm[]) => MMGameForm[]) => void
   onSave: () => void; onCancel: () => void
 }
 
-function RegularRoundForm({ roundNum, form, setForm, accent, initials, psigems, availableParticipants, losers, winners, saving, mm, adjustPsi, setRole, toggleMMParticipant, canGoStep2, canSaveRegular, goToStep2, addDM, removeDM, toggleDMParticipant, setDMWinner, setDMEliminated, dmRoundsHelper, onSave, onCancel }: RegularFormProps) {
+function RegularRoundForm({ roundNum, form, setForm, accent, initials, psigems, availableParticipants, losers, winners, saving, mm, adjustPsi, setRole, toggleMMParticipant, canGoStep2, canSaveRegular, goToStep2, addDM, removeDM, setDMName, toggleDMParticipant, setDMWinner, setDMEliminated, dmRoundsHelper, onSave, onCancel }: RegularFormProps) {
   const isEdit = roundNum === undefined
   return (
     <div className={styles.formCard} style={isEdit ? { borderColor: 'rgba(176,38,255,0.3)' } : {}}>
@@ -425,7 +429,7 @@ function RegularRoundForm({ roundNum, form, setForm, accent, initials, psigems, 
         <div className={styles.formBody}>
           <div className={styles.dmHeader}><div className={styles.dmBar} /><span className={styles.matchLabel}>DEATH MATCH</span></div>
           <DMMatchesList form={form} losers={losers} accent={accent} initials={initials}
-            addDM={addDM} removeDM={removeDM} toggleDMParticipant={toggleDMParticipant}
+            addDM={addDM} removeDM={removeDM} setDMName={setDMName} toggleDMParticipant={toggleDMParticipant}
             setDMWinner={setDMWinner} setDMEliminated={setDMEliminated} dmRoundsHelper={dmRoundsHelper} />
           <div className={styles.formActions}>
             <button className={styles.btnCancel} onClick={() => setForm(f => ({ ...f, step: 1 }))}>← Назад</button>
@@ -437,9 +441,9 @@ function RegularRoundForm({ roundNum, form, setForm, accent, initials, psigems, 
   )
 }
 
-function DMMatchesList({ form, losers, accent, initials, addDM, removeDM, toggleDMParticipant, setDMWinner, setDMEliminated, dmRoundsHelper }: {
+function DMMatchesList({ form, losers, accent, initials, addDM, removeDM, setDMName, toggleDMParticipant, setDMWinner, setDMEliminated, dmRoundsHelper }: {
   form: FormState; losers: string[]; accent: string; initials: (n: string) => string
-  addDM: () => void; removeDM: (i: number) => void
+  addDM: () => void; removeDM: (i: number) => void; setDMName: (di: number, v: string) => void
   toggleDMParticipant: (di: number, p: string) => void
   setDMWinner: (di: number, p: string) => void; setDMEliminated: (di: number, p: string) => void
   dmRoundsHelper: (di: number, fn: (l: MMGameForm[]) => MMGameForm[]) => void
@@ -454,6 +458,7 @@ function DMMatchesList({ form, losers, accent, initials, addDM, removeDM, toggle
               <span className={styles.dmMatchLabel}>DM {form.deathMatches.length > 1 ? di + 1 : ''}</span>
               {form.deathMatches.length > 1 && <button className={styles.removeGameBtn} onClick={() => removeDM(di)}>✕</button>}
             </div>
+            <input className={styles.input} placeholder="Название DM (необязательно)" value={dmForm.name} onChange={e => setDMName(di, e.target.value)} />
             <p className={styles.hint}>Участники:</p>
             <div className={styles.chipGrid}>
               {losers.map(p => (
@@ -533,7 +538,7 @@ function FinalGamesForm({ games, players, setFinalGameWinner, setFinalGamePoints
   )
 }
 
-function InlineEditForm({ round, form, setForm, accent, initials, psigems, losers, winners, saving, mm, adjustPsi, setRole, toggleMMParticipant, getFinalWinner, addDM, removeDM, toggleDMParticipant, setDMWinner, setDMEliminated, dmRoundsHelper, goToStep2, onSave, onCancel }: {
+function InlineEditForm({ round, form, setForm, accent, initials, psigems, losers, winners, saving, mm, adjustPsi, setRole, toggleMMParticipant, getFinalWinner, addDM, removeDM, setDMName, toggleDMParticipant, setDMWinner, setDMEliminated, dmRoundsHelper, goToStep2, onSave, onCancel }: {
   round: Round; form: FormState; setForm: React.Dispatch<React.SetStateAction<FormState>>
   accent: string; initials: (n: string) => string; psigems: Record<string, number>
   losers: string[]; winners: string[]; saving: boolean
@@ -541,7 +546,7 @@ function InlineEditForm({ round, form, setForm, accent, initials, psigems, loser
   adjustPsi: (name: string, delta: number) => void; setRole: (name: string, role: MMRole) => void
   toggleMMParticipant: (name: string) => void
   getFinalWinner: (games: { winner: string }[], players: string[]) => string | null
-  addDM: () => void; removeDM: (i: number) => void
+  addDM: () => void; removeDM: (i: number) => void; setDMName: (di: number, v: string) => void
   toggleDMParticipant: (di: number, p: string) => void
   setDMWinner: (di: number, p: string) => void; setDMEliminated: (di: number, p: string) => void
   dmRoundsHelper: (di: number, fn: (l: MMGameForm[]) => MMGameForm[]) => void
@@ -574,7 +579,7 @@ function InlineEditForm({ round, form, setForm, accent, initials, psigems, loser
       saving={saving} mm={mm} adjustPsi={adjustPsi} setRole={setRole} toggleMMParticipant={toggleMMParticipant}
       canGoStep2={() => form.mmParticipants.length > 0 && losers.length > 0 && winners.length > 0}
       canSaveRegular={() => canSave}
-      goToStep2={goToStep2} addDM={addDM} removeDM={removeDM}
+      goToStep2={goToStep2} addDM={addDM} removeDM={removeDM} setDMName={setDMName}
       toggleDMParticipant={toggleDMParticipant} setDMWinner={setDMWinner} setDMEliminated={setDMEliminated} dmRoundsHelper={dmRoundsHelper}
       onSave={onSave} onCancel={onCancel} />
   )
