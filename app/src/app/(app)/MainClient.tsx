@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import type { Role } from '@/lib/types'
 import CubeSimply from '@/components/CubeSimply'
@@ -9,6 +9,39 @@ import CubeZero from '@/components/CubeZero'
 import CubeGambit from '@/components/CubeGambit'
 import { SEASONS_CONFIG } from '@/lib/seasonsConfig'
 import styles from './main.module.css'
+
+function usePresence() {
+  const [online, setOnline] = useState<string[]>([])
+
+  const refresh = useCallback(() => {
+    fetch('/api/presence').then(r => r.ok ? r.json() : null).then(d => {
+      if (d?.online) setOnline(d.online)
+    }).catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/presence', { method: 'POST' }).catch(() => {})
+    refresh()
+    const pingId = setInterval(() => fetch('/api/presence', { method: 'POST' }).catch(() => {}), 30_000)
+    const pollId = setInterval(refresh, 30_000)
+    return () => { clearInterval(pingId); clearInterval(pollId) }
+  }, [refresh])
+
+  return online
+}
+
+function PresenceAvatar({ username }: { username: string }) {
+  const [url, setUrl] = useState<string | null>(null)
+  useEffect(() => {
+    fetch(`/api/users/${encodeURIComponent(username)}/avatar`)
+      .then(r => r.ok ? r.json() : { avatarUrl: null })
+      .then(d => setUrl(d.avatarUrl ?? null))
+      .catch(() => {})
+  }, [username])
+  return url
+    ? <img src={url} alt={username} className={styles.presenceAvatar} title={username} />
+    : <div className={styles.presenceAvatarInitials} title={username}>{username.slice(0, 2).toUpperCase()}</div>
+}
 
 const CUBE_MAP: Record<string, React.ComponentType> = { simply: CubeSimply, zero: CubeZero, gambit: CubeGambit }
 
@@ -33,6 +66,7 @@ export default function MainClient({ username, role }: Props) {
   const router = useRouter()
   const badge = BADGE_MAP[role]
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const online = usePresence()
 
   useEffect(() => {
     fetch('/api/me/avatar')
@@ -95,6 +129,16 @@ export default function MainClient({ username, role }: Props) {
           ))}
         </div>
       </main>
+
+      {online.length > 0 && (
+        <div className={styles.presenceBar}>
+          <span className={styles.presenceDot} />
+          <span className={styles.presenceLabel}>{online.length} онлайн</span>
+          <div className={styles.presenceList}>
+            {online.map(u => <PresenceAvatar key={u} username={u} />)}
+          </div>
+        </div>
+      )}
     </>
   )
 }

@@ -421,10 +421,92 @@
 
 /* ─── Ranking tab ─── */
 
+.rankingLayout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
 .rankingSection {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
+}
+
+/* Score info panel */
+.scoreInfo {
+  width: 240px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 84px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  padding: 22px 20px;
+}
+
+.scoreInfoTitle {
+  font-size: 0.68rem;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  font-weight: 800;
+  background: linear-gradient(90deg, var(--neon), var(--neon-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 18px;
+}
+
+.scoreInfoItems {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.scoreInfoRow {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.scoreInfoWeight {
+  font-size: 1.1rem;
+  font-weight: 800;
+  font-family: 'Poppins', sans-serif;
+  color: rgba(255,255,255,0.5);
+  flex-shrink: 0;
+  width: 38px;
+  text-align: right;
+  line-height: 1.2;
+}
+
+.scoreInfoDesc {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.scoreInfoName {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.scoreInfoSub {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.35);
+  line-height: 1.4;
+}
+
+.scoreInfoNote {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 0.5px;
 }
 
 .rankTable {
@@ -587,6 +669,11 @@
 }
 
 /* ─── Responsive ─── */
+
+@media (max-width: 900px) {
+  .rankingLayout { flex-direction: column; }
+  .scoreInfo { width: 100%; position: static; }
+}
 
 @media (max-width: 700px) {
   .content { padding: 20px 16px; }

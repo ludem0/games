@@ -91,7 +91,8 @@ function RankingTab({ allPlayers, allStats, currentUser }: {
     .sort((a, b) => b.score - a.score)
 
   return (
-    <div className={styles.rankingSection}>
+    <div className={styles.rankingLayout}>
+      <div className={styles.rankingSection}>
       <div className={styles.rankTable}>
         <div className={styles.rankTableHead}>
           <span style={{ width: 36 }}>#</span>
@@ -156,6 +157,37 @@ function RankingTab({ allPlayers, allStats, currentUser }: {
             </div>
           )
         })}
+      </div>
+      </div>
+
+      <div className={styles.scoreInfo}>
+        <div className={styles.scoreInfoTitle}>Как считается Score</div>
+        <div className={styles.scoreInfoItems}>
+          <div className={styles.scoreInfoRow}>
+            <span className={styles.scoreInfoWeight}>40%</span>
+            <div className={styles.scoreInfoDesc}>
+              <span className={styles.scoreInfoName}>Avg Placement</span>
+              <span className={styles.scoreInfoSub}>1 место = 100, последнее = 0. Среднее по сезонам</span>
+            </div>
+          </div>
+          <div className={styles.scoreInfoRow}>
+            <span className={styles.scoreInfoWeight} style={{ color: 'var(--neon)' }}>40%</span>
+            <div className={styles.scoreInfoDesc}>
+              <span className={styles.scoreInfoName}>MM Win Rate</span>
+              <span className={styles.scoreInfoSub}>Иммунитеты / MM участий × 100</span>
+            </div>
+          </div>
+          <div className={styles.scoreInfoRow}>
+            <span className={styles.scoreInfoWeight} style={{ color: 'var(--neon-hot)' }}>20%</span>
+            <div className={styles.scoreInfoDesc}>
+              <span className={styles.scoreInfoName}>DM Win Rate</span>
+              <span className={styles.scoreInfoSub}>Победы / DM участий × 100. Если не было DM — вес перераспределяется</span>
+            </div>
+          </div>
+        </div>
+        <div className={styles.scoreInfoNote}>
+          Итог: взвешенное среднее 0–100
+        </div>
       </div>
     </div>
   )
