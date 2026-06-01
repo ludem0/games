@@ -38,9 +38,10 @@ export default function LeaderboardSection({ slug, accent, isAdmin, participants
   const initials = (n: string) => n.slice(0, 2).toUpperCase()
 
   // Eliminated players in chronological order (index 0 = first eliminated)
-  const eliminatedOrdered = rounds
-    .filter(r => r.deathMatch?.eliminated)
-    .map(r => r.deathMatch!.eliminated)
+  const eliminatedOrdered = rounds.flatMap(r => {
+    const dms = r.deathMatches ?? (r.deathMatch ? [r.deathMatch] : [])
+    return dms.map(dm => dm.eliminated).filter(Boolean) as string[]
+  })
 
   const eliminatedSet = new Set(eliminatedOrdered)
   const active = participants.filter(p => !eliminatedSet.has(p))

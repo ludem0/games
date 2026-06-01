@@ -53,6 +53,7 @@ export interface Round {
   type?: 'final'
   mainMatch: MainMatch
   deathMatch: DeathMatch | null
+  deathMatches?: DeathMatch[]
   finalGames?: FinalGame[]
   mmPsigemDelta?: Record<string, number>
 }

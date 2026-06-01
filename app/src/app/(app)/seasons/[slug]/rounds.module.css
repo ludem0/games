@@ -1100,6 +1100,33 @@
 }
 .btnOutlineSmall:hover { border-color: rgba(255,255,255,0.25); color: var(--text); }
 
+/* Multiple DM blocks */
+.dmMatchesList { display: flex; flex-direction: column; gap: 12px; }
+
+.dmMatchBlock {
+  padding: 14px;
+  background: rgba(239,68,68,0.04);
+  border: 1px solid rgba(239,68,68,0.15);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dmMatchHeader { display: flex; align-items: center; justify-content: space-between; }
+
+.dmMatchLabel {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: #EF4444;
+}
+
+.chipDisabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 .removeGameBtn {
   background: none;
   border: none;
