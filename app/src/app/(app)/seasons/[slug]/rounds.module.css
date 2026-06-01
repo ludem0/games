@@ -1122,9 +1122,9 @@
   color: #EF4444;
 }
 
-.chipDisabled {
-  opacity: 0.3;
-  cursor: not-allowed;
+.chipOtherDm {
+  opacity: 0.45;
+  border-style: dashed;
 }
 
 .removeGameBtn {

@@ -149,10 +149,17 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
   function removeDM(i: number) { setForm(f => ({ ...f, deathMatches: f.deathMatches.filter((_, j) => j !== i) })) }
   function toggleDMParticipant(di: number, p: string) {
     setForm(f => {
-      const dms = [...f.deathMatches]
-      const dm = dms[di]
-      const has = dm.participants.includes(p)
-      dms[di] = { ...dm, participants: has ? dm.participants.filter(x => x !== p) : [...dm.participants, p], winner: has && dm.winner === p ? '' : dm.winner, eliminated: has && dm.eliminated === p ? '' : dm.eliminated }
+      const dms = f.deathMatches.map((dm, i) => {
+        if (i === di) {
+          const has = dm.participants.includes(p)
+          return { ...dm, participants: has ? dm.participants.filter(x => x !== p) : [...dm.participants, p], winner: has && dm.winner === p ? '' : dm.winner, eliminated: has && dm.eliminated === p ? '' : dm.eliminated }
+        }
+        // Remove from other DMs when claiming for this DM
+        if (dm.participants.includes(p)) {
+          return { ...dm, participants: dm.participants.filter(x => x !== p), winner: dm.winner === p ? '' : dm.winner, eliminated: dm.eliminated === p ? '' : dm.eliminated }
+        }
+        return dm
+      })
       return { ...f, deathMatches: dms }
     })
   }
@@ -451,8 +458,7 @@ function DMMatchesList({ form, losers, accent, initials, addDM, removeDM, toggle
             <div className={styles.chipGrid}>
               {losers.map(p => (
                 <button key={p}
-                  className={`${styles.chip} ${dmForm.participants.includes(p) ? styles.chipSelected : ''} ${assignedElsewhere.includes(p) ? styles.chipDisabled : ''}`}
-                  disabled={assignedElsewhere.includes(p)}
+                  className={`${styles.chip} ${dmForm.participants.includes(p) ? styles.chipSelected : ''} ${assignedElsewhere.includes(p) ? styles.chipOtherDm : ''}`}
                   onClick={() => toggleDMParticipant(di, p)}>{p}</button>
               ))}
             </div>
