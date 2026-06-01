@@ -76,6 +76,14 @@ function recomputePsigems(participants: string[], rounds: Round[]): Record<strin
       r[dm.winner] = (r[dm.winner] ?? 1) + ePsi
       r[dm.eliminated] = 0
     }
+    if (round.type === 'final') {
+      const champion = round.mainMatch.winners[0]
+      const loser = round.mainMatch.losers[0]
+      if (champion && loser) {
+        r[champion] = (r[champion] ?? 1) + (r[loser] ?? 0)
+        r[loser] = 0
+      }
+    }
   }
   return r
 }
@@ -219,6 +227,8 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
     const loser = players.find(p => p !== champion)!
     const newPsi = { ...psigems }
     for (const [n, d] of Object.entries(form.mmPsigemDelta)) newPsi[n] = Math.max(0, (newPsi[n] ?? 1) + d)
+    newPsi[champion] = (newPsi[champion] ?? 1) + (newPsi[loser] ?? 0)
+    newPsi[loser] = 0
     const mmData: MainMatch = { name: 'Финал', participants: players, winners: [champion], losers: [loser] }
     const res = await fetch(`/api/seasons/${slug}/rounds`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'final', mainMatch: mmData, deathMatch: null, finalGames: form.finalGames.map(g => ({ ...g, columnName: form.finalColumnName })) }) })
     if (res.ok) { const r = await res.json(); setRounds(p => [...p, r]); setCollapsed(p => new Set([...p, r.id])) }
