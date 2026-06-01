@@ -1,0 +1,178 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 64px;
+  background: rgba(8, 8, 16, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.navLogo {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 900;
+  font-size: 1.5rem;
+  color: var(--neon);
+  text-shadow: 0 0 20px rgba(0, 252, 237, 0.8), 0 0 40px rgba(0, 252, 237, 0.3);
+  letter-spacing: 6px;
+}
+
+.back {
+  font-size: 0.8rem;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 200ms;
+}
+.back:hover { color: var(--text); }
+
+.content {
+  padding: 40px;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+.avatarSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.avatarCircle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.avatarPlaceholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 2px;
+}
+
+.username {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.roleBadge {
+  font-size: 0.7rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.uploadSection {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.uploadLabel {
+  font-size: 0.7rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.fileInputWrap {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.fileInput {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.8rem;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.fileInput:focus { outline: none; border-color: var(--neon); }
+.fileInput::file-selector-button {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.uploadBtn {
+  background: var(--neon);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: opacity 200ms;
+  white-space: nowrap;
+}
+.uploadBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.uploadBtn:not(:disabled):hover { opacity: 0.85; }
+
+.hint {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.errorMsg {
+  font-size: 0.8rem;
+  color: #ff6b6b;
+}
+
+.successMsg {
+  font-size: 0.8rem;
+  color: var(--neon);
+}
+
+@media (max-width: 480px) {
+  .content { padding: 24px 20px; }
+  .navbar { padding: 0 20px; }
+}

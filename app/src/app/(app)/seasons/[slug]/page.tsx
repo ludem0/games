@@ -2,18 +2,8 @@ import { cookies } from 'next/headers'
 import { redirect, notFound } from 'next/navigation'
 import { verifyToken, getUsers } from '@/lib/auth'
 import { getParticipants, getRounds, getPsigems } from '@/lib/seasons'
+import { SEASONS_CONFIG } from '@/lib/seasonsConfig'
 import SeasonClient from './SeasonClient'
-
-const SEASONS: Record<string, {
-  name: string
-  status: 'done' | 'active' | 'soon'
-  statusLabel: string
-  accent: string
-}> = {
-  simply: { name: 'PG: Simply',        status: 'done',   statusLabel: 'Завершён', accent: '#FFE033' },
-  zero:   { name: 'PG: Zero',          status: 'done',   statusLabel: 'Завершён', accent: '#E0E0E0' },
-  gambit: { name: 'PG: Puzzle Gambit', status: 'active', statusLabel: 'Идёт',     accent: '#B026FF' },
-}
 
 export default async function SeasonPage({ params }: { params: Promise<{ slug: string }> }) {
   const cookieStore = await cookies()
@@ -23,7 +13,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ slug: s
   if (!user) redirect('/login')
 
   const { slug } = await params
-  const season = SEASONS[slug]
+  const season = SEASONS_CONFIG[slug]
   if (!season) notFound()
 
   const participants = getParticipants(slug)

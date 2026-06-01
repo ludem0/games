@@ -4,6 +4,21 @@ import { useState, useEffect } from 'react'
 import type { Round } from '@/lib/seasons'
 import styles from './season.module.css'
 
+function useAvatarUrls(participants: string[]): Record<string, string | null> {
+  const [urls, setUrls] = useState<Record<string, string | null>>({})
+  useEffect(() => {
+    if (participants.length === 0) return
+    Promise.all(
+      participants.map(p =>
+        fetch(`/api/users/${encodeURIComponent(p)}/avatar`)
+          .then(r => r.ok ? r.json() : { avatarUrl: null })
+          .then(d => [p, d.avatarUrl ?? null] as [string, string | null])
+      )
+    ).then(entries => setUrls(Object.fromEntries(entries)))
+  }, [participants.join(',')])
+  return urls
+}
+
 interface Props {
   slug: string
   accent: string
@@ -16,6 +31,7 @@ interface Props {
 export default function LeaderboardSection({ slug, accent, isAdmin, participants, initialPsigems, initialRounds }: Props) {
   const [psigems, setPsigems] = useState<Record<string, number>>(initialPsigems)
   const [rounds, setRounds] = useState<Round[]>(initialRounds)
+  const avatarUrls = useAvatarUrls(participants)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<Record<string, number>>(initialPsigems)
   const [saving, setSaving] = useState(false)
@@ -172,12 +188,20 @@ export default function LeaderboardSection({ slug, accent, isAdmin, participants
               <span className={`${styles.rankNum} ${!editing && rank === 1 ? styles.rankNum1 : ''}`} style={{ color }}>
                 {editing ? '–' : getRankDisplay(name)}
               </span>
-              <span
-                className={`${styles.rankAvatar} ${!editing && rank === 1 ? styles.rankAvatar1 : ''}`}
-                style={{ background: `${color}18`, color, borderColor: `${color}45` }}
-              >
-                {initials(name)}
-              </span>
+              {avatarUrls[name]
+                ? <img
+                    src={avatarUrls[name]!}
+                    alt={name}
+                    className={`${styles.rankAvatar} ${!editing && rank === 1 ? styles.rankAvatar1 : ''}`}
+                    style={{ borderColor: `${color}45`, objectFit: 'cover' }}
+                  />
+                : <span
+                    className={`${styles.rankAvatar} ${!editing && rank === 1 ? styles.rankAvatar1 : ''}`}
+                    style={{ background: `${color}18`, color, borderColor: `${color}45` }}
+                  >
+                    {initials(name)}
+                  </span>
+              }
               <span className={`${styles.rankName} ${!editing && rank === 1 ? styles.rankName1 : ''}`}>{name}</span>
 
               {editing ? (

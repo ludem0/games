@@ -104,6 +104,10 @@ function saveSeason(slug: string, data: SeasonData): void {
   writeAll(all)
 }
 
+export function getAllSeasons(): Record<string, SeasonData> {
+  return readAll()
+}
+
 export function getParticipants(slug: string): string[] {
   return getSeason(slug).participants
 }
