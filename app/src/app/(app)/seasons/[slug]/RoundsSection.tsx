@@ -1162,7 +1162,7 @@ function SubRoundsDisplay({ games, participants, accent, initials, psigems, rowR
                       {c.name || 'Очки'}
                     </span>
                   ))}
-                  <span>Ψ</span>
+                  <span style={{ textAlign: 'center' }}>Ψ</span>
                 </div>
                 {gameRanked.map((p, ri) => {
                   const role = rowRole(p)
@@ -1178,8 +1178,8 @@ function SubRoundsDisplay({ games, participants, accent, initials, psigems, rowR
                         }>{initials(p)}</span>
                         {p}{role === 'winner' && <span className={styles.wingIcon}>🪶</span>}
                       </span>
-                      {cols.map((c, ci) => <span key={ci} className={styles.rankTablePts} style={{ textAlign: 'center' }}>{c.points?.[p] ?? '—'}</span>)}
-                      <span className={styles.rankTablePsi}>{psigems[p] ?? 1}<span className={styles.psiUnit}> Ψ</span></span>
+                          {cols.map((c, ci) => <span key={ci} className={styles.rankTablePts} style={{ textAlign: 'center' }}>{c.points?.[p] ?? '—'}</span>)}
+                      <span className={styles.rankTablePsi} style={{ textAlign: 'center' }}>{psigems[p] ?? 1}<span className={styles.psiUnit}> Ψ</span></span>
                     </div>
                   )
                 })}
