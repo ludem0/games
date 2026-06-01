@@ -730,8 +730,8 @@ function RoundCard({ round, accent, isAdmin, initials, psigems, isLast, isCollap
                       <div key={p} className={`${styles.rankTableRow} ${role === 'winner' ? styles.rowWinner : role === 'loser' ? styles.rowLoser : styles.rowNeutral}`}>
                         <span className={styles.rankTableNum}>{i + 1}</span>
                         <span className={styles.rankTableName}><span className={styles.rankTableAvatar} style={role === 'winner' ? { background: 'rgba(34,197,94,0.25)', color: '#22c55e' } : role === 'loser' ? { background: 'rgba(239,68,68,0.25)', color: '#ef4444' } : { background: `${accent}15`, color: accent }}>{initials(p)}</span>{p}{role === 'winner' && <span className={styles.wingIcon}>🪶</span>}</span>
-                        <span className={styles.rankTablePts}>{mm.points?.[p] ?? '—'}</span>
-                        <span className={styles.rankTablePsi}>{psigems[p] ?? 1}<span className={styles.psiUnit}> Ψ</span></span>
+                        <span className={styles.rankTablePts} style={{ textAlign: 'center' }}>{mm.points?.[p] ?? '—'}</span>
+                        <span className={styles.rankTablePsi} style={{ textAlign: 'center' }}>{psigems[p] ?? 1}<span className={styles.psiUnit}> Ψ</span></span>
                       </div>
                     )})}
                   </div>
@@ -762,8 +762,8 @@ function RoundCard({ round, accent, isAdmin, initials, psigems, isLast, isCollap
                         <div key={p} className={`${styles.rankTableRow} ${isWin ? styles.rowWinner : styles.rowLoser}`}>
                           <span className={styles.rankTableNum}>{i + 1}</span>
                           <span className={styles.rankTableName}><span className={styles.rankTableAvatar} style={isWin ? { background: 'rgba(34,197,94,0.25)', color: '#22c55e' } : { background: 'rgba(239,68,68,0.25)', color: '#ef4444' }}>{initials(p)}</span><span className={isElim ? styles.eliminated : ''}>{p}</span>{isWin && <span className={styles.wingIcon}>🪶</span>}</span>
-                          <span className={styles.rankTablePts}>{dm.points?.[p] ?? '—'}</span>
-                          <span className={styles.rankTablePsi}>{psigems[p] ?? 1}<span className={styles.psiUnit}> Ψ</span></span>
+                          <span className={styles.rankTablePts} style={{ textAlign: 'center' }}>{dm.points?.[p] ?? '—'}</span>
+                          <span className={styles.rankTablePsi} style={{ textAlign: 'center' }}>{psigems[p] ?? 1}<span className={styles.psiUnit}> Ψ</span></span>
                         </div>
                       )
                     })}
