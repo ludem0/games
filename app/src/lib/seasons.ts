@@ -25,6 +25,11 @@ export interface MainMatch {
   games?: MMGame[]
 }
 
+export interface DMRound {
+  name: string
+  columns?: MMGameColumn[]
+}
+
 export interface DeathMatch {
   name: string
   participants: string[]
@@ -32,6 +37,7 @@ export interface DeathMatch {
   eliminated: string
   points?: Record<string, number>
   columnName?: string
+  rounds?: DMRound[]
 }
 
 export interface FinalGame {
