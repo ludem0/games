@@ -80,9 +80,6 @@ function avgPlacementInfo(stats: PlayerStats) {
   return { avg: Math.round(avg * 10) / 10, places }
 }
 
-const TIER_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32'] // gold, silver, bronze
-const TIER_GLOWS = ['rgba(255,215,0,0.5)', 'rgba(192,192,192,0.4)', 'rgba(205,127,50,0.4)']
-
 function RankingTab({ allPlayers, allStats, currentUser }: {
   allPlayers: string[]
   allStats: Record<string, PlayerStats>
@@ -93,76 +90,31 @@ function RankingTab({ allPlayers, allStats, currentUser }: {
     .map(p => ({ username: p, score: computePerformanceScore(allStats[p]), stats: allStats[p] }))
     .sort((a, b) => b.score - a.score)
 
-  const top3 = ranked.slice(0, 3)
-  const rest = ranked.slice(3)
-  const podiumOrder = top3.length >= 3
-    ? [top3[1], top3[0], top3[2]]
-    : top3.length === 2
-    ? [top3[1], top3[0]]
-    : top3
-  const podiumHeights: Record<number, number> = { 0: 72, 1: 108, 2: 52 }
-
   return (
     <div className={styles.rankingSection}>
-      {top3.length > 0 && (
-        <div className={styles.podium}>
-          {podiumOrder.map((entry, i) => {
-            const realRank = ranked.indexOf(entry) + 1
-            const podiumH = podiumHeights[i] ?? 72
-            const color = TIER_COLORS[realRank - 1] ?? '#888'
-            const glow = TIER_GLOWS[realRank - 1] ?? 'rgba(136,136,136,0.3)'
-            const placement = avgPlacementInfo(entry.stats)
-            return (
-              <div
-                key={entry.username}
-                className={`${styles.podiumSlot} ${entry.username === currentUser ? styles.podiumSelf : ''}`}
-              >
-                <div className={styles.podiumMeta}>
-                  <div className={styles.podiumAvatarWrap} style={{ borderColor: color, boxShadow: `0 0 16px ${glow}` }}>
-                    <Avatar username={entry.username} size={realRank === 1 ? 56 : 46} className={styles.podiumAvatarInner} />
-                  </div>
-                  <span className={styles.podiumName}>{entry.username}</span>
-                  <span className={styles.podiumScore} style={{ color }}>{entry.score}</span>
-                  {placement && (
-                    <span className={styles.podiumPlacement}>
-                      avg {placement.avg} <span className={styles.podiumPlacementSeasons}>({placement.places.join(', ')})</span>
-                    </span>
-                  )}
-                </div>
-                <div className={styles.podiumBlock} style={{ height: podiumH, borderColor: color, boxShadow: `0 0 24px ${glow}` }}>
-                  <span className={styles.podiumRankNum} style={{ color }}>{realRank}</span>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
-
       <div className={styles.rankTable}>
         <div className={styles.rankTableHead}>
-          <span style={{ width: 28 }}>#</span>
-          <span style={{ width: 32 }} />
+          <span style={{ width: 36 }}>#</span>
+          <span style={{ width: 36 }} />
           <span style={{ flex: 1 }}>Игрок</span>
-          <span style={{ width: 90 }}>Место avg</span>
-          <span style={{ width: 86 }}>MM wins</span>
-          <span style={{ width: 86 }}>DM wins</span>
-          <span style={{ width: 48 }}>MM🔥</span>
-          <span style={{ width: 48 }}>DM⚡</span>
-          <span style={{ width: 110 }}>Score</span>
+          <span style={{ width: 96 }}>Место avg</span>
+          <span style={{ width: 90 }}>MM wins</span>
+          <span style={{ width: 90 }}>DM wins</span>
+          <span style={{ width: 52 }}>MM🔥</span>
+          <span style={{ width: 52 }}>DM⚡</span>
+          <span style={{ width: 60 }}>Score</span>
         </div>
 
-        {rest.map((entry, i) => {
-          const rank = i + 4
-          const maxScore = ranked[0]?.score ?? 1
-          const barW = maxScore > 0 ? (entry.score / maxScore) * 100 : 0
+        {ranked.map((entry, i) => {
+          const rank = i + 1
           const s = entry.stats.totals
           const mm = frac(s.mmWins, s.mmParticipations)
           const dm = frac(s.dmWins, s.dmParticipations)
           const placement = avgPlacementInfo(entry.stats)
           return (
-            <div key={entry.username} className={`${styles.rankRow} ${entry.username === currentUser ? styles.rankRowSelf : ''}`}>
-              <span className={styles.rankNum}>{rank}</span>
-              <Avatar username={entry.username} size={30} className={styles.rankAvatar} />
+            <div key={entry.username} className={`${styles.rankRow} ${entry.username === currentUser ? styles.rankRowSelf : ''} ${rank <= 3 ? styles[`rankRowTop${rank}` as keyof typeof styles] : ''}`}>
+              <span className={`${styles.rankNum} ${rank <= 3 ? styles.rankNumTop : ''}`}>{rank}</span>
+              <Avatar username={entry.username} size={36} className={styles.rankAvatar} />
               <span className={styles.rankName}>{entry.username}</span>
 
               <span className={styles.rankCell}>
@@ -171,7 +123,7 @@ function RankingTab({ allPlayers, allStats, currentUser }: {
                     <span className={styles.rankCellMain}>{placement.avg}</span>
                     <span className={styles.rankCellSub}>({placement.places.join(', ')})</span>
                   </>
-                ) : '—'}
+                ) : <span className={styles.rankCellMuted}>—</span>}
               </span>
 
               <span className={styles.rankCell}>
@@ -180,7 +132,7 @@ function RankingTab({ allPlayers, allStats, currentUser }: {
                     <span className={styles.rankCellNeon}>{mm.wins}/{mm.total}</span>
                     <span className={styles.rankCellSub}>{mm.pct}%</span>
                   </>
-                ) : '—'}
+                ) : <span className={styles.rankCellMuted}>—</span>}
               </span>
 
               <span className={styles.rankCell}>
@@ -189,7 +141,7 @@ function RankingTab({ allPlayers, allStats, currentUser }: {
                     <span className={styles.rankCellHot}>{dm.wins}/{dm.total}</span>
                     <span className={styles.rankCellSub}>{dm.pct}%</span>
                   </>
-                ) : '—'}
+                ) : <span className={styles.rankCellMuted}>—</span>}
               </span>
 
               <span className={styles.rankCellCenter}>
@@ -200,10 +152,7 @@ function RankingTab({ allPlayers, allStats, currentUser }: {
                 {s.dmWinStreak > 0 ? <span className={styles.streakVal}>{s.dmWinStreak}</span> : <span className={styles.rankCellMuted}>—</span>}
               </span>
 
-              <div className={styles.rankBarWrap}>
-                <div className={styles.rankBar} style={{ width: `${barW}%` }} />
-                <span className={styles.rankScore}>{entry.score}</span>
-              </div>
+              <span className={styles.rankScoreVal}>{entry.score}</span>
             </div>
           )
         })}
@@ -280,9 +229,6 @@ export default function StatsClient({ username, role, allStats, allPlayers }: Pr
                   <div className={styles.scoreLabels}>
                     <span className={styles.scoreName}>{selected}</span>
                     <span className={styles.scoreDesc}>Performance Score</span>
-                    <span className={styles.scoreTier}>
-                      {score >= 70 ? '🏆 Топ игрок' : score >= 40 ? '⚡ Хорошо' : '📈 Развивается'}
-                    </span>
                     {(() => {
                       const p = avgPlacementInfo(stats)
                       return p ? (
