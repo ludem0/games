@@ -60,6 +60,7 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
   )
   const availableParticipants = participants.filter(p => !eliminatedPlayers.includes(p))
   const isFinalTime = availableParticipants.length === 2
+  const finalExists = rounds.some(r => r.type === 'final')
 
   const losers = form.mmParticipants.filter(p => form.mmRoles[p] === 'loser')
   const winners = form.mmParticipants.filter(p => form.mmRoles[p] === 'winner')
@@ -178,7 +179,7 @@ export default function RoundsSection({ slug, accent, isAdmin, initialRounds, pa
     <div className={styles.section}>
       <div className={styles.sectionHeader}>
         <span className={styles.sectionLabel}>РАУНДЫ</span>
-        {isAdmin && !showForm && (
+        {isAdmin && !showForm && !finalExists && (
           <button className={styles.btnOutline}
             onClick={() => { setForm({ ...INIT_FORM, mode: isFinalTime ? 'final' : 'regular' }); setShowForm(true) }}>
             {isFinalTime ? '🏆 Добавить финал' : '+ Добавить раунд'}
