@@ -37,28 +37,35 @@ export default function LeaderboardSection({ slug, accent, isAdmin, participants
 
   const initials = (n: string) => n.slice(0, 2).toUpperCase()
 
-  // Eliminated players in chronological order (index 0 = first eliminated)
-  const eliminatedOrdered = rounds.flatMap(r => {
-    const dms = r.deathMatches ?? (r.deathMatch ? [r.deathMatch] : [])
-    return dms.map(dm => dm.eliminated).filter(Boolean) as string[]
-  })
+  // Groups of eliminated players per round (same round = same rank)
+  const eliminatedGroups: string[][] = rounds
+    .map(r => {
+      const dms = r.deathMatches ?? (r.deathMatch ? [r.deathMatch] : [])
+      return dms.map(dm => dm.eliminated).filter(Boolean) as string[]
+    })
+    .filter(g => g.length > 0)
 
-  const eliminatedSet = new Set(eliminatedOrdered)
+  const eliminatedSet = new Set(eliminatedGroups.flat())
   const active = participants.filter(p => !eliminatedSet.has(p))
   const activeSorted = [...active].sort((a, b) => (psigems[b] ?? 1) - (psigems[a] ?? 1))
-  // Most recently eliminated ranks higher → reverse chronological order
-  const eliminatedSorted = [...eliminatedOrdered].reverse()
-  const sorted = [...activeSorted, ...eliminatedSorted]
+  // Reverse: most recently eliminated group shown highest among eliminated
+  const eliminatedGroupsReversed = [...eliminatedGroups].reverse()
+  const sorted = [...activeSorted, ...eliminatedGroupsReversed.flat()]
 
   const MEDALS = ['#FFD700', '#C0C0C0', '#CD7F32']
 
   function getRank(name: string): number {
-    const val = psigems[name] ?? 1
     if (!eliminatedSet.has(name)) {
+      const val = psigems[name] ?? 1
       const first = activeSorted.findIndex(p => (psigems[p] ?? 1) === val)
       return first + 1
     }
-    return activeSorted.length + eliminatedSorted.indexOf(name) + 1
+    let rank = activeSorted.length + 1
+    for (const group of eliminatedGroupsReversed) {
+      if (group.includes(name)) return rank
+      rank += group.length
+    }
+    return rank
   }
 
   function startEdit() { setDraft({ ...psigems }); setEditing(true) }
