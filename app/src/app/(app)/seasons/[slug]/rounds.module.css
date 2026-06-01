@@ -250,6 +250,9 @@
 .rankTableHead > span {
   min-width: 0;
 }
+.rankTableHead > span:nth-child(n+3) {
+  text-align: center;
+}
 
 .rankTableRow {
   display: grid;
