@@ -151,7 +151,7 @@ function MatchCard({
     </>
   )
 
-  if (playerCanClick && match.minigameSlug) {
+  if (match.minigameSlug && (playerCanClick || isAdmin)) {
     return (
       <Link href={`/minigames/${match.minigameSlug}`} className={cardClass} style={{ textDecoration: 'none' }}>
         {inner}
