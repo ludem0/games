@@ -8,7 +8,8 @@ import CubeZero from '@/components/CubeZero'
 import CubeGambit from '@/components/CubeGambit'
 import LeaderboardSection from './LeaderboardSection'
 import RoundsSection from './RoundsSection'
-import type { Round } from '@/lib/seasons'
+import MatchesSection from './MatchesSection'
+import type { Round, Match } from '@/lib/seasons'
 import styles from './season.module.css'
 
 const CUBES: Record<string, React.ComponentType> = {
@@ -29,11 +30,12 @@ interface Props {
   allPlayers: string[]
   initialRounds: Round[]
   initialPsigems: Record<string, number>
+  initialMatches: Match[]
 }
 
 export default function SeasonClient({
   slug, name, status, statusLabel, accent,
-  role, username, initialParticipants, allPlayers, initialRounds, initialPsigems,
+  role, username, initialParticipants, allPlayers, initialRounds, initialPsigems, initialMatches,
 }: Props) {
   const Cube = CUBES[slug] ?? CubeSimply
   const [participants, setParticipants] = useState(initialParticipants)
@@ -85,6 +87,13 @@ export default function SeasonClient({
       </nav>
 
       <main className={styles.content}>
+        {/* Matches */}
+        <MatchesSection
+          slug={slug}
+          isAdmin={role === 'admin'}
+          initialMatches={initialMatches}
+        />
+
         {/* Hero */}
         <div className={styles.hero}>
           <div className={styles.cubeWrap}><Cube /></div>

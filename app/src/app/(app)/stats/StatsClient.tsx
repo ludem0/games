@@ -97,7 +97,7 @@ function RankingTab({ allPlayers, allStats, currentUser }: {
         <div className={styles.rankTableHead}>
           <span style={{ width: 36 }}>#</span>
           <span style={{ width: 36 }} />
-          <span style={{ flex: 1 }}>Игрок</span>
+          <span style={{ flex: 1.5, minWidth: 120 }}>Игрок</span>
           <span style={{ width: 96 }}>Место avg</span>
           <span style={{ width: 90 }}>MM wins</span>
           <span style={{ width: 90 }}>DM wins</span>

@@ -58,14 +58,24 @@ export interface Round {
   mmPsigemDelta?: Record<string, number>
 }
 
+export interface Match {
+  id: string
+  type: 'main' | 'death'
+  name: string
+  visible: boolean
+  accessible: boolean
+  minigameSlug?: string
+}
+
 export interface SeasonData {
   participants: string[]
   ranks: string[]
   rounds: Round[]
   psigems: Record<string, number>
+  matches?: Match[]
 }
 
-const EMPTY_SEASON: SeasonData = { participants: [], ranks: [], rounds: [], psigems: {} }
+const EMPTY_SEASON: SeasonData = { participants: [], ranks: [], rounds: [], psigems: {}, matches: [] }
 
 function readAll(): Record<string, SeasonData> {
   try {
@@ -81,6 +91,7 @@ function readAll(): Record<string, SeasonData> {
           ranks: (v.ranks as string[]) ?? [],
           rounds: (v.rounds as Round[]) ?? [],
           psigems: (v.psigems as Record<string, number>) ?? {},
+          matches: (v.matches as Match[]) ?? [],
         }
       }
     }
@@ -158,4 +169,13 @@ export function getPsigems(slug: string): Record<string, number> {
 export function savePsigems(slug: string, psigems: Record<string, number>): void {
   const season = getSeason(slug)
   saveSeason(slug, { ...season, psigems })
+}
+
+export function getMatches(slug: string): Match[] {
+  return getSeason(slug).matches ?? []
+}
+
+export function saveMatches(slug: string, matches: Match[]): void {
+  const season = getSeason(slug)
+  saveSeason(slug, { ...season, matches })
 }

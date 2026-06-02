@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 import { redirect, notFound } from 'next/navigation'
 import { verifyToken, getUsers } from '@/lib/auth'
-import { getParticipants, getRounds, getPsigems } from '@/lib/seasons'
+import { getParticipants, getRounds, getPsigems, getMatches } from '@/lib/seasons'
 import { SEASONS_CONFIG } from '@/lib/seasonsConfig'
 import SeasonClient from './SeasonClient'
 
@@ -19,6 +19,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ slug: s
   const participants = getParticipants(slug)
   const rounds = getRounds(slug)
   const psigems = getPsigems(slug)
+  const matches = getMatches(slug)
   const allPlayers = getUsers()
     .filter(u => u.role === 'player')
     .map(u => u.username)
@@ -36,6 +37,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ slug: s
       allPlayers={allPlayers}
       initialRounds={rounds}
       initialPsigems={psigems}
+      initialMatches={matches}
     />
   )
 }
