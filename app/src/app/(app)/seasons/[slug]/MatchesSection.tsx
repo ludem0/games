@@ -9,6 +9,7 @@ interface Props {
   slug: string
   isAdmin: boolean
   initialMatches: Match[]
+  participants: string[]
 }
 
 interface EditState {
@@ -19,6 +20,8 @@ interface EditState {
 function MatchCard({
   match,
   isAdmin,
+  seasonSlug,
+  participants,
   onToggleVisible,
   onToggleAccessible,
   onDelete,
@@ -26,6 +29,8 @@ function MatchCard({
 }: {
   match: Match
   isAdmin: boolean
+  seasonSlug: string
+  participants: string[]
   onToggleVisible: () => void
   onToggleAccessible: () => void
   onDelete: () => void
@@ -33,6 +38,22 @@ function MatchCard({
 }) {
   const [editing, setEditing] = useState(false)
   const [edit, setEdit] = useState<EditState>({ name: match.name, minigameSlug: match.minigameSlug ?? '' })
+  const [creating, setCreating] = useState(false)
+
+  async function createMinigame(e: React.MouseEvent) {
+    e.preventDefault(); e.stopPropagation()
+    setCreating(true)
+    const res = await fetch('/api/minigames', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: edit.name || match.name, seasonSlug, participants }),
+    })
+    setCreating(false)
+    if (res.ok) {
+      const game = await res.json()
+      setEdit(s => ({ ...s, minigameSlug: game.id }))
+    }
+  }
 
   const isMain = match.type === 'main'
   const playerCanClick = !isAdmin && match.accessible && match.visible
@@ -87,13 +108,22 @@ function MatchCard({
             placeholder="Название"
             onClick={e => e.stopPropagation()}
           />
-          <input
-            className={styles.slugInput}
-            value={edit.minigameSlug}
-            onChange={e => setEdit(s => ({ ...s, minigameSlug: e.target.value }))}
-            placeholder="mini-game slug"
-            onClick={e => e.stopPropagation()}
-          />
+          <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
+            <input
+              className={styles.slugInput}
+              style={{ flex: 1 }}
+              value={edit.minigameSlug}
+              onChange={e => setEdit(s => ({ ...s, minigameSlug: e.target.value }))}
+              placeholder="mini-game slug"
+            />
+            <button
+              className={styles.saveBtn}
+              style={{ fontSize: '0.72rem', padding: '6px 10px', whiteSpace: 'nowrap' }}
+              onClick={createMinigame}
+              disabled={creating}
+              title="Создать новую мини-игру и вставить slug"
+            >{creating ? '...' : '+ Игра'}</button>
+          </div>
           <button
             className={styles.saveBtn}
             onClick={e => { e.preventDefault(); e.stopPropagation(); onSave(edit); setEditing(false) }}
@@ -132,7 +162,7 @@ function MatchCard({
   return <div className={cardClass}>{inner}</div>
 }
 
-export default function MatchesSection({ slug, isAdmin, initialMatches }: Props) {
+export default function MatchesSection({ slug, isAdmin, initialMatches, participants }: Props) {
   const [matches, setMatches] = useState<Match[]>(initialMatches)
 
   async function addMatch(type: 'main' | 'death') {
@@ -193,6 +223,8 @@ export default function MatchesSection({ slug, isAdmin, initialMatches }: Props)
                   onToggleVisible={() => updateMatch(m.id, { visible: !m.visible })}
                   onToggleAccessible={() => updateMatch(m.id, { accessible: !m.accessible })}
                   onDelete={() => deleteMatch(m.id)}
+                  seasonSlug={slug}
+                  participants={participants}
                   onSave={edit => updateMatch(m.id, { name: edit.name, minigameSlug: edit.minigameSlug || undefined })}
                 />
               ))}
@@ -223,6 +255,8 @@ export default function MatchesSection({ slug, isAdmin, initialMatches }: Props)
                   onToggleVisible={() => updateMatch(m.id, { visible: !m.visible })}
                   onToggleAccessible={() => updateMatch(m.id, { accessible: !m.accessible })}
                   onDelete={() => deleteMatch(m.id)}
+                  seasonSlug={slug}
+                  participants={participants}
                   onSave={edit => updateMatch(m.id, { name: edit.name, minigameSlug: edit.minigameSlug || undefined })}
                 />
               ))}
