@@ -590,6 +590,80 @@
 }
 .inputSm:focus { border-color: rgba(0, 252, 237, 0.35); }
 
+/* === Minigames Section === */
+.minigameCreateForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  margin-top: 8px;
+}
+.minigameInput {
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+}
+.minigameInput:focus { border-color: rgba(139,92,246,0.4); }
+.minigameParticipantsLabel { font-size: 0.78rem; color: rgba(255,255,255,0.4); letter-spacing: 0.5px; }
+.minigameParticipantsPicker { display: flex; gap: 8px; flex-wrap: wrap; }
+.minigameParticipantBtn {
+  padding: 5px 14px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 20px;
+  background: transparent;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.minigameParticipantBtn:hover { border-color: rgba(139,92,246,0.4); color: #fff; }
+.minigameParticipantBtnActive {
+  border-color: #8b5cf6 !important;
+  background: rgba(139,92,246,0.15) !important;
+  color: #fff !important;
+}
+.minigameError { font-size: 0.82rem; color: #ff6b9d; }
+.minigameCreateBtn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.88rem;
+  font-family: inherit;
+  align-self: flex-start;
+}
+.minigameCreateBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.minigameList { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.minigameCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s;
+}
+.minigameCard:hover { border-color: rgba(139,92,246,0.35); }
+.minigameCardName { font-weight: 600; flex: 1; }
+.minigameCardMeta { display: flex; gap: 12px; align-items: center; }
+.minigameCardStatus { font-size: 0.75rem; padding: 2px 10px; border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; color: rgba(255,255,255,0.5); }
+.minigameCardPlayers, .minigameCardRounds { font-size: 0.78rem; color: rgba(255,255,255,0.35); }
+
 @media (max-width: 900px) {
   .twoCol {
     grid-template-columns: 1fr;
