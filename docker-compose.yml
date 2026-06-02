@@ -4,6 +4,7 @@ services:
     volumes:
       - ./users.json:/app/users.json
       - ./seasons.json:/app/seasons.json
+      - ./minigames.json:/app/minigames.json
       - ./avatars:/app/public/avatars
     env_file: .env
     networks:
