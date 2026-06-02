@@ -38,20 +38,27 @@ function MatchCard({
 }) {
   const [editing, setEditing] = useState(false)
   const [edit, setEdit] = useState<EditState>({ name: match.name, minigameSlug: match.minigameSlug ?? '' })
+  const [gameName, setGameName] = useState('')
   const [creating, setCreating] = useState(false)
+  const [createError, setCreateError] = useState('')
 
   async function createMinigame(e: React.MouseEvent) {
     e.preventDefault(); e.stopPropagation()
+    const name = gameName.trim() || edit.name || match.name
     setCreating(true)
+    setCreateError('')
     const res = await fetch('/api/minigames', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: edit.name || match.name, seasonSlug, participants }),
+      body: JSON.stringify({ name, seasonSlug, participants }),
     })
     setCreating(false)
     if (res.ok) {
       const game = await res.json()
       setEdit(s => ({ ...s, minigameSlug: game.id }))
+      setGameName('')
+    } else {
+      setCreateError('Ошибка создания')
     }
   }
 
@@ -108,22 +115,38 @@ function MatchCard({
             placeholder="Название"
             onClick={e => e.stopPropagation()}
           />
-          <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
-            <input
-              className={styles.slugInput}
-              style={{ flex: 1 }}
-              value={edit.minigameSlug}
-              onChange={e => setEdit(s => ({ ...s, minigameSlug: e.target.value }))}
-              placeholder="mini-game slug"
-            />
-            <button
-              className={styles.saveBtn}
-              style={{ fontSize: '0.72rem', padding: '6px 10px', whiteSpace: 'nowrap' }}
-              onClick={createMinigame}
-              disabled={creating}
-              title="Создать новую мини-игру и вставить slug"
-            >{creating ? '...' : '+ Игра'}</button>
-          </div>
+          {edit.minigameSlug ? (
+            <div onClick={e => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: '0.72rem', opacity: 0.6 }}>Игра:</span>
+              <span className={styles.slugInput} style={{ flex: 1, opacity: 0.8, fontSize: '0.72rem' }}>{edit.minigameSlug}</span>
+              <button
+                className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
+                onClick={e => { e.preventDefault(); e.stopPropagation(); setEdit(s => ({ ...s, minigameSlug: '' })) }}
+                title="Отвязать игру"
+              >✕</button>
+            </div>
+          ) : (
+            <div onClick={e => e.stopPropagation()}>
+              <div style={{ display: 'flex', gap: 6, marginBottom: createError ? 4 : 0 }}>
+                <input
+                  className={styles.slugInput}
+                  style={{ flex: 1 }}
+                  value={gameName}
+                  onChange={e => setGameName(e.target.value)}
+                  placeholder="Название игры"
+                />
+                <button
+                  className={styles.saveBtn}
+                  style={{ fontSize: '0.72rem', padding: '6px 10px', whiteSpace: 'nowrap' }}
+                  onClick={createMinigame}
+                  disabled={creating}
+                >
+                  {creating ? '...' : 'Создать игру'}
+                </button>
+              </div>
+              {createError && <div style={{ color: '#e74c3c', fontSize: '0.7rem' }}>{createError}</div>}
+            </div>
+          )}
           <button
             className={styles.saveBtn}
             onClick={e => { e.preventDefault(); e.stopPropagation(); onSave(edit); setEditing(false) }}
