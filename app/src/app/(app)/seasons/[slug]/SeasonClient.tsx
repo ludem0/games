@@ -9,7 +9,7 @@ import CubeGambit from '@/components/CubeGambit'
 import LeaderboardSection from './LeaderboardSection'
 import RoundsSection from './RoundsSection'
 import MatchesSection from './MatchesSection'
-import MinigamesSection from './MinigamesSection'
+
 import type { Round, Match } from '@/lib/seasons'
 import styles from './season.module.css'
 
@@ -93,13 +93,6 @@ export default function SeasonClient({
           slug={slug}
           isAdmin={role === 'admin'}
           initialMatches={initialMatches}
-        />
-
-        {/* Minigames */}
-        <MinigamesSection
-          seasonSlug={slug}
-          isAdmin={role === 'admin'}
-          participants={participants}
         />
 
         {/* Hero */}
