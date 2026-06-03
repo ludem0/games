@@ -78,7 +78,7 @@ export default function RoundDetail({ game, round, role, username, onUpdate }: P
     }
   }
 
-  const layoutToShow = peekData ?? (isOpen || isDone ? round.layout : null)
+  const layoutToShow = peekData ?? (isAdmin || isOpen || isDone ? round.layout : null)
 
   return (
     <div className={styles.roundDetail}>
