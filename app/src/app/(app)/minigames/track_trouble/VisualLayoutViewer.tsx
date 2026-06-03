@@ -35,7 +35,8 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
   const tx = (i: number) => FRAME + 20 + spacing * (i + 1)
   const trackIdx = (id: string) => layout.tracks.findIndex(t => t.id === id)
 
-  const switchY = (si: number) => TRACK_TOP + 150 + si * 60
+  const switchY = (sw: TrackSwitch, si: number) =>
+    sw.side === 'south' ? RAVINE_Y - 140 - si * 55 : TRACK_TOP + 100 + si * 55
   const anchorIdx = (sw: TrackSwitch) => {
     if (sw.anchorTrackId) {
       const ai = trackIdx(sw.anchorTrackId)
@@ -75,24 +76,29 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
           const ai = anchorIdx(sw)
           if (ai < 0) return null
           const ax = tx(ai)
-          const sy = switchY(si)
-          const armEndY = sw.side === 'north' ? sy - FORK_H : sy + FORK_H
+          const sy = switchY(sw, si)
+          // south switch: arms go UP from node; north switch: arms go DOWN
+          const armEndY = sw.side === 'south' ? sy - FORK_H : sy + FORK_H
+          // active arm = anchor arm unless anchor track was greyed (switch activated)
+          const anchorTrack = sw.anchorTrackId
+            ? layout.tracks.find(t => t.id === sw.anchorTrackId)
+            : null
+          const switchActivated = anchorTrack?.isGreyed ?? false
           return (
             <g key={sw.id}>
               {sw.swapsTrackIds.map((tid, k) => {
                 const ti = trackIdx(tid)
                 if (ti < 0) return null
-                const t = layout.tracks[ti]
-                const aror = Math.round(ti) === Math.round(ai)
-                if (aror) return null
-                const armCol = t.isGreyed ? '#c9c9c9' : sw.color
+                const isAnchorArm = tid === sw.anchorTrackId
+                const isActive = switchActivated ? !isAnchorArm : isAnchorArm
+                const armCol = isActive ? sw.color : '#c9c9c9'
                 return (
                   <line key={k} x1={ax} y1={sy} x2={tx(ti)} y2={armEndY}
                     stroke={armCol} strokeWidth={6} strokeLinecap="round" />
                 )
               })}
               <circle cx={ax} cy={sy} r={NODE_R}
-                fill={sw.active ? sw.color : '#8a8a8a'} stroke="#fff" strokeWidth={2} />
+                fill={sw.color} stroke="#fff" strokeWidth={2} />
             </g>
           )
         })}
@@ -157,16 +163,17 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
           )
         })}
 
-        {/* Switch levers (orange box + color dot) on the activatable side */}
+        {/* Switch levers (orange box + color dot): between the swapped tracks */}
         {layout.switches.map((sw) => {
-          const ai = anchorIdx(sw)
-          if (ai < 0) return null
-          const lx = tx(Math.round(ai))
-          const ly = sw.side === 'north' ? TOP_BOX_Y + 8 : LETTER_Y + 4
+          const idxs = sw.swapsTrackIds.map(trackIdx).filter(i => i >= 0)
+          if (idxs.length < 2) return null
+          const midIdx = idxs.reduce((a, b) => a + b, 0) / idxs.length
+          const lx = tx(midIdx)
+          const ly = sw.side === 'north' ? TOP_BOX_Y - 4 : RAVINE_Y + 10
           return (
             <g key={`lever-${sw.id}`}>
               <rect x={lx - 24} y={ly} width={48} height={26} rx={4}
-                fill="#e8731c" stroke="#16a34a" strokeWidth={2.5} />
+                fill="#e8731c" stroke="#bf4c0a" strokeWidth={1.5} />
               <rect x={lx - 18} y={ly + 8} width={11} height={10} rx={2} fill="#cfcfcf" />
               <circle cx={lx + 8} cy={ly + 13} r={7} fill={sw.color} />
             </g>
