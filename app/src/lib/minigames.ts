@@ -17,7 +17,8 @@ export interface TrackSwitch {
   color: string
   side: 'north' | 'south'
   active: boolean
-  swapsTrackIds: [string, string]
+  swapsTrackIds: string[]   // ≥2 paths toggled together
+  anchorTrackId?: string    // track the node sits on; default = centroid of involved
 }
 
 export interface Track {

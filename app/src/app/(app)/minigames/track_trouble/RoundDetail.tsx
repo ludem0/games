@@ -20,6 +20,7 @@ interface Props {
 
 export default function RoundDetail({ game, round, role, username, onUpdate }: Props) {
   const [editingLayout, setEditingLayout] = useState(false)
+  const [seeding, setSeeding] = useState(false)
   const [peeking, setPeeking] = useState(false)
   const [peekData, setPeekData] = useState<RoundLayout | null>(null)
   const [peekError, setPeekError] = useState('')
@@ -63,6 +64,13 @@ export default function RoundDetail({ game, round, role, username, onUpdate }: P
     if (res.ok) onUpdate(await res.json())
   }
 
+  async function seedDefaults() {
+    setSeeding(true)
+    const res = await fetch(`/api/minigames/${game.id}/seed`, { method: 'POST' })
+    setSeeding(false)
+    if (res.ok) refreshGame()
+  }
+
   const layoutToShow = peekData ?? (isOpen || isDone ? round.layout : null)
 
   return (
@@ -87,6 +95,9 @@ export default function RoundDetail({ game, round, role, username, onUpdate }: P
         <div className={styles.adminToolbar}>
           <button className={styles.editorToggleBtn} onClick={() => setEditingLayout(v => !v)}>
             {editingLayout ? '← Просмотр' : '✏️ Редактировать макет'}
+          </button>
+          <button className={styles.editorToggleBtn} onClick={seedDefaults} disabled={seeding}>
+            {seeding ? 'Загрузка...' : '📥 Загрузить эталонные макеты'}
           </button>
         </div>
       )}

@@ -2,6 +2,7 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/auth'
 import { getAllMinigames, saveMinigame, createEmptyRound, type MinigameData } from '@/lib/minigames'
+import { getDefaultRoundLayouts } from '@/lib/trackTroubleLayouts'
 
 export async function GET() {
   const cookieStore = await cookies()
@@ -28,13 +29,18 @@ export async function POST(req: Request) {
   }
 
   const slug = id?.trim() || `${seasonSlug}-${name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
+  const defaults = slug === 'track_trouble' ? getDefaultRoundLayouts() : null
   const game: MinigameData = {
     id: slug,
     seasonSlug,
     name,
     status: 'setup',
     participants,
-    rounds: Array.from({ length: 9 }, (_, i) => createEmptyRound(i + 1)),
+    rounds: Array.from({ length: 9 }, (_, i) => {
+      const round = createEmptyRound(i + 1)
+      if (defaults) round.layout = defaults[i]
+      return round
+    }),
     totalPoints: Object.fromEntries(participants.map(p => [p, 0])),
     psigemBalance: Object.fromEntries(participants.map(p => [p, 0])),
     peeks: {},

@@ -233,6 +233,7 @@
 /* === Visual Layout (SVG) === */
 .svgWrap { width: 100%; }
 .svgCanvas { width: 100%; background: rgba(255,255,255,0.015); border-radius: 12px; border: 1px solid rgba(255,255,255,0.07); display: block; }
+.ttCanvas { width: 100%; max-width: 560px; margin: 0 auto; display: block; }
 .svgEditorWrap { display: flex; gap: 16px; align-items: flex-start; }
 .svgSidePanel { width: 240px; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 14px; min-height: 320px; }
 .svgToolbar { display: flex; gap: 6px; flex-wrap: wrap; }
