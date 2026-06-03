@@ -5,14 +5,15 @@ import type { RoundLayout, Track, TrackSwitch, MinecartChain } from '@/lib/minig
 import styles from './minigame.module.css'
 
 const W = 800
-const H = 650
-const RAVINE_Y = 470
+const H = 720
+const RAVINE_Y = 520
 const NORTH_Y = 60
-const SOUTH_Y = 580
-const WAGON_H = 42
-const WAGON_W = 54
+const SOUTH_Y = 640
+const WAGON_H = 50
+const WAGON_W = 62
+const WAGON_GAP = 8
 const FORK_H = 60
-const SWITCH_HANDLE_Y = 195
+const SWITCH_HANDLE_Y = 220
 
 type Selection =
   | { type: 'track'; trackId: string }
@@ -59,7 +60,7 @@ export default function VisualLayoutEditor({ gameSlug, roundNumber, initialLayou
   const trackIdx = (id: string) => layout.tracks.findIndex(t => t.id === id)
   const switchY = (si: number) => RAVINE_Y - 160 - si * 70
   const plusY = (chainCount: number) =>
-    chainCount === 0 ? RAVINE_Y - 32 : RAVINE_Y - chainCount * (WAGON_H + 6) - 38
+    chainCount === 0 ? RAVINE_Y - 32 : RAVINE_Y - chainCount * (WAGON_H + WAGON_GAP) - 38
 
   function toSVGCoords(e: React.MouseEvent): { x: number; y: number } {
     const svg = svgRef.current
@@ -237,19 +238,19 @@ export default function VisualLayoutEditor({ gameSlug, roundNumber, initialLayou
         >
           {/* Ravine */}
           <line x1={0} y1={RAVINE_Y} x2={W} y2={RAVINE_Y} stroke="#6b5d2f" strokeWidth={7} strokeLinecap="round" />
-          <text x={W / 2} y={RAVINE_Y + 18} textAnchor="middle"
-            fill="rgba(255,255,255,0.12)" fontSize={9} fontFamily="Poppins,sans-serif" letterSpacing={4}
+          <text x={W / 2} y={RAVINE_Y + 20} textAnchor="middle"
+            fill="rgba(255,255,255,0.12)" fontSize={12} fontFamily="Poppins,sans-serif" letterSpacing={4}
             style={{ pointerEvents: 'none' }}>
             ПРОПАСТЬ
           </text>
 
           {/* Side labels */}
           <text x={16} y={NORTH_Y - 8} fill="rgba(255,255,255,0.22)"
-            fontSize={10} fontFamily="Poppins,sans-serif" style={{ pointerEvents: 'none' }}>
+            fontSize={14} fontFamily="Poppins,sans-serif" style={{ pointerEvents: 'none' }}>
             🏔 СЕВЕР
           </text>
-          <text x={16} y={SOUTH_Y + 28} fill="rgba(255,255,255,0.22)"
-            fontSize={10} fontFamily="Poppins,sans-serif" style={{ pointerEvents: 'none' }}>
+          <text x={16} y={SOUTH_Y + 30} fill="rgba(255,255,255,0.22)"
+            fontSize={14} fontFamily="Poppins,sans-serif" style={{ pointerEvents: 'none' }}>
             ⛏ ЮГ
           </text>
 
@@ -264,7 +265,7 @@ export default function VisualLayoutEditor({ gameSlug, roundNumber, initialLayou
             )
           })()}
 
-          {/* Switches — fork rendering */}
+          {/* Switches — single node + diagonal fork arm */}
           {layout.switches.map((sw, si) => {
             const i0 = trackIdx(sw.swapsTrackIds[0])
             const i1 = trackIdx(sw.swapsTrackIds[1])
@@ -272,24 +273,23 @@ export default function VisualLayoutEditor({ gameSlug, roundNumber, initialLayou
             const x0 = tx(i0)
             const x1 = tx(i1)
             const sy = switchY(si)
+            const armEndY = sw.side === 'north' ? sy - FORK_H : sy + FORK_H
             const col = sw.active ? sw.color : '#555'
             const armOp = sw.active ? 1 : 0.35
             const isSel = sel?.type === 'switch' && sel.switchId === sw.id
             return (
               <g key={sw.id} style={{ cursor: 'pointer' }}
                 onClick={e => { e.stopPropagation(); setSel({ type: 'switch', switchId: sw.id }) }}>
-                <line x1={x0} y1={sy} x2={x1} y2={sy - FORK_H}
-                  stroke={col} strokeWidth={isSel ? 3 : 2.5} opacity={armOp} />
-                <line x1={x1} y1={sy} x2={x0} y2={sy - FORK_H}
-                  stroke={col} strokeWidth={isSel ? 3 : 2.5} opacity={armOp} />
-                <line x1={x0} y1={sy} x2={x1} y2={sy}
-                  stroke={col} strokeWidth={1.5} opacity={armOp * 0.4} strokeDasharray="4 3" />
-                <circle cx={x0} cy={sy} r={isSel ? 11 : 9}
+                <line x1={x0} y1={sy} x2={x1} y2={armEndY}
+                  stroke={col} strokeWidth={isSel ? 5 : 4} strokeLinecap="round" opacity={armOp} />
+                <circle cx={x0} cy={sy} r={isSel ? 13 : 11}
                   fill={sw.active ? sw.color : '#333'}
                   stroke={isSel ? '#fff' : (sw.active ? sw.color : '#666')} strokeWidth={isSel ? 2.5 : 2} />
-                <circle cx={x1} cy={sy} r={isSel ? 11 : 9}
-                  fill={sw.active ? sw.color : '#333'}
-                  stroke={isSel ? '#fff' : (sw.active ? sw.color : '#666')} strokeWidth={isSel ? 2.5 : 2} />
+                <text x={x1} y={armEndY + (sw.side === 'north' ? -6 : 16)} textAnchor="middle"
+                  fill={col} fontSize={13} fontFamily="Poppins,sans-serif" fontWeight="700"
+                  opacity={armOp} style={{ pointerEvents: 'none' }}>
+                  →{String.fromCharCode(65 + i1)}
+                </text>
               </g>
             )
           })}
@@ -319,13 +319,13 @@ export default function VisualLayoutEditor({ gameSlug, roundNumber, initialLayou
                   style={{ pointerEvents: 'none' }} />
 
                 {/* Letter label */}
-                <rect x={x - 16} y={SOUTH_Y + 8} width={32} height={24} rx={5}
+                <rect x={x - 18} y={SOUTH_Y + 8} width={36} height={28} rx={6}
                   fill={isSel ? 'rgba(139,92,246,0.2)' : 'rgba(255,255,255,0.05)'}
                   stroke={isSel ? '#8b5cf6' : 'rgba(255,255,255,0.12)'} strokeWidth={1}
                   style={{ pointerEvents: 'none' }} />
-                <text x={x} y={SOUTH_Y + 25} textAnchor="middle"
+                <text x={x} y={SOUTH_Y + 28} textAnchor="middle"
                   fill={isSel ? '#a78bfa' : 'rgba(255,255,255,0.6)'}
-                  fontSize={13} fontFamily="Poppins,sans-serif" fontWeight="600"
+                  fontSize={17} fontFamily="Poppins,sans-serif" fontWeight="700"
                   style={{ pointerEvents: 'none' }}>
                   {String.fromCharCode(65 + i)}
                 </text>
@@ -342,20 +342,20 @@ export default function VisualLayoutEditor({ gameSlug, roundNumber, initialLayou
 
                 {/* North header boxes per chain */}
                 {track.chains.map((chain, ci) => {
-                  const offset = (ci - (track.chains.length - 1) / 2) * 60
-                  const bx = x + offset - 27
+                  const offset = (ci - (track.chains.length - 1) / 2) * 70
+                  const bx = x + offset - 32
                   return (
                     <g key={chain.id} style={{ pointerEvents: 'none' }}>
-                      <rect x={bx} y={NORTH_Y - 44} width={54} height={38} rx={6}
+                      <rect x={bx} y={NORTH_Y - 52} width={64} height={46} rx={7}
                         fill="rgba(255,255,255,0.06)"
-                        stroke={chain.color || 'rgba(255,255,255,0.15)'} strokeWidth={1.5} />
-                      <text x={bx + 27} y={NORTH_Y - 26} textAnchor="middle"
-                        fill="rgba(255,255,255,0.9)" fontSize={14}
+                        stroke={chain.color || 'rgba(255,255,255,0.15)'} strokeWidth={2} />
+                      <text x={bx + 32} y={NORTH_Y - 30} textAnchor="middle"
+                        fill="rgba(255,255,255,0.95)" fontSize={20}
                         fontFamily="Poppins,sans-serif" fontWeight="800">
                         {chain.points}
                       </text>
-                      <text x={bx + 27} y={NORTH_Y - 13} textAnchor="middle"
-                        fill="rgba(255,255,255,0.4)" fontSize={9} fontFamily="Poppins,sans-serif">
+                      <text x={bx + 32} y={NORTH_Y - 14} textAnchor="middle"
+                        fill="rgba(255,255,255,0.4)" fontSize={12} fontFamily="Poppins,sans-serif">
                         ×{chain.capacity}
                       </text>
                     </g>
@@ -389,7 +389,7 @@ export default function VisualLayoutEditor({ gameSlug, roundNumber, initialLayou
           {layout.tracks.map((track, i) => {
             const x = tx(i)
             return track.chains.map((chain, ci) => {
-              const wy = RAVINE_Y - (ci + 1) * (WAGON_H + 6) - 4
+              const wy = RAVINE_Y - (ci + 1) * (WAGON_H + WAGON_GAP) - 4
               const wLeft = x - WAGON_W / 2
               const isSel = sel?.type === 'chain' && sel.chainId === chain.id
               const isDraggingThis = chainDrag?.chainId === chain.id
@@ -401,28 +401,27 @@ export default function VisualLayoutEditor({ gameSlug, roundNumber, initialLayou
                   onClick={e => { e.stopPropagation(); setSel({ type: 'chain', trackId: track.id, chainId: chain.id }) }}>
                   <rect x={wLeft} y={wy} width={WAGON_W} height={WAGON_H}
                     rx={6} fill={chain.color || '#555'}
-                    stroke={isSel ? '#ffffff' : '#d97706'} strokeWidth={isSel ? 2.5 : 1.5} />
-                  <rect x={wLeft + 3} y={wy + 3} width={WAGON_W - 6} height={WAGON_H - 6}
+                    stroke={isSel ? '#ffffff' : '#d97706'} strokeWidth={isSel ? 2.5 : 2} />
+                  <rect x={wLeft + 4} y={wy + 4} width={WAGON_W - 8} height={WAGON_H - 8}
                     rx={4} fill="rgba(0,0,0,0.25)" style={{ pointerEvents: 'none' }} />
-                  <text x={x} y={wy + 16} textAnchor="middle"
-                    fill="rgba(255,255,255,0.9)" fontSize={9} fontFamily="Poppins,sans-serif" fontWeight="700"
+                  {[[wLeft + 6, wy + 6], [wLeft + WAGON_W - 6, wy + 6],
+                    [wLeft + 6, wy + WAGON_H - 6], [wLeft + WAGON_W - 6, wy + WAGON_H - 6]].map(([bx, by], bi) => (
+                    <circle key={bi} cx={bx} cy={by} r={2} fill="rgba(0,0,0,0.45)" style={{ pointerEvents: 'none' }} />
+                  ))}
+                  <text x={x} y={wy + 20} textAnchor="middle"
+                    fill="rgba(255,255,255,0.95)" fontSize={13} fontFamily="Poppins,sans-serif" fontWeight="700"
                     style={{ pointerEvents: 'none' }}>
-                    {chain.destination?.slice(0, 5) || '—'}
+                    {chain.destination?.slice(0, 6) || '—'}
                   </text>
-                  <text x={x - 7} y={wy + 30} textAnchor="middle"
-                    fill="#00FCED" fontSize={9} fontFamily="Poppins,sans-serif" fontWeight="700"
+                  <text x={x - 10} y={wy + 37} textAnchor="middle"
+                    fill="#00FCED" fontSize={13} fontFamily="Poppins,sans-serif" fontWeight="700"
                     style={{ pointerEvents: 'none' }}>
                     {chain.points}pt
                   </text>
-                  <text x={x + 14} y={wy + 30} textAnchor="middle"
-                    fill="rgba(255,255,255,0.5)" fontSize={11} style={{ pointerEvents: 'none' }}>
+                  <text x={x + 18} y={wy + 38} textAnchor="middle"
+                    fill="rgba(255,255,255,0.6)" fontSize={15} style={{ pointerEvents: 'none' }}>
                     {chain.departsTo === 'north' ? '↑' : '↓'}
                   </text>
-                  {Array.from({ length: Math.min(chain.capacity, 6) }).map((_, di) => (
-                    <circle key={di}
-                      cx={wLeft + 6 + di * 7} cy={wy + WAGON_H - 5}
-                      r={2.5} fill="rgba(255,255,255,0.45)" style={{ pointerEvents: 'none' }} />
-                  ))}
                 </g>
               )
             })
@@ -441,9 +440,9 @@ export default function VisualLayoutEditor({ gameSlug, roundNumber, initialLayou
                   rx={6} fill={chain.color || '#555'} stroke="#ffffff" strokeWidth={2} />
                 <rect x={wLeft + 3} y={gy - WAGON_H / 2 + 3} width={WAGON_W - 6} height={WAGON_H - 6}
                   rx={4} fill="rgba(0,0,0,0.25)" />
-                <text x={gx} y={gy - WAGON_H / 2 + 16} textAnchor="middle"
-                  fill="rgba(255,255,255,0.9)" fontSize={9} fontFamily="Poppins,sans-serif" fontWeight="700">
-                  {chain.destination?.slice(0, 5) || '—'}
+                <text x={gx} y={gy - WAGON_H / 2 + 20} textAnchor="middle"
+                  fill="rgba(255,255,255,0.9)" fontSize={13} fontFamily="Poppins,sans-serif" fontWeight="700">
+                  {chain.destination?.slice(0, 6) || '—'}
                 </text>
               </g>
             )
@@ -469,10 +468,10 @@ export default function VisualLayoutEditor({ gameSlug, roundNumber, initialLayou
 
         <div className={styles.svgHint}>
           {switchDrag
-            ? 'Перетащите на другой путь для переключателя'
+            ? 'Перетащите на другой путь для развилки'
             : chainDrag
               ? 'Перетащите вагонетку на другой путь'
-              : '⚡ потяни к другому пути → переключатель'}
+              : '⚡ потяни от пути к пути → развилка'}
         </div>
 
         {/* Track properties */}
@@ -550,11 +549,11 @@ export default function VisualLayoutEditor({ gameSlug, roundNumber, initialLayou
                 style={{ width: 48, padding: 2, cursor: 'pointer' }} />
             </label>
             <label className={styles.svgPropRow}>
-              <span>Сторона</span>
+              <span>Развилка</span>
               <select className={styles.editorSelect} value={selSwitch.side}
                 onChange={e => updSwitch(selSwitch.id, { side: e.target.value as 'north' | 'south' })}>
-                <option value="south">⛏ Юг</option>
-                <option value="north">🏔 Север</option>
+                <option value="south">↓ Вниз (Юг)</option>
+                <option value="north">↑ Вверх (Север)</option>
               </select>
             </label>
             <label className={styles.svgPropRow}>
