@@ -22,12 +22,12 @@ export async function POST(req: Request) {
   if (!user || user.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await req.json()
-  const { name, seasonSlug, participants } = body
+  const { name, seasonSlug, participants, id } = body
   if (!name || !seasonSlug || !Array.isArray(participants)) {
     return NextResponse.json({ error: 'name, seasonSlug, participants required' }, { status: 400 })
   }
 
-  const slug = `${seasonSlug}-${name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
+  const slug = id?.trim() || `${seasonSlug}-${name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
   const game: MinigameData = {
     id: slug,
     seasonSlug,

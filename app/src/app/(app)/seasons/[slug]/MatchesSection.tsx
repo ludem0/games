@@ -39,6 +39,7 @@ function MatchCard({
   const [editing, setEditing] = useState(false)
   const [edit, setEdit] = useState<EditState>({ name: match.name, minigameSlug: match.minigameSlug ?? '' })
   const [gameName, setGameName] = useState('')
+  const [gameId, setGameId] = useState('')
   const [creating, setCreating] = useState(false)
   const [createError, setCreateError] = useState('')
 
@@ -47,10 +48,12 @@ function MatchCard({
     const name = gameName.trim() || edit.name || match.name
     setCreating(true)
     setCreateError('')
+    const body: Record<string, unknown> = { name, seasonSlug, participants }
+    if (gameId.trim()) body.id = gameId.trim()
     const res = await fetch('/api/minigames', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, seasonSlug, participants }),
+      body: JSON.stringify(body),
     })
     setCreating(false)
     if (res.ok) {
@@ -127,7 +130,7 @@ function MatchCard({
             </div>
           ) : (
             <div onClick={e => e.stopPropagation()}>
-              <div style={{ display: 'flex', gap: 6, marginBottom: createError ? 4 : 0 }}>
+              <div style={{ display: 'flex', gap: 6, marginBottom: 4 }}>
                 <input
                   className={styles.slugInput}
                   style={{ flex: 1 }}
@@ -144,6 +147,13 @@ function MatchCard({
                   {creating ? '...' : 'Создать игру'}
                 </button>
               </div>
+              <input
+                className={styles.slugInput}
+                style={{ width: '100%', marginBottom: createError ? 4 : 0 }}
+                value={gameId}
+                onChange={e => setGameId(e.target.value)}
+                placeholder="ID игры (необязательно, напр. track_trouble)"
+              />
               {createError && <div style={{ color: '#e74c3c', fontSize: '0.7rem' }}>{createError}</div>}
             </div>
           )}
