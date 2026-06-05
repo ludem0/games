@@ -74,10 +74,19 @@ export function getDefaultRoundLayouts(): RoundLayout[] {
 
     // R4: 6 tracks, three purple X-crossings (A↔B, C↔D, E↔F), levers north
     round(4,
-      [{ points: 2, cap: 3 }, { points: 4, cap: 2 }, { points: 2, cap: 2 }, { points: 4, cap: 1 }, { points: 2, cap: 2 }, { points: 4, cap: 1 }],
-      [{ color: PURPLE, side: 'north', tracks: [0, 1], anchor: 0, cross: true },
-       { color: PURPLE, side: 'north', tracks: [2, 3], anchor: 2, cross: true },
-       { color: PURPLE, side: 'north', tracks: [4, 5], anchor: 4, cross: true }]),
+      [{ points: 2, cap: 3 },
+       { points: 4, cap: 2 },
+       { points: 2, cap: 2 },
+       { points: 4, cap: 1 },
+       { points: 2, cap: 2 },
+       { points: 4, cap: 1 }
+      ],
+      [{ color: PURPLE, side: 'south', tracks: [0, 1], anchor: 0, y:200},
+       { color: PURPLE, side: 'south', tracks: [1, 0], anchor: 1, y:200},
+       { color: PURPLE, side: 'south', tracks: [2, 3], anchor: 2, y:200},
+       { color: PURPLE, side: 'south', tracks: [3, 2], anchor: 3, y:200},
+       { color: PURPLE, side: 'south', tracks: [4, 5], anchor: 4, y:200},
+       { color: PURPLE, side: 'south', tracks: [5, 4], anchor: 5, y:200}]),
 
     // R5: 5 tracks, one pink 3-way star fork (B,C,D), lever both
     round(5,
