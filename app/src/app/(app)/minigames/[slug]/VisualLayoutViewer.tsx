@@ -172,15 +172,14 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
             )
           }
 
-          // Plain connector: black line from anchor column to first swap target, no node/lever.
+          // Plain connector: horizontal black line at sy connecting anchor column to target column.
           if (sw.plain) {
             const ai = anchorIdx(sw)
             if (ai < 0) return null
             const ti0 = trackIdx(sw.swapsTrackIds[0])
             if (ti0 < 0) return null
-            const armEndY = sw.side === 'south' ? sy - FORK_H : sy + FORK_H
             return (
-              <line key={sw.id} x1={tx(ai)} y1={sy} x2={tx(ti0)} y2={armEndY}
+              <line key={sw.id} x1={tx(ai)} y1={sy} x2={tx(ti0)} y2={sy}
                 stroke="#1a1a1a" strokeWidth={5} strokeLinecap="round" />
             )
           }
