@@ -201,22 +201,30 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
           )
         })}
 
-        {/* Switch levers (orange box + color dot): between the swapped tracks */}
-        {layout.switches.map((sw) => {
-          const idxs = sw.swapsTrackIds.map(trackIdx).filter(i => i >= 0)
-          if (idxs.length < 2) return null
-          const midIdx = idxs.reduce((a, b) => a + b, 0) / idxs.length
-          const lx = tx(midIdx)
-          const ly = sw.side === 'north' ? TOP_BOX_Y - 4 : RAVINE_Y + 10
-          return (
-            <g key={`lever-${sw.id}`}>
-              <rect x={lx - 24} y={ly} width={48} height={26} rx={4}
-                fill="#e8731c" stroke="#bf4c0a" strokeWidth={1.5} />
-              <rect x={lx - 18} y={ly + 8} width={11} height={10} rx={2} fill="#cfcfcf" />
-              <circle cx={lx + 8} cy={ly + 13} r={7} fill={sw.color} />
-            </g>
-          )
-        })}
+        {/* Switch levers: one per (color, side) group — single lever controls all switches of that color */}
+        {(() => {
+          const groups = new Map<string, { color: string; side: 'north' | 'south'; allIdxs: number[] }>()
+          for (const sw of layout.switches) {
+            const key = `${sw.color}|${sw.side}`
+            const idxs = sw.swapsTrackIds.map(trackIdx).filter(i => i >= 0)
+            if (!groups.has(key)) groups.set(key, { color: sw.color, side: sw.side, allIdxs: [] })
+            groups.get(key)!.allIdxs.push(...idxs)
+          }
+          return Array.from(groups.entries()).map(([key, g]) => {
+            if (g.allIdxs.length === 0) return null
+            const midIdx = g.allIdxs.reduce((a, b) => a + b, 0) / g.allIdxs.length
+            const lx = tx(midIdx)
+            const ly = g.side === 'north' ? TOP_BOX_Y - 4 : RAVINE_Y + 10
+            return (
+              <g key={`lever-${key}`}>
+                <rect x={lx - 24} y={ly} width={48} height={26} rx={4}
+                  fill="#e8731c" stroke="#bf4c0a" strokeWidth={1.5} />
+                <rect x={lx - 18} y={ly + 8} width={11} height={10} rx={2} fill="#cfcfcf" />
+                <circle cx={lx + 8} cy={ly + 13} r={7} fill={g.color} />
+              </g>
+            )
+          })
+        })()}
       </svg>
     </div>
   )
