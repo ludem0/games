@@ -83,6 +83,13 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
     const curr = trackAnchorY.get(sw.anchorTrackId)
     if (curr == null || sy > curr) trackAnchorY.set(sw.anchorTrackId, sy)
   }
+  // Plain connectors also cut the anchor track at their Y (used for no-destination tracks)
+  for (const sw of layout.switches) {
+    if (!sw.plain || !sw.anchorTrackId) continue
+    const sy = switchY(sw)
+    const curr = trackAnchorY.get(sw.anchorTrackId)
+    if (curr == null || sy < curr) trackAnchorY.set(sw.anchorTrackId, sy)
+  }
   const trackTopArmY = new Map<string, number>()
   for (const sw of layout.switches) {
     if (sw.crossing) continue
@@ -129,6 +136,13 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
 
           const tAnchor = trackAnchorY.get(track.id)
           const topArm = trackTopArmY.get(track.id)
+          const noDestination = track.chains.length > 0 && track.chains.every(c => c.points === 0)
+
+          // No-destination track with anchor: bottom segment only (cut at anchor Y)
+          if (noDestination && tAnchor != null) {
+            return <line key={track.id} x1={x} y1={tAnchor} x2={x} y2={TRACK_BOTTOM} {...lp} />
+          }
+
           if (tAnchor != null && topArm != null && topArm < tAnchor) {
             return (
               <g key={track.id}>
