@@ -100,10 +100,19 @@ export function getDefaultRoundLayouts(): RoundLayout[] {
        { side: 'south', tracks: [2], anchor: 1, plain: true},
        { side: 'south', tracks: [2], anchor: 3, plain: true}]),
 
-    // R6: 6 tracks, three down-forks (purple A↔B, purple C↔D, cyan E↔F), levers south
+    // R6: 6 tracks, three down-forks (purple A↔B, purple C↔D, cyan E↔F), levers soЦЫЫuth
     round(6,
-      [{ points: 2, cap: 3 }, { points: 6, cap: 1 }, { points: 3, cap: 3 }, { points: 4, cap: 1 }, { points: 1, cap: 3 }, { points: 5, cap: 1 }],
-      [{ color: PURPLE, side: 'south', tracks: [0, 1], anchor: 0 },
+      [{ points: 2, cap: 3 },
+       { points: 3, cap: 2 },
+       { points: 0, cap: 1 },
+       { points: 1, cap: 3 }, 
+       { points: 4, cap: 2 },
+       { points: 6, cap: 0 , floating: true},
+       { points: 4, cap: 0 , floating: true},
+       { points: 2, cap: 3}],
+      [{ color: PURPLE, side: 'south', tracks: [0, 1], anchor: 0, y:200 },
+       { side: 'south', tracks: [0], anchor: 1, plain: true, y:220},
+       { side: 'south', tracks: [1], anchor: 2, plain: true},
        { color: PINK, side: 'south', tracks: [2, 3], anchor: 2 },
        { color: CYAN, side: 'south', tracks: [4, 5], anchor: 4 }]),
 
