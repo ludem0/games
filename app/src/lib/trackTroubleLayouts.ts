@@ -111,10 +111,12 @@ export function getDefaultRoundLayouts(): RoundLayout[] {
        { points: 4, cap: 0 , floating: true},
        { points: 2, cap: 3}],
       [{ color: PURPLE, side: 'south', tracks: [0, 1], anchor: 0, y:200 },
-       { side: 'south', tracks: [0], anchor: 1, plain: true, y:230},
-       { side: 'south', tracks: [1], anchor: 2, plain: true, y:260},
-       { color: PINK, side: 'south', tracks: [2, 3], anchor: 2 },
-       { color: CYAN, side: 'south', tracks: [4, 5], anchor: 4 }]),
+       { side: 'south', tracks: [0], anchor: 1, plain: true, y:260},
+       { side: 'south', tracks: [1], anchor: 2, plain: true, y:300},
+       { color: PURPLE, side: 'south', tracks: [3, 4], anchor: 3 },
+       { side: 'south', tracks: [3], anchor: 4, plain: true},
+       { color: CYAN, side: 'south', tracks: [4, 5], anchor: 4 , y:200},
+       { color: CYAN, side: 'south', tracks: [6, 7], anchor: 7 , y:200}]),
 
     // R7: 6 tracks, multi-arm forks (purple A→A,B,C ; purple D→D,E ; cyan F→E,F)
     round(7,
