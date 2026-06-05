@@ -60,6 +60,18 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
     for (const tid of sw.swapsTrackIds) crossingTop.set(tid, sy)
   }
 
+  // Floating tracks: line runs from TRACK_TOP down to the arm endpoint of the
+  // switch that connects to them (nothing below that point).
+  const floatingArmBottom = new Map<string, number>()
+  for (const sw of layout.switches) {
+    const sy = switchY(sw)
+    const armEndY = sw.side === 'south' ? sy - FORK_H : sy + FORK_H
+    for (const tid of sw.swapsTrackIds) {
+      const track = layout.tracks.find(t => t.id === tid)
+      if (track?.isFloating) floatingArmBottom.set(tid, armEndY)
+    }
+  }
+
   return (
     <div className={styles.svgWrap}>
       <svg viewBox={`0 0 ${W} ${H}`} className={styles.ttCanvas} role="img" aria-label="Макет раунда">
@@ -71,11 +83,19 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
         <line x1={FRAME} y1={RAVINE_Y} x2={W - FRAME} y2={RAVINE_Y}
           stroke="#7a6f33" strokeWidth={6} />
 
-        {/* Tracks — floating paths start from ravine (no upper segment) */}
+        {/* Tracks — floating: line from TRACK_TOP down to switch arm endpoint only */}
         {layout.tracks.map((track, i) => {
           const x = tx(i)
           const col = track.isGreyed ? '#c9c9c9' : '#1a1a1a'
-          const top = track.isFloating ? RAVINE_Y : (crossingTop.get(track.id) ?? TRACK_TOP)
+          if (track.isFloating) {
+            const armY = floatingArmBottom.get(track.id)
+            if (armY == null) return null
+            return (
+              <line key={track.id} x1={x} y1={TRACK_TOP} x2={x} y2={armY}
+                stroke={col} strokeWidth={5} strokeLinecap="round" />
+            )
+          }
+          const top = crossingTop.get(track.id) ?? TRACK_TOP
           return (
             <line key={track.id} x1={x} y1={top} x2={x} y2={TRACK_BOTTOM}
               stroke={col} strokeWidth={5} strokeLinecap="round" />
