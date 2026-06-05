@@ -49,8 +49,8 @@ export function getDefaultRoundLayouts(): RoundLayout[] {
         { points: 2, cap: 2 },                    // D
         { points: 3, cap: 1 },                    // E
       ],
-      [{ color: PURPLE, side: 'south', tracks: [0, 1], anchor: 0 , y:150},   // A↔B
-       { color: PURPLE, side: 'south', tracks: [2, 3], anchor: 2 , y:150}]), // C↔floating
+      [{ color: PURPLE, side: 'south', tracks: [0, 1], anchor: 0 , y:200},   // A↔B
+       { color: PURPLE, side: 'south', tracks: [2, 3], anchor: 2 , y:200}]), // C↔floating
 
     // R2
     round(2,
