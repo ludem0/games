@@ -17,22 +17,22 @@ function tr(id: string, points: number | null, capacity: number, isGreyed = fals
 }
 function sw(
   id: string, color: string, side: 'north' | 'south',
-  swapsTrackIds: string[], anchorTrackId: string, crossing = false, y?: number,
+  swapsTrackIds: string[], anchorTrackId: string, crossing = false, y?: number, noLever?: boolean, plain?: boolean,
 ): TrackSwitch {
-  return { id, color, side, active: true, swapsTrackIds, anchorTrackId, crossing, ...(y != null && { y }) }
+  return { id, color, side, active: true, swapsTrackIds, anchorTrackId, crossing, ...(y != null && { y }), ...(noLever && { noLever }), ...(plain && { plain }) }
 }
 
 // helper to build a round from letter specs
 function round(
   r: number,
   tracks: { points: number | null; cap: number; grey?: boolean; floating?: boolean }[],
-  switches: { color: string; side: 'north' | 'south'; tracks: number[]; anchor: number; cross?: boolean; y?: number }[],
+  switches: { color?: string; side: 'north' | 'south'; tracks: number[]; anchor: number; cross?: boolean; y?: number; noLever?: boolean; plain?: boolean }[],
 ): RoundLayout {
   const id = (i: number) => `r${r}${String.fromCharCode(65 + i)}`
   return {
     tracks: tracks.map((t, i) => tr(id(i), t.points, t.cap, t.grey, t.floating)),
     switches: switches.map((s, si) =>
-      sw(`r${r}s${si}`, s.color, s.side, s.tracks.map(id), id(s.anchor), s.cross ?? false, s.y)),
+      sw(`r${r}s${si}`, s.color ?? '#1a1a1a', s.side, s.tracks.map(id), id(s.anchor), s.cross ?? false, s.y, s.noLever, s.plain)),
     peekUnlocked: false,
   }
 }
@@ -90,7 +90,12 @@ export function getDefaultRoundLayouts(): RoundLayout[] {
 
     // R5: 5 tracks, one pink 3-way star fork (B,C,D), lever both
     round(5,
-      [{ points: 2, cap: 3 }, { points: 1, cap: 3 }, { points: 6, cap: 3 }, { points: 4, cap: 3 }, { points: 3, cap: 4 }],
+      [{ points: 2, cap: 3 },
+       { points: 1, cap: 2 },
+       { points: 6, cap: 3 },
+       { points: 4, cap: 2 },
+       { points: 3, cap: 4 }
+      ],
       [{ color: PINK, side: 'south', tracks: [1, 2, 3], anchor: 2 }]),
 
     // R6: 6 tracks, three down-forks (purple A↔B, purple C↔D, cyan E↔F), levers south

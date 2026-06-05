@@ -172,6 +172,19 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
             )
           }
 
+          // Plain connector: black line from anchor column to first swap target, no node/lever.
+          if (sw.plain) {
+            const ai = anchorIdx(sw)
+            if (ai < 0) return null
+            const ti0 = trackIdx(sw.swapsTrackIds[0])
+            if (ti0 < 0) return null
+            const armEndY = sw.side === 'south' ? sy - FORK_H : sy + FORK_H
+            return (
+              <line key={sw.id} x1={tx(ai)} y1={sy} x2={tx(ti0)} y2={armEndY}
+                stroke="#1a1a1a" strokeWidth={5} strokeLinecap="round" />
+            )
+          }
+
           // Fork: single node on anchor; active arm = anchor (straight), others grey.
           const ai = anchorIdx(sw)
           if (ai < 0) return null
@@ -271,6 +284,7 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
         {(() => {
           const groups = new Map<string, { color: string; side: 'north' | 'south'; allIdxs: number[] }>()
           for (const sw of layout.switches) {
+            if (sw.noLever) continue
             const key = `${sw.color}|${sw.side}`
             const idxs = sw.swapsTrackIds.map(trackIdx).filter(i => i >= 0)
             if (!groups.has(key)) groups.set(key, { color: sw.color, side: sw.side, allIdxs: [] })
