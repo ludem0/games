@@ -20,6 +20,7 @@ export interface TrackSwitch {
   swapsTrackIds: string[]   // ≥2 paths toggled together
   anchorTrackId?: string    // track the node sits on; default = centroid of involved
   crossing?: boolean        // render as X-cross (node per track, colored arms cross) instead of fork
+  y?: number                // override switch node Y coordinate
 }
 
 export interface Track {

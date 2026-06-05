@@ -37,7 +37,7 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
 
   // Parallel switches sit level (not stacked): fixed Y per side.
   const switchY = (sw: TrackSwitch) =>
-    sw.side === 'south' ? RAVINE_Y - 160 : TRACK_TOP + 95
+    sw.y ?? (sw.side === 'south' ? RAVINE_Y - 160 : TRACK_TOP + 95)
   const anchorIdx = (sw: TrackSwitch) => {
     if (sw.anchorTrackId) {
       const ai = trackIdx(sw.anchorTrackId)

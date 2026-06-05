@@ -17,22 +17,22 @@ function tr(id: string, points: number | null, capacity: number, isGreyed = fals
 }
 function sw(
   id: string, color: string, side: 'north' | 'south',
-  swapsTrackIds: string[], anchorTrackId: string, crossing = false,
+  swapsTrackIds: string[], anchorTrackId: string, crossing = false, y?: number,
 ): TrackSwitch {
-  return { id, color, side, active: true, swapsTrackIds, anchorTrackId, crossing }
+  return { id, color, side, active: true, swapsTrackIds, anchorTrackId, crossing, ...(y != null && { y }) }
 }
 
 // helper to build a round from letter specs
 function round(
   r: number,
   tracks: { points: number | null; cap: number; grey?: boolean; floating?: boolean }[],
-  switches: { color: string; side: 'north' | 'south'; tracks: number[]; anchor: number; cross?: boolean }[],
+  switches: { color: string; side: 'north' | 'south'; tracks: number[]; anchor: number; cross?: boolean; y?: number }[],
 ): RoundLayout {
   const id = (i: number) => `r${r}${String.fromCharCode(65 + i)}`
   return {
     tracks: tracks.map((t, i) => tr(id(i), t.points, t.cap, t.grey, t.floating)),
     switches: switches.map((s, si) =>
-      sw(`r${r}s${si}`, s.color, s.side, s.tracks.map(id), id(s.anchor), s.cross ?? false)),
+      sw(`r${r}s${si}`, s.color, s.side, s.tracks.map(id), id(s.anchor), s.cross ?? false, s.y)),
     peekUnlocked: false,
   }
 }
