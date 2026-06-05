@@ -186,7 +186,9 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
               {sw.swapsTrackIds.map((tid, k) => {
                 const ti = trackIdx(tid)
                 if (ti < 0) return null
-                const isAnchorArm = tid === sw.anchorTrackId
+                // If anchor is not in swapsTrackIds, first swap = standard (active) arm
+                const anchorInSwaps = sw.swapsTrackIds.includes(sw.anchorTrackId ?? '')
+                const isAnchorArm = anchorInSwaps ? tid === sw.anchorTrackId : k === 0
                 const isActive = switchActivated ? !isAnchorArm : isAnchorArm
                 const armCol = isActive ? sw.color : '#c9c9c9'
                 return (
