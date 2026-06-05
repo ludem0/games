@@ -123,7 +123,7 @@ export function getDefaultRoundLayouts(): RoundLayout[] {
       [{ points: 4, cap: 2 },
        { points: 1, cap: 3 },
        { points: 3, cap: 3 },
-       { points: 1, cap: 0 , floating: true},
+       { points: 1, cap: 0 },
        { points: 3, cap: 3 },
        { points: 5, cap: 1 },],
       [{ color: PURPLE, side: 'south', tracks: [0, 1], anchor: 0, y:200 },
