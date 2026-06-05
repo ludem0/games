@@ -129,7 +129,7 @@ export function getDefaultRoundLayouts(): RoundLayout[] {
       [{ color: PURPLE, side: 'south', tracks: [0, 1], anchor: 0, y:200 },
        { color: PURPLE, side: 'south', tracks: [1, 0], anchor: 1, y:200 },
        { color: PURPLE, side: 'south', tracks: [2, 3], anchor: 2, y:300 },
-       { color: PINK, side: 'south', tracks: [2, 3, 4], anchor: 3, y:200 }]),
+       { color: PINK, side: 'south', tracks: [3, 4, 5], anchor: 4, y:200 }]),
 
     // R8: 5 tracks, one purple staircase fork (A..E), lever north
     round(8,
