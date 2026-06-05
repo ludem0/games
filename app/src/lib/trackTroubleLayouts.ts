@@ -120,10 +120,16 @@ export function getDefaultRoundLayouts(): RoundLayout[] {
 
     // R7: 6 tracks, multi-arm forks (purple A→A,B,C ; purple D→D,E ; cyan F→E,F)
     round(7,
-      [{ points: 2, cap: 3 }, { points: 3, cap: 2 }, { points: 1, cap: 1 }, { points: 4, cap: 3 }, { points: 6, cap: 2 }, { points: 2, cap: 3 }],
-      [{ color: PURPLE, side: 'south', tracks: [0, 1, 2], anchor: 0 },
-       { color: PURPLE, side: 'south', tracks: [3, 4], anchor: 3 },
-       { color: CYAN, side: 'south', tracks: [4, 5], anchor: 5 }]),
+      [{ points: 4, cap: 2 },
+       { points: 1, cap: 3 },
+       { points: 3, cap: 3 },
+       { points: 1, cap: 0 , floating: true},
+       { points: 3, cap: 3 },
+       { points: 5, cap: 1 },],
+      [{ color: PURPLE, side: 'south', tracks: [0, 1], anchor: 0, y:200 },
+       { color: PURPLE, side: 'south', tracks: [1, 0], anchor: 1, y:200 },
+       { color: PURPLE, side: 'south', tracks: [2, 3], anchor: 2, y:300 },
+       { color: PINK, side: 'south', tracks: [2, 3, 4], anchor: 3, y:200 }]),
 
     // R8: 5 tracks, one purple staircase fork (A..E), lever north
     round(8,
