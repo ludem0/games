@@ -68,7 +68,10 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
     const armEndY = sw.side === 'south' ? sy - FORK_H : sy + FORK_H
     for (const tid of sw.swapsTrackIds) {
       const track = layout.tracks.find(t => t.id === tid)
-      if (track?.isFloating) floatingArmBottom.set(tid, armEndY)
+      if (track?.isFloating) {
+        const curr = floatingArmBottom.get(tid)
+        if (curr == null || armEndY > curr) floatingArmBottom.set(tid, armEndY)
+      }
     }
   }
 
