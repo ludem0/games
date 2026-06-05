@@ -52,11 +52,11 @@ export function getDefaultRoundLayouts(): RoundLayout[] {
       [{ color: PURPLE, side: 'south', tracks: [0, 1], anchor: 0 },   // A↔B
        { color: PURPLE, side: 'south', tracks: [2, 3], anchor: 2 }]), // C↔floating
 
-    // R2: 5 tracks, purple X-crossings up top (A↔B, C↔D), levers north
+    // R2: A(4)↔B(2) purple north fork; C(1)↔D(5) purple south fork; E(3) plain. Levers both sides.
     round(2,
       [{ points: 4, cap: 2 }, { points: 2, cap: 2 }, { points: 1, cap: 2 }, { points: 5, cap: 2 }, { points: 3, cap: 4 }],
-      [{ color: PURPLE, side: 'north', tracks: [0, 1], anchor: 0, cross: true },
-       { color: PURPLE, side: 'north', tracks: [2, 3], anchor: 2, cross: true }]),
+      [{ color: PURPLE, side: 'north', tracks: [0, 1], anchor: 0 },
+       { color: PURPLE, side: 'south', tracks: [2, 3], anchor: 3 }]),
 
     // R3: 6 tracks, no switches, F has tall stack
     round(3,
