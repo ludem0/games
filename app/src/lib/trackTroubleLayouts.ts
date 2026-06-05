@@ -39,9 +39,9 @@ function round(
 
 export function getDefaultRoundLayouts(): RoundLayout[] {
   return [
-    // R1: 5 tracks, two purple 2-way switches (A↔B, C↔D), levers south
+    // R1: 6 tracks, two purple 2-way switches (A↔B, C↔D), levers south
     round(1,
-      [{ points: 4, cap: 3 }, { points: 3, cap: 3 }, { points: 2, cap: 3 }, { points: 5, cap: 3 }, { points: 2, cap: 1 }],
+      [{ points: 4, cap: 3 }, { points: 3, cap: 3 }, { points: 2, cap: 3 }, { points: 5, cap: 3 }, { points: 2, cap: 1 }, { points: 3, cap: 1 }],
       [{ color: PURPLE, side: 'south', tracks: [0, 1], anchor: 0 },
        { color: PURPLE, side: 'south', tracks: [2, 3], anchor: 2 }]),
 
