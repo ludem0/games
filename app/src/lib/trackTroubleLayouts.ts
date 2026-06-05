@@ -57,7 +57,7 @@ export function getDefaultRoundLayouts(): RoundLayout[] {
       [
         { points: 4, cap: 2 },
         { points: 2, cap: 2 },
-        { points: 1, cap: 0, floating: true },
+        { points: 1, cap: 2},
         { points: 5, cap: 2 },
         { points: 3, cap: 4 }
       ],
