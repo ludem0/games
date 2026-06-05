@@ -72,6 +72,33 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
     }
   }
 
+  // Two-segment rendering: if a track is anchor of a fork switch at anchorY,
+  // and another switch's arm arrives at this track ABOVE anchorY (armEndY < anchorY),
+  // the track splits into top segment (TRACK_TOP→armEndY) and bottom segment
+  // (anchorY→TRACK_BOTTOM), with a visible gap between them.
+  const trackAnchorY = new Map<string, number>()
+  for (const sw of layout.switches) {
+    if (sw.crossing || !sw.anchorTrackId) continue
+    const sy = switchY(sw)
+    const curr = trackAnchorY.get(sw.anchorTrackId)
+    if (curr == null || sy > curr) trackAnchorY.set(sw.anchorTrackId, sy)
+  }
+  const trackTopArmY = new Map<string, number>()
+  for (const sw of layout.switches) {
+    if (sw.crossing) continue
+    const sy = switchY(sw)
+    const armEndY = sw.side === 'south' ? sy - FORK_H : sy + FORK_H
+    for (const tid of sw.swapsTrackIds) {
+      if (tid === sw.anchorTrackId) continue
+      const tAnchor = trackAnchorY.get(tid)
+      if (tAnchor == null) continue
+      if (armEndY < tAnchor) {
+        const curr = trackTopArmY.get(tid)
+        if (curr == null || armEndY < curr) trackTopArmY.set(tid, armEndY)
+      }
+    }
+  }
+
   return (
     <div className={styles.svgWrap}>
       <svg viewBox={`0 0 ${W} ${H}`} className={styles.ttCanvas} role="img" aria-label="Макет раунда">
@@ -83,23 +110,35 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
         <line x1={FRAME} y1={RAVINE_Y} x2={W - FRAME} y2={RAVINE_Y}
           stroke="#7a6f33" strokeWidth={6} />
 
-        {/* Tracks — floating: line from TRACK_TOP down to switch arm endpoint only */}
+        {/* Tracks */}
         {layout.tracks.map((track, i) => {
           const x = tx(i)
           const col = track.isGreyed ? '#c9c9c9' : '#1a1a1a'
+          const lp = { stroke: col, strokeWidth: 5, strokeLinecap: 'round' as const }
+
           if (track.isFloating) {
             const armY = floatingArmBottom.get(track.id)
             if (armY == null) return null
+            return <line key={track.id} x1={x} y1={TRACK_TOP} x2={x} y2={armY} {...lp} />
+          }
+
+          if (crossingTop.has(track.id)) {
+            const top = crossingTop.get(track.id)!
+            return <line key={track.id} x1={x} y1={top} x2={x} y2={TRACK_BOTTOM} {...lp} />
+          }
+
+          const tAnchor = trackAnchorY.get(track.id)
+          const topArm = trackTopArmY.get(track.id)
+          if (tAnchor != null && topArm != null && topArm < tAnchor) {
             return (
-              <line key={track.id} x1={x} y1={TRACK_TOP} x2={x} y2={armY}
-                stroke={col} strokeWidth={5} strokeLinecap="round" />
+              <g key={track.id}>
+                <line x1={x} y1={TRACK_TOP} x2={x} y2={topArm} {...lp} />
+                <line x1={x} y1={tAnchor} x2={x} y2={TRACK_BOTTOM} {...lp} />
+              </g>
             )
           }
-          const top = crossingTop.get(track.id) ?? TRACK_TOP
-          return (
-            <line key={track.id} x1={x} y1={top} x2={x} y2={TRACK_BOTTOM}
-              stroke={col} strokeWidth={5} strokeLinecap="round" />
-          )
+
+          return <line key={track.id} x1={x} y1={TRACK_TOP} x2={x} y2={TRACK_BOTTOM} {...lp} />
         })}
 
         {/* Switches: X-cross (node per track, colored arms cross) or fork (single node) */}
