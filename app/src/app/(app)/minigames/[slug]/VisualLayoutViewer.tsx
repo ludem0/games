@@ -245,6 +245,7 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
           const x = tx(i)
           return track.chains.map((chain, ci) => {
             if (chain.departsTo !== 'north') return null
+            if (chain.points === 0) return null
             const offset = (ci - (track.chains.length - 1) / 2) * 56
             const bx = x + offset - 22
             return (
