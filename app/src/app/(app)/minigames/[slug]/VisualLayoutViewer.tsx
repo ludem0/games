@@ -71,11 +71,11 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
         <line x1={FRAME} y1={RAVINE_Y} x2={W - FRAME} y2={RAVINE_Y}
           stroke="#7a6f33" strokeWidth={6} />
 
-        {/* Tracks */}
+        {/* Tracks — floating paths start from ravine (no upper segment) */}
         {layout.tracks.map((track, i) => {
           const x = tx(i)
           const col = track.isGreyed ? '#c9c9c9' : '#1a1a1a'
-          const top = crossingTop.get(track.id) ?? TRACK_TOP
+          const top = track.isFloating ? RAVINE_Y : (crossingTop.get(track.id) ?? TRACK_TOP)
           return (
             <line key={track.id} x1={x} y1={top} x2={x} y2={TRACK_BOTTOM}
               stroke={col} strokeWidth={5} strokeLinecap="round" />
