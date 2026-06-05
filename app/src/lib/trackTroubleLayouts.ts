@@ -141,8 +141,8 @@ export function getDefaultRoundLayouts(): RoundLayout[] {
        { points: 6, cap: 1 }],
       [{ color: PURPLE, side: 'south', tracks: [0, 2], anchor: 1, y:200 },
        { side: 'south', tracks: [1], anchor: 2, plain: true, y:280},
-       { side: 'south', tracks: [2], anchor: 3, plain: true, y:270},
-       { side: 'south', tracks: [3], anchor: 4, plain: true, y:260}]),
+       { side: 'south', tracks: [2], anchor: 3, plain: true, y:290},
+       { side: 'south', tracks: [3], anchor: 4, plain: true, y:300}]),
 
     // R9: 6 tracks, three colored down-forks (purple A↔B, pink C↔D, cyan E↔F)
     round(9,
