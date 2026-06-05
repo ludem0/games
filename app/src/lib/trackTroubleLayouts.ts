@@ -12,8 +12,8 @@ const CYAN = '#06b6d4'
 function ch(id: string, points: number, capacity: number): MinecartChain {
   return { id, capacity, color: '#9aa0a6', destination: '', points, departsTo: 'north' }
 }
-function tr(id: string, points: number | null, capacity: number, isGreyed = false): Track {
-  return { id, color: '#1a1a1a', chains: points == null ? [] : [ch(`${id}c`, points, capacity)], isGreyed }
+function tr(id: string, points: number | null, capacity: number, isGreyed = false, isFloating = false): Track {
+  return { id, color: '#1a1a1a', chains: points == null ? [] : [ch(`${id}c`, points, capacity)], isGreyed, isFloating }
 }
 function sw(
   id: string, color: string, side: 'north' | 'south',
@@ -25,12 +25,12 @@ function sw(
 // helper to build a round from letter specs
 function round(
   r: number,
-  tracks: { points: number | null; cap: number; grey?: boolean }[],
+  tracks: { points: number | null; cap: number; grey?: boolean; floating?: boolean }[],
   switches: { color: string; side: 'north' | 'south'; tracks: number[]; anchor: number; cross?: boolean }[],
 ): RoundLayout {
   const id = (i: number) => `r${r}${String.fromCharCode(65 + i)}`
   return {
-    tracks: tracks.map((t, i) => tr(id(i), t.points, t.cap, t.grey)),
+    tracks: tracks.map((t, i) => tr(id(i), t.points, t.cap, t.grey, t.floating)),
     switches: switches.map((s, si) =>
       sw(`r${r}s${si}`, s.color, s.side, s.tracks.map(id), id(s.anchor), s.cross ?? false)),
     peekUnlocked: false,
@@ -39,11 +39,18 @@ function round(
 
 export function getDefaultRoundLayouts(): RoundLayout[] {
   return [
-    // R1: 6 tracks, two purple 2-way switches (A↔B, C↔D), levers south
+    // R1: A(4), B(3), C(2→5float), D(2), E(3); purple south switches A↔B and C↔floating
     round(1,
-      [{ points: 4, cap: 3 }, { points: 3, cap: 3 }, { points: 2, cap: 3 }, { points: 5, cap: 3 }, { points: 2, cap: 1 }, { points: 3, cap: 1 }],
-      [{ color: PURPLE, side: 'south', tracks: [0, 1], anchor: 0 },
-       { color: PURPLE, side: 'south', tracks: [2, 3], anchor: 2 }]),
+      [
+        { points: 4, cap: 3 },                    // A
+        { points: 3, cap: 3 },                    // B
+        { points: 2, cap: 3 },                    // C
+        { points: 5, cap: 0, floating: true },    // floating (only reachable via C switch)
+        { points: 2, cap: 2 },                    // D
+        { points: 3, cap: 1 },                    // E
+      ],
+      [{ color: PURPLE, side: 'south', tracks: [0, 1], anchor: 0 },   // A↔B
+       { color: PURPLE, side: 'south', tracks: [2, 3], anchor: 2 }]), // C↔floating
 
     // R2: 5 tracks, purple X-crossings up top (A↔B, C↔D), levers north
     round(2,

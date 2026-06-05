@@ -27,6 +27,7 @@ export interface Track {
   color: string
   chains: MinecartChain[]
   isGreyed: boolean
+  isFloating?: boolean  // destination-only path: no start wagons, no bottom letter label
 }
 
 export interface RoundLayout {

@@ -186,20 +186,25 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
           })
         })}
 
-        {/* South track letters */}
-        {layout.tracks.map((track, i) => {
-          const x = tx(i)
-          return (
-            <g key={track.id}>
-              <rect x={x - 18} y={LETTER_Y} width={36} height={32} rx={6}
-                fill="#ffffff" stroke="#2b3a67" strokeWidth={2.5} />
-              <text x={x} y={LETTER_Y + 22} textAnchor="middle"
-                fill="#2b3a67" fontSize={18} fontFamily="Poppins,sans-serif" fontWeight="800">
-                {String.fromCharCode(65 + i)}
-              </text>
-            </g>
-          )
-        })}
+        {/* South track letters — floating tracks skipped; letters are sequential over non-floating only */}
+        {(() => {
+          let li = 0
+          return layout.tracks.map((track, i) => {
+            if (track.isFloating) return null
+            const letter = String.fromCharCode(65 + li++)
+            const x = tx(i)
+            return (
+              <g key={track.id}>
+                <rect x={x - 18} y={LETTER_Y} width={36} height={32} rx={6}
+                  fill="#ffffff" stroke="#2b3a67" strokeWidth={2.5} />
+                <text x={x} y={LETTER_Y + 22} textAnchor="middle"
+                  fill="#2b3a67" fontSize={18} fontFamily="Poppins,sans-serif" fontWeight="800">
+                  {letter}
+                </text>
+              </g>
+            )
+          })
+        })()}
 
         {/* Switch levers: one per (color, side) group — single lever controls all switches of that color */}
         {(() => {
