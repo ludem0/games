@@ -145,6 +145,19 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
         {layout.switches.map((sw) => {
           const sy = switchY(sw)
           const idxs = sw.swapsTrackIds.map(trackIdx).filter(i => i >= 0)
+
+          // Plain connector: horizontal black line at sy, no node/lever. Checked before idxs.length guard.
+          if (sw.plain) {
+            const ai = anchorIdx(sw)
+            if (ai < 0) return null
+            const ti0 = trackIdx(sw.swapsTrackIds[0])
+            if (ti0 < 0) return null
+            return (
+              <line key={sw.id} x1={tx(ai)} y1={sy} x2={tx(ti0)} y2={sy}
+                stroke="#1a1a1a" strokeWidth={5} strokeLinecap="round" />
+            )
+          }
+
           if (idxs.length < 2) return null
 
           if (sw.crossing) {
@@ -169,18 +182,6 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
                     fill={sw.color} stroke="#fff" strokeWidth={2} />
                 ))}
               </g>
-            )
-          }
-
-          // Plain connector: horizontal black line at sy connecting anchor column to target column.
-          if (sw.plain) {
-            const ai = anchorIdx(sw)
-            if (ai < 0) return null
-            const ti0 = trackIdx(sw.swapsTrackIds[0])
-            if (ti0 < 0) return null
-            return (
-              <line key={sw.id} x1={tx(ai)} y1={sy} x2={tx(ti0)} y2={sy}
-                stroke="#1a1a1a" strokeWidth={5} strokeLinecap="round" />
             )
           }
 
