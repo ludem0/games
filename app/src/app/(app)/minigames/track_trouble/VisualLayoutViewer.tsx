@@ -35,8 +35,9 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
   const tx = (i: number) => FRAME + 20 + spacing * (i + 1)
   const trackIdx = (id: string) => layout.tracks.findIndex(t => t.id === id)
 
-  const switchY = (sw: TrackSwitch, si: number) =>
-    sw.side === 'south' ? RAVINE_Y - 140 - si * 55 : TRACK_TOP + 100 + si * 55
+  // Parallel switches sit level (not stacked): fixed Y per side.
+  const switchY = (sw: TrackSwitch) =>
+    sw.side === 'south' ? RAVINE_Y - 160 : TRACK_TOP + 95
   const anchorIdx = (sw: TrackSwitch) => {
     if (sw.anchorTrackId) {
       const ai = trackIdx(sw.anchorTrackId)
@@ -49,6 +50,15 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
 
   const isDeparted = (chainId: string) =>
     crossingNumber === 2 && availableChains != null && !availableChains.includes(chainId)
+
+  // Tracks that participate in an X-crossing switch: their black line starts at
+  // the node (the segment above is replaced by the crossing arms).
+  const crossingTop = new Map<string, number>()
+  for (const sw of layout.switches) {
+    if (!sw.crossing) continue
+    const sy = switchY(sw)
+    for (const tid of sw.swapsTrackIds) crossingTop.set(tid, sy)
+  }
 
   return (
     <div className={styles.svgWrap}>
@@ -65,21 +75,49 @@ export default function VisualLayoutViewer({ layout, availableChains, crossingNu
         {layout.tracks.map((track, i) => {
           const x = tx(i)
           const col = track.isGreyed ? '#c9c9c9' : '#1a1a1a'
+          const top = crossingTop.get(track.id) ?? TRACK_TOP
           return (
-            <line key={track.id} x1={x} y1={TRACK_TOP} x2={x} y2={TRACK_BOTTOM}
+            <line key={track.id} x1={x} y1={top} x2={x} y2={TRACK_BOTTOM}
               stroke={col} strokeWidth={5} strokeLinecap="round" />
           )
         })}
 
-        {/* Switches: node + fork arms */}
-        {layout.switches.map((sw, si) => {
+        {/* Switches: X-cross (node per track, colored arms cross) or fork (single node) */}
+        {layout.switches.map((sw) => {
+          const sy = switchY(sw)
+          const idxs = sw.swapsTrackIds.map(trackIdx).filter(i => i >= 0)
+          if (idxs.length < 2) return null
+
+          if (sw.crossing) {
+            // Each track gets a node; grey vertical arm to its own top box,
+            // colored diagonal arm to the partner track top — the two cross.
+            const armTopY = TRACK_TOP
+            return (
+              <g key={sw.id}>
+                {idxs.map((ti, k) => {
+                  const partner = idxs[(k + 1) % idxs.length]
+                  return (
+                    <g key={`arm-${k}`}>
+                      <line x1={tx(ti)} y1={sy} x2={tx(ti)} y2={armTopY}
+                        stroke="#c9c9c9" strokeWidth={6} strokeLinecap="round" />
+                      <line x1={tx(ti)} y1={sy} x2={tx(partner)} y2={armTopY}
+                        stroke={sw.color} strokeWidth={6} strokeLinecap="round" />
+                    </g>
+                  )
+                })}
+                {idxs.map((ti, k) => (
+                  <circle key={`node-${k}`} cx={tx(ti)} cy={sy} r={NODE_R}
+                    fill={sw.color} stroke="#fff" strokeWidth={2} />
+                ))}
+              </g>
+            )
+          }
+
+          // Fork: single node on anchor; active arm = anchor (straight), others grey.
           const ai = anchorIdx(sw)
           if (ai < 0) return null
           const ax = tx(ai)
-          const sy = switchY(sw, si)
-          // south switch: arms go UP from node; north switch: arms go DOWN
           const armEndY = sw.side === 'south' ? sy - FORK_H : sy + FORK_H
-          // active arm = anchor arm unless anchor track was greyed (switch activated)
           const anchorTrack = sw.anchorTrackId
             ? layout.tracks.find(t => t.id === sw.anchorTrackId)
             : null

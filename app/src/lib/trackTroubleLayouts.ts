@@ -17,22 +17,22 @@ function tr(id: string, points: number | null, capacity: number, isGreyed = fals
 }
 function sw(
   id: string, color: string, side: 'north' | 'south',
-  swapsTrackIds: string[], anchorTrackId: string,
+  swapsTrackIds: string[], anchorTrackId: string, crossing = false,
 ): TrackSwitch {
-  return { id, color, side, active: true, swapsTrackIds, anchorTrackId }
+  return { id, color, side, active: true, swapsTrackIds, anchorTrackId, crossing }
 }
 
 // helper to build a round from letter specs
 function round(
   r: number,
   tracks: { points: number | null; cap: number; grey?: boolean }[],
-  switches: { color: string; side: 'north' | 'south'; tracks: number[]; anchor: number }[],
+  switches: { color: string; side: 'north' | 'south'; tracks: number[]; anchor: number; cross?: boolean }[],
 ): RoundLayout {
   const id = (i: number) => `r${r}${String.fromCharCode(65 + i)}`
   return {
     tracks: tracks.map((t, i) => tr(id(i), t.points, t.cap, t.grey)),
     switches: switches.map((s, si) =>
-      sw(`r${r}s${si}`, s.color, s.side, s.tracks.map(id), id(s.anchor))),
+      sw(`r${r}s${si}`, s.color, s.side, s.tracks.map(id), id(s.anchor), s.cross ?? false)),
     peekUnlocked: false,
   }
 }
@@ -48,8 +48,8 @@ export function getDefaultRoundLayouts(): RoundLayout[] {
     // R2: 5 tracks, purple X-crossings up top (A↔B, C↔D), levers north
     round(2,
       [{ points: 4, cap: 2 }, { points: 2, cap: 2 }, { points: 1, cap: 2 }, { points: 5, cap: 2 }, { points: 3, cap: 4 }],
-      [{ color: PURPLE, side: 'north', tracks: [0, 1], anchor: 0 },
-       { color: PURPLE, side: 'north', tracks: [2, 3], anchor: 2 }]),
+      [{ color: PURPLE, side: 'north', tracks: [0, 1], anchor: 0, cross: true },
+       { color: PURPLE, side: 'north', tracks: [2, 3], anchor: 2, cross: true }]),
 
     // R3: 6 tracks, no switches, F has tall stack
     round(3,
@@ -59,9 +59,9 @@ export function getDefaultRoundLayouts(): RoundLayout[] {
     // R4: 6 tracks, three purple X-crossings (A↔B, C↔D, E↔F), levers north
     round(4,
       [{ points: 2, cap: 3 }, { points: 4, cap: 2 }, { points: 2, cap: 2 }, { points: 4, cap: 1 }, { points: 2, cap: 2 }, { points: 4, cap: 1 }],
-      [{ color: PURPLE, side: 'north', tracks: [0, 1], anchor: 0 },
-       { color: PURPLE, side: 'north', tracks: [2, 3], anchor: 2 },
-       { color: PURPLE, side: 'north', tracks: [4, 5], anchor: 4 }]),
+      [{ color: PURPLE, side: 'north', tracks: [0, 1], anchor: 0, cross: true },
+       { color: PURPLE, side: 'north', tracks: [2, 3], anchor: 2, cross: true },
+       { color: PURPLE, side: 'north', tracks: [4, 5], anchor: 4, cross: true }]),
 
     // R5: 5 tracks, one pink 3-way star fork (B,C,D), lever both
     round(5,
