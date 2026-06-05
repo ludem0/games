@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import type { MinecartRound, MinigameData, RoundLayout } from '@/lib/minigames'
 import type { Role } from '@/lib/types'
-import LayoutViewer from './LayoutViewer'
-import AdminLayoutEditor from './AdminLayoutEditor'
+import VisualLayoutViewer from './VisualLayoutViewer'
+import VisualLayoutEditor from './VisualLayoutEditor'
 import SubmissionForm from './SubmissionForm'
 import SubmissionsPanel from './SubmissionsPanel'
 import ResultPanel from './ResultPanel'
@@ -20,6 +20,8 @@ interface Props {
 
 export default function RoundDetail({ game, round, role, username, onUpdate }: Props) {
   const [editingLayout, setEditingLayout] = useState(false)
+  const [seeding, setSeeding] = useState(false)
+  const [seedError, setSeedError] = useState('')
   const [peeking, setPeeking] = useState(false)
   const [peekData, setPeekData] = useState<RoundLayout | null>(null)
   const [peekError, setPeekError] = useState('')
@@ -63,7 +65,20 @@ export default function RoundDetail({ game, round, role, username, onUpdate }: P
     if (res.ok) onUpdate(await res.json())
   }
 
-  const layoutToShow = peekData ?? (isOpen || isDone ? round.layout : null)
+  async function seedDefaults() {
+    setSeeding(true)
+    setSeedError('')
+    const res = await fetch(`/api/minigames/${game.id}/seed`, { method: 'POST' })
+    setSeeding(false)
+    if (res.ok) {
+      refreshGame()
+    } else {
+      const d = await res.json().catch(() => ({}))
+      setSeedError(d.error ?? `HTTP ${res.status}`)
+    }
+  }
+
+  const layoutToShow = peekData ?? (isAdmin || isOpen || isDone ? round.layout : null)
 
   return (
     <div className={styles.roundDetail}>
@@ -88,12 +103,16 @@ export default function RoundDetail({ game, round, role, username, onUpdate }: P
           <button className={styles.editorToggleBtn} onClick={() => setEditingLayout(v => !v)}>
             {editingLayout ? '← Просмотр' : '✏️ Редактировать макет'}
           </button>
+          <button className={styles.editorToggleBtn} onClick={seedDefaults} disabled={seeding}>
+            {seeding ? 'Загрузка...' : '📥 Загрузить эталонные макеты'}
+          </button>
+          {seedError && <span className={styles.subError}>Ошибка: {seedError}</span>}
         </div>
       )}
 
       {/* Layout editor (admin) */}
       {isAdmin && editingLayout && (
-        <AdminLayoutEditor
+        <VisualLayoutEditor
           gameSlug={game.id}
           roundNumber={round.roundNumber}
           initialLayout={round.layout}
@@ -107,7 +126,7 @@ export default function RoundDetail({ game, round, role, username, onUpdate }: P
 
       {/* Layout viewer */}
       {!editingLayout && layoutToShow && (
-        <LayoutViewer
+        <VisualLayoutViewer
           layout={layoutToShow}
           playerSide={playerSide}
           availableChains={crossingNumber === 2 ? round.availableChainsForCrossing2 : undefined}
