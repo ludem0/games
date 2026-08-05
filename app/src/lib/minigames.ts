@@ -15,7 +15,7 @@ export interface MinecartChain {
 export interface TrackSwitch {
   id: string
   color: string
-  side: 'north' | 'south'
+  side: 'north' | 'south' | 'both'  // bank(s) a player must stand on to pull the lever
   active: boolean
   swapsTrackIds: string[]   // ≥2 paths toggled together
   anchorTrackId?: string    // track the node sits on; default = centroid of involved
@@ -23,6 +23,15 @@ export interface TrackSwitch {
   y?: number                // override switch node Y coordinate
   noLever?: boolean         // don't render a lever token for this switch
   plain?: boolean           // simple connector: plain black line, no node, no lever
+  leverAt?: string          // track id whose column hosts the lever (usually a spacer/floating slot)
+  leverAtNorth?: string     // with side 'both' the two levers may sit in different columns
+  leverAtSouth?: string
+  armTop?: number           // absolute Y where the upward arms end; default = node Y − FORK_H
+  mergeTracks?: string[]    // tracks joined by the black fan below the node; default = swapsTrackIds
+  mergeY?: number           // fan endpoint Y; if omitted, each arm lands on that track's wagon stack
+  activeTrackId?: string    // arm the lever starts on; default = anchor
+  activeArm?: number        // index into swapsTrackIds; set once the lever has been pulled
+  armDir?: 1 | -1           // levers with 3+ arms swing back and forth: 1→2→3→2→1
 }
 
 export interface Track {
@@ -31,6 +40,7 @@ export interface Track {
   chains: MinecartChain[]
   isGreyed: boolean
   isFloating?: boolean  // destination-only path: no start wagons, no bottom letter label
+  isSpacer?: boolean    // empty grid column: renders nothing, only holds a slot (e.g. for a lever)
 }
 
 export interface RoundLayout {
