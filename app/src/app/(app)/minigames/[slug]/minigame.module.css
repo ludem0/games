@@ -229,3 +229,21 @@
 .rulesTable { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
 .rulesTable td { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.75); }
 .rulesTable td:first-child { color: rgba(255,255,255,0.5); width: 55%; }
+
+/* Results tab: one table per played round, plus the final standings */
+.resultsWrap { display: flex; flex-direction: column; gap: 22px; }
+.resTableWrap { overflow-x: auto; border-radius: 10px; border: 1px solid rgba(255,255,255,0.07); }
+.resTable { width: 100%; border-collapse: collapse; font-size: 0.85rem; white-space: nowrap; }
+.resTable th, .resTable td { border: 1px solid rgba(255,255,255,0.08); padding: 8px 12px; text-align: center; }
+.resTable thead th { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.75); font-weight: 700; letter-spacing: 0.4px; }
+.resCorner { background: transparent !important; border-color: transparent !important; }
+.resPlayerHead { text-align: left !important; }
+.resScoreHead, .resTotalHead { width: 74px; }
+.resPlayer { text-align: left !important; font-weight: 600; }
+.resAction { background: rgba(255,255,255,0.02); color: rgba(255,255,255,0.45); }
+.resScore { font-weight: 700; color: rgba(255,255,255,0.85); }
+.resTotal { font-weight: 800; background: rgba(0,252,237,0.06); color: #00FCED; }
+.resSelfRow { outline: 1px solid rgba(0,252,237,0.35); outline-offset: -1px; }
+.resFinal { max-width: 420px; }
+.resBest { background: rgba(34,197,94,0.18) !important; color: #86efac !important; }
+.resWorst { background: rgba(239,68,68,0.18) !important; color: #fca5a5 !important; }

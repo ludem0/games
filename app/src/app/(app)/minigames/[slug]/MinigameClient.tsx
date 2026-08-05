@@ -4,13 +4,12 @@ import { useState } from 'react'
 import Link from 'next/link'
 import type { MinigameData } from '@/lib/minigames'
 import type { Role } from '@/lib/types'
-import OverviewSection from './OverviewSection'
+import ResultsSection from './ResultsSection'
 import RoundsSection from './RoundsSection'
-import LeaderboardSection from './LeaderboardSection'
 import RulesTab from './RulesTab'
 import styles from './minigame.module.css'
 
-type Tab = 'overview' | 'rounds' | 'leaderboard' | 'rules'
+type Tab = 'results' | 'rounds' | 'rules'
 
 interface Props {
   game: MinigameData
@@ -24,8 +23,7 @@ export default function MinigameClient({ game: initialGame, username, role }: Pr
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'rounds', label: 'Раунды' },
-    { id: 'overview', label: 'Обзор' },
-    { id: 'leaderboard', label: 'Рейтинг' },
+    { id: 'results', label: 'Результаты' },
     { id: 'rules', label: 'Правила' },
   ]
 
@@ -52,14 +50,11 @@ export default function MinigameClient({ game: initialGame, username, role }: Pr
       </div>
 
       <div className={styles.content}>
-        {tab === 'overview' && (
-          <OverviewSection game={game} role={role} username={username} onUpdate={setGame} />
+        {tab === 'results' && (
+          <ResultsSection game={game} role={role} username={username} />
         )}
         {tab === 'rounds' && (
           <RoundsSection game={game} role={role} username={username} onUpdate={setGame} />
-        )}
-        {tab === 'leaderboard' && (
-          <LeaderboardSection gameSlug={game.id} participants={game.participants} />
         )}
         {tab === 'rules' && <RulesTab />}
       </div>
