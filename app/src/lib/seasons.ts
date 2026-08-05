@@ -72,6 +72,7 @@ export interface SeasonData {
   ranks: string[]
   rounds: Round[]
   psigems: Record<string, number>
+  opals?: Record<string, number>
   matches?: Match[]
 }
 
@@ -91,6 +92,7 @@ function readAll(): Record<string, SeasonData> {
           ranks: (v.ranks as string[]) ?? [],
           rounds: (v.rounds as Round[]) ?? [],
           psigems: (v.psigems as Record<string, number>) ?? {},
+          opals: (v.opals as Record<string, number>) ?? {},
           matches: (v.matches as Match[]) ?? [],
         }
       }
@@ -169,6 +171,15 @@ export function getPsigems(slug: string): Record<string, number> {
 export function savePsigems(slug: string, psigems: Record<string, number>): void {
   const season = getSeason(slug)
   saveSeason(slug, { ...season, psigems })
+}
+
+export function getOpals(slug: string): Record<string, number> {
+  return getSeason(slug).opals ?? {}
+}
+
+export function saveOpals(slug: string, opals: Record<string, number>): void {
+  const season = getSeason(slug)
+  saveSeason(slug, { ...season, opals })
 }
 
 export function getMatches(slug: string): Match[] {

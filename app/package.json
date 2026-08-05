@@ -3,15 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node server.mjs",
     "build": "next build",
-    "start": "next start"
+    "start": "node server.mjs"
   },
   "dependencies": {
+    "jose": "^5.9.6",
     "next": "latest",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "jose": "^5.9.6"
+    "ws": "^8.21.2"
   },
   "devDependencies": {
     "@types/node": "^22",

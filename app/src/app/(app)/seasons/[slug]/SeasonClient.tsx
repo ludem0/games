@@ -9,6 +9,8 @@ import CubeGambit from '@/components/CubeGambit'
 import LeaderboardSection from './LeaderboardSection'
 import RoundsSection from './RoundsSection'
 import MatchesSection from './MatchesSection'
+import InventorySection from './InventorySection'
+import ChatsSection from './ChatsSection'
 
 import type { Round, Match } from '@/lib/seasons'
 import styles from './season.module.css'
@@ -152,6 +154,27 @@ export default function SeasonClient({
               ))}
             </div>
           )}
+        </div>
+
+        {/* Inventory + chats */}
+        <div className={styles.twoCol}>
+          <div className={styles.colLeft}>
+            <InventorySection
+              slug={slug}
+              accent={accent}
+              isAdmin={role === 'admin'}
+              username={username}
+            />
+          </div>
+          <div className={styles.colRight}>
+            <ChatsSection
+              slug={slug}
+              accent={accent}
+              isAdmin={role === 'admin'}
+              username={username}
+              participants={participants}
+            />
+          </div>
         </div>
 
         {/* Two-column: leaderboard + rounds */}
