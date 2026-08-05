@@ -41,8 +41,11 @@ export default function RoundDetail({ game, round, role, username, onUpdate }: P
   const isPending = round.phase === 'pending'
   const isDone = round.phase === 'complete'
 
+  // a future round only: not started, and not the pause between the two phases
+  const peekCost = round.roundNumber === 9 ? 1 : 2
   const canPeek = isPending
-    && round.layout.peekUnlocked
+    && round.results.length === 0
+    && round.layout.tracks.length > 0
     && !isAdmin
     && !(game.peeks[username] ?? []).includes(round.roundNumber)
 
@@ -138,7 +141,7 @@ export default function RoundDetail({ game, round, role, username, onUpdate }: P
       {canPeek && !peekData && (
         <div className={styles.peekSection}>
           <button className={styles.peekBtn} onClick={handlePeek} disabled={peeking}>
-            {peeking ? 'Открываю...' : '👁 Посмотреть макет (2 Ψ)'}
+            {peeking ? 'Открываю...' : `👁 Посмотреть макет (${peekCost} Ψ)`}
           </button>
           {peekError && <span className={styles.subError}>{peekError}</span>}
         </div>

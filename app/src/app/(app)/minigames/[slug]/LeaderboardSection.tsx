@@ -31,10 +31,10 @@ export default function LeaderboardSection({ gameSlug }: Props) {
   return (
     <div className={styles.lbWrap}>
       <div className={styles.lbHeader}>
-        <span style={{ width: 36 }}>#</span>
+        <span style={{ width: 36, textAlign: 'center' }}>#</span>
         <span style={{ flex: 1 }}>Игрок</span>
-        <span style={{ width: 80 }}>Очки</span>
-        <span style={{ width: 80 }}>Псигемы</span>
+        <span style={{ width: 80, textAlign: 'center' }}>Очки</span>
+        <span style={{ width: 80, textAlign: 'center' }}>Псигемы</span>
       </div>
       {entries.map((e, i) => (
         <div key={e.username} className={styles.lbRow}>

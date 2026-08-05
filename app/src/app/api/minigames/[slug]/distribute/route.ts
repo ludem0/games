@@ -37,11 +37,11 @@ export async function POST(_req: Request, { params }: Params) {
   const bottomPlayers = participants.filter(p => (pts[p] ?? 0) === bottomScore)
   const eliminationCandidates = bottomPlayers
 
-  // opal challenge: closest to average
+  // opal challenge: only a sole closest player wins it, a tie fails the challenge
   const avg = participants.reduce((s, p) => s + (pts[p] ?? 0), 0) / participants.length
-  const opalWinner = participants.reduce((best, p) => {
-    return Math.abs((pts[p] ?? 0) - avg) < Math.abs((pts[best] ?? 0) - avg) ? p : best
-  }, participants[0])
+  const bestGap = Math.min(...participants.map(p => Math.abs((pts[p] ?? 0) - avg)))
+  const closest = participants.filter(p => Math.abs((pts[p] ?? 0) - avg) === bestGap)
+  const opalWinner = closest.length === 1 ? closest[0] : null
 
   // merge in-game psigems into season psigems
   const seasonPsigems = getPsigems(game.seasonSlug)
@@ -61,6 +61,8 @@ export async function POST(_req: Request, { params }: Params) {
     topPlayers,
     eliminationCandidates,
     opalWinner,
+    opalChallengeFailed: opalWinner === null,
+    closestToAverage: closest,
     averagePoints: Math.round(avg * 10) / 10,
     psigemGrants,
     finalStandings: sorted.map(p => ({ username: p, points: pts[p] ?? 0 })),

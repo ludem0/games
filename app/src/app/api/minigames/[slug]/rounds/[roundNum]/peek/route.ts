@@ -7,6 +7,11 @@ import { getPsigems, savePsigems } from '@/lib/seasons'
 type Params = { params: Promise<{ slug: string; roundNum: string }> }
 
 const PEEK_COST = 2
+const FINAL_ROUND = 9
+const FINAL_ROUND_PEEK_COST = 1
+
+const peekCost = (roundNumber: number) =>
+  roundNumber === FINAL_ROUND ? FINAL_ROUND_PEEK_COST : PEEK_COST
 
 export async function POST(_req: Request, { params }: Params) {
   const cookieStore = await cookies()
@@ -28,17 +33,24 @@ export async function POST(_req: Request, { params }: Params) {
 
   const round = game.rounds.find(r => r.roundNumber === n)
   if (!round) return NextResponse.json({ error: 'Round not found' }, { status: 404 })
-  if (!round.layout.peekUnlocked) return NextResponse.json({ error: 'Peek not unlocked for this round' }, { status: 400 })
-  if (round.phase !== 'pending') return NextResponse.json({ error: 'Round already started' }, { status: 400 })
+  // only rounds that have not been played yet, so the pause between the two phases
+  // of a running round does not count as "a future round"
+  if (round.phase !== 'pending' || round.results.length > 0) {
+    return NextResponse.json({ error: 'Round already started' }, { status: 400 })
+  }
+  if (round.layout.tracks.length === 0) {
+    return NextResponse.json({ error: 'Layout not published yet' }, { status: 400 })
+  }
 
   const alreadyPeeked = (game.peeks[user.username] ?? []).includes(n)
   if (alreadyPeeked) return NextResponse.json({ error: 'Already peeked this round' }, { status: 400 })
 
+  const cost = peekCost(n)
   const psigems = getPsigems(game.seasonSlug)
   const balance = psigems[user.username] ?? 0
-  if (balance < PEEK_COST) return NextResponse.json({ error: 'Not enough psigems' }, { status: 400 })
+  if (balance < cost) return NextResponse.json({ error: 'Not enough psigems' }, { status: 400 })
 
-  psigems[user.username] = balance - PEEK_COST
+  psigems[user.username] = balance - cost
   savePsigems(game.seasonSlug, psigems)
 
   game.peeks[user.username] = [...(game.peeks[user.username] ?? []), n]

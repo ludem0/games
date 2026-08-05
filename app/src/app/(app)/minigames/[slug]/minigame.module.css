@@ -75,10 +75,10 @@
 .lbWrap { display: flex; flex-direction: column; gap: 2px; }
 .lbHeader { display: flex; gap: 8px; padding: 10px 16px; font-size: 0.72rem; letter-spacing: 1px; color: rgba(255,255,255,0.35); text-transform: uppercase; }
 .lbRow { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; }
-.lbRank { width: 36px; font-size: 0.85rem; color: rgba(255,255,255,0.4); }
+.lbRank { width: 36px; text-align: center; font-size: 0.85rem; color: rgba(255,255,255,0.4); }
 .lbName { flex: 1; font-weight: 600; }
-.lbPts { width: 80px; text-align: right; color: #00FCED; font-weight: 700; }
-.lbPsi { width: 80px; text-align: right; color: #a855f7; font-size: 0.85rem; }
+.lbPts { width: 80px; text-align: center; color: #00FCED; font-weight: 700; }
+.lbPsi { width: 80px; text-align: center; color: #a855f7; font-size: 0.85rem; }
 .noData { text-align: center; color: rgba(255,255,255,0.3); padding: 40px; }
 
 /* === Rounds Section === */

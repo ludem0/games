@@ -19,6 +19,21 @@ export default function ResultPanel({ result, round }: Props) {
     }
   }
 
+  // after a phase is resolved everyone sees what everyone else did
+  const switchColors: Record<string, string> = {}
+  for (const sw of round.layout.switches) switchColors[sw.id] = sw.color
+  const actions = round.submissions
+    .filter(s => s.crossingNumber === result.crossingNumber)
+    .map(s => {
+      if (s.action.type === 'board') {
+        return { username: s.username, text: `🚃 ${chainLabels[s.action.chainId] || s.action.chainId}`, color: '' }
+      }
+      if (s.action.type === 'switch') {
+        return { username: s.username, text: '⚡ рычаг', color: switchColors[s.action.switchId] ?? '' }
+      }
+      return { username: s.username, text: '⏸ остался', color: '' }
+    })
+
   return (
     <div className={styles.resultWrap}>
       <div className={styles.resultTitle}>
@@ -43,6 +58,20 @@ export default function ResultPanel({ result, round }: Props) {
         </div>
       ) : (
         <div className={styles.resultNone}>Ни одна вагонетка не отправилась</div>
+      )}
+
+      {actions.length > 0 && (
+        <div className={styles.resultSection}>
+          <div className={styles.resultLabel}>Кто что сделал</div>
+          <div className={styles.resultPositions}>
+            {actions.map(a => (
+              <div key={a.username} className={styles.resultPosRow}>
+                <span>{a.username}</span>
+                <span className={styles.resultPosSide} style={a.color ? { color: a.color } : undefined}>{a.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       <div className={styles.resultSection}>
