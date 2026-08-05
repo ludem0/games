@@ -169,5 +169,15 @@ No Co-Authored-By unless requested.
 ## JSON storage notes
 
 - `minigames.json` starts as `{}` — populated when admin creates a game
+- `chats.json` starts as `{}` — season chats, format `Record<seasonSlug, Chat[]>`
 - Mounted as Docker volume: changes persist across container rebuilds
 - Format: `Record<slug, MinigameData>`
+
+**Adding a new data file:** create it on the server *before* `docker compose up`,
+otherwise Docker mounts a directory in its place. Give it mode `666` — the container
+runs as uid 100 (`app`), so a root-owned `644` file makes every write fail with
+`EACCES` and the route answers 500.
+
+```bash
+cd ~/games && echo '{}' > newfile.json && chmod 666 newfile.json
+```

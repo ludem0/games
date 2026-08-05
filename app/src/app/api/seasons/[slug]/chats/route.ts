@@ -54,6 +54,10 @@ export async function POST(req: NextRequest, { params }: Params) {
     createdAt: new Date().toISOString(),
     messages: [],
   }
-  saveChat(slug, chat)
+  try {
+    saveChat(slug, chat)
+  } catch {
+    return NextResponse.json({ error: 'Не удалось сохранить чат' }, { status: 500 })
+  }
   return NextResponse.json(chat, { status: 201 })
 }

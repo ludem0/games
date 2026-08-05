@@ -59,7 +59,11 @@ export async function POST(req: NextRequest, { params }: Params) {
         text: `${user.username} добавил в чат ${body.addMember}`,
         at: new Date().toISOString(),
       }]
-      saveChat(slug, chat)
+      try {
+        saveChat(slug, chat)
+      } catch {
+        return NextResponse.json({ error: 'Не удалось сохранить чат' }, { status: 500 })
+      }
       publish(slug, chat)
     }
     return NextResponse.json(chat)
@@ -75,7 +79,11 @@ export async function POST(req: NextRequest, { params }: Params) {
     text,
     at: new Date().toISOString(),
   }]
-  saveChat(slug, chat)
+  try {
+    saveChat(slug, chat)
+  } catch {
+    return NextResponse.json({ error: 'Не удалось сохранить чат' }, { status: 500 })
+  }
   publish(slug, chat)
   return NextResponse.json(chat)
 }

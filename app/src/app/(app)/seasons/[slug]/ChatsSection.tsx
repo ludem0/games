@@ -43,6 +43,16 @@ export default function ChatsSection({ slug, accent, isAdmin, username, particip
   const socketRef = useRef<WebSocket | null>(null)
   const openIdRef = useRef<string | null>(null)
 
+  // a failing route may answer with an HTML error page, so never assume JSON
+  async function errorFrom(res: Response) {
+    try {
+      const data = await res.json()
+      return data.error ?? `Ошибка ${res.status}`
+    } catch {
+      return `Ошибка ${res.status}`
+    }
+  }
+
   const loadList = useCallback(async () => {
     const res = await fetch(`/api/seasons/${slug}/chats`)
     if (res.ok) setChats(await res.json())
@@ -128,7 +138,7 @@ export default function ChatsSection({ slug, accent, isAdmin, username, particip
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title: newTitle, members: newMembers }),
     })
-    if (!res.ok) { setError((await res.json()).error ?? 'Ошибка'); return }
+    if (!res.ok) { setError(await errorFrom(res)); return }
     const created: Chat = await res.json()
     setCreating(false)
     setNewTitle('')
@@ -147,7 +157,7 @@ export default function ChatsSection({ slug, accent, isAdmin, username, particip
       body: JSON.stringify({ text: value }),
     })
     if (res.ok) { setChat(await res.json()); loadList() }
-    else setError((await res.json()).error ?? 'Ошибка')
+    else setError(await errorFrom(res))
   }
 
   async function addMember(name: string) {
@@ -159,6 +169,7 @@ export default function ChatsSection({ slug, accent, isAdmin, username, particip
       body: JSON.stringify({ addMember: name }),
     })
     if (res.ok) { setChat(await res.json()); loadList() }
+    else setError(await errorFrom(res))
   }
 
   const time = (iso: string) =>
@@ -191,6 +202,9 @@ export default function ChatsSection({ slug, accent, isAdmin, username, particip
           <button className={styles.btnSolid} style={{ background: accent }} onClick={createChat}>Создать</button>
         </div>
       )}
+
+      {/* a failed create has no chat panel to show the error in */}
+      {error && !chat && <p className={styles.chatError}>{error}</p>}
 
       {chats.length === 0 && !creating && <p className={styles.noContent}>Чатов пока нет</p>}
 
