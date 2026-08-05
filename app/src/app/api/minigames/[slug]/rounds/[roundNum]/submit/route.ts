@@ -45,6 +45,10 @@ export async function POST(req: Request, { params }: Params) {
       if (track.isGreyed) continue
       const chain = track.chains.find(c => c.id === action.chainId)
       if (chain) {
+        // destination-only paths carry no wagons, so nobody can board them
+        if (chain.capacity === 0 || track.isFloating) {
+          return NextResponse.json({ error: 'Nothing to board on this path' }, { status: 400 })
+        }
         // chain must depart to player's opposite side (i.e., available from their side)
         if (crossingNumber === 2 && !round.availableChainsForCrossing2.includes(action.chainId)) {
           return NextResponse.json({ error: 'Chain already departed' }, { status: 400 })
@@ -59,7 +63,9 @@ export async function POST(req: Request, { params }: Params) {
   if (action.type === 'switch') {
     const sw = round.layout.switches.find(s => s.id === action.switchId)
     if (!sw) return NextResponse.json({ error: 'Switch not found' }, { status: 400 })
-    if (sw.side !== playerSide) return NextResponse.json({ error: 'Switch is on other side' }, { status: 400 })
+    if (sw.side !== 'both' && sw.side !== playerSide) {
+      return NextResponse.json({ error: 'Switch is on other side' }, { status: 400 })
+    }
     if (!sw.active) return NextResponse.json({ error: 'Switch is inactive' }, { status: 400 })
   }
 

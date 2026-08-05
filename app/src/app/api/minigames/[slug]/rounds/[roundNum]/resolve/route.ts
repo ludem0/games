@@ -5,6 +5,7 @@ import {
   getMinigame, saveMinigame, getPlayerPosition,
   computePsigemGrants, type CrossingResult,
 } from '@/lib/minigames'
+import { pullLever, destinationPoints } from '@/lib/trackRouting'
 
 type Params = { params: Promise<{ slug: string; roundNum: string }> }
 
@@ -54,13 +55,10 @@ export async function POST(_req: Request, { params }: Params) {
   for (const [username, action] of subMap) {
     if (action.type !== 'switch') continue
     const sw = round.layout.switches.find(s => s.id === action.switchId)
-    if (!sw || sw.side !== positions[username] || !sw.active) continue
+    if (!sw || !sw.active) continue
+    if (sw.side !== 'both' && sw.side !== positions[username]) continue
     activatedSwitchIds.push(sw.id)
-    // flip isGreyed on both swapped tracks
-    for (const trackId of sw.swapsTrackIds) {
-      const track = round.layout.tracks.find(t => t.id === trackId)
-      if (track) track.isGreyed = !track.isGreyed
-    }
+    pullLever(sw)
   }
 
   // --- STEP 4: process board actions ---
@@ -97,10 +95,11 @@ export async function POST(_req: Request, { params }: Params) {
     if (!chain) continue
 
     if (riders.length === chain.capacity) {
-      // exact match — depart!
+      // exact match — depart! points come from wherever the active arms lead now
       departedChainIds.push(chainId)
+      const earned = destinationPoints(round.layout, track.id)
       for (const username of riders) {
-        pointsAwarded[username] = chain.points
+        pointsAwarded[username] = earned
         newPositions[username] = chain.departsTo
       }
     }
@@ -137,9 +136,8 @@ export async function POST(_req: Request, { params }: Params) {
     round.availableChainsForCrossing2 = round.availableChainsForCrossing2.filter(
       id => !departedChainIds.includes(id)
     )
-    round.phase = 'crossing1_open' // stays open until admin manually opens crossing 2
-    // mark that crossing 1 is done by removing the open state
-    round.phase = 'pending' // will be re-opened as crossing2_open by admin
+    // back to pending; admin re-opens as crossing2_open (results.length === 1 distinguishes it)
+    round.phase = 'pending'
   } else {
     round.phase = 'complete'
   }

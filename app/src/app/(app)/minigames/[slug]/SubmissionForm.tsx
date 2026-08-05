@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { MinecartRound, SubmissionAction } from '@/lib/minigames'
+import { destinationPoints } from '@/lib/trackRouting'
 import styles from './minigame.module.css'
 
 interface Props {
@@ -23,16 +24,24 @@ export default function SubmissionForm({ gameSlug, round, username, playerSide, 
 
   const existingSub = round.submissions.find(s => s.username === username && s.crossingNumber === crossingNumber)
 
-  // available chains: on non-greyed tracks, not departed in crossing 2
+  // available chains: on non-greyed tracks that actually carry wagons, not departed in crossing 2.
+  // Points shown are the ones the cart would earn right now — the levers can change them.
   const availableChains = round.layout.tracks
-    .filter(t => !t.isGreyed)
+    .filter(t => !t.isGreyed && !t.isFloating && !t.isSpacer)
     .flatMap(t => t.chains
+      .filter(c => c.capacity > 0)
       .filter(c => crossingNumber === 1 || round.availableChainsForCrossing2.includes(c.id))
-      .map(c => ({ ...c, trackId: t.id, trackColor: t.color }))
+      .map(c => ({
+        ...c,
+        points: destinationPoints(round.layout, t.id),
+        trackId: t.id,
+        trackColor: t.color,
+      }))
     )
 
   // available switches: active, on player's side
-  const availableSwitches = round.layout.switches.filter(s => s.active && s.side === playerSide)
+  const availableSwitches = round.layout.switches.filter(
+    s => s.active && (s.side === 'both' || s.side === playerSide))
 
   async function submit() {
     let action: SubmissionAction
