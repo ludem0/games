@@ -30,6 +30,7 @@ export default function SubmissionForm({ gameSlug, round, username, playerSide, 
     .filter(t => !t.isGreyed && !t.isFloating && !t.isSpacer)
     .flatMap(t => t.chains
       .filter(c => c.capacity > 0)
+      .filter(c => c.departsTo !== playerSide)   // wagons stand on the opposite bank
       .filter(c => crossingNumber === 1 || round.availableChainsForCrossing2.includes(c.id))
       .map(c => ({
         ...c,
@@ -99,7 +100,13 @@ export default function SubmissionForm({ gameSlug, round, username, playerSide, 
 
       {mode === 'board' && (
         <div className={styles.subOptions}>
-          {availableChains.length === 0 && <div className={styles.subNoOpts}>Нет доступных вагонеток</div>}
+          {availableChains.length === 0 && (
+            <div className={styles.subNoOpts}>
+              {playerSide === 'north'
+                ? 'Вы уже на той стороне. Вагонетки стоят на южном берегу, так что в этой фазе остаётся рычаг на вашей стороне или «остаться».'
+                : 'Нет доступных вагонеток'}
+            </div>
+          )}
           {availableChains.map(chain => (
             <label key={chain.id} className={`${styles.subOption} ${selectedChainId === chain.id ? styles.subOptionSelected : ''}`}
               style={{ borderColor: selectedChainId === chain.id ? chain.color : undefined }}>

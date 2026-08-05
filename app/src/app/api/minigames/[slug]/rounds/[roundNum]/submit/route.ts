@@ -49,6 +49,10 @@ export async function POST(req: Request, { params }: Params) {
         if (chain.capacity === 0 || track.isFloating) {
           return NextResponse.json({ error: 'Nothing to board on this path' }, { status: 400 })
         }
+        // wagons stand on the bank opposite their destination
+        if (playerSide === chain.departsTo) {
+          return NextResponse.json({ error: 'Already on that side of the ravine' }, { status: 400 })
+        }
         // chain must depart to player's opposite side (i.e., available from their side)
         if (crossingNumber === 2 && !round.availableChainsForCrossing2.includes(action.chainId)) {
           return NextResponse.json({ error: 'Chain already departed' }, { status: 400 })

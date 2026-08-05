@@ -75,6 +75,12 @@ export async function POST(_req: Request, { params }: Params) {
 
   for (const [username, action] of subMap) {
     if (action.type !== 'board') continue
+    const trackId = chainToTrack.get(action.chainId)
+    const chain = round.layout.tracks
+      .find(t => t.id === trackId)?.chains
+      .find(c => c.id === action.chainId)
+    // the wagons stand on the opposite bank, so someone already across cannot board
+    if (!chain || positions[username] === chain.departsTo) continue
     if (!boardGroups.has(action.chainId)) boardGroups.set(action.chainId, [])
     boardGroups.get(action.chainId)!.push(username)
   }
