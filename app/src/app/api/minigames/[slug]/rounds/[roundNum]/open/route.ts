@@ -24,18 +24,18 @@ export async function POST(_req: Request, { params }: Params) {
 
   const deadline = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
 
-  if (round.phase === 'pending') {
+  if (round.phase === 'crossing1_open') {
+    return NextResponse.json({ error: 'Crossing 1 still open — resolve it first' }, { status: 400 })
+  } else if (round.phase === 'pending' && round.results.length === 1) {
+    // crossing 1 resolved, open crossing 2
+    round.phase = 'crossing2_open'
+    round.phaseDeadline = deadline
+  } else if (round.phase === 'pending' && round.results.length === 0) {
     round.phase = 'crossing1_open'
     round.phaseDeadline = deadline
     // set available chains for crossing 2 (all chains)
     round.availableChainsForCrossing2 = round.layout.tracks.flatMap(t => t.chains.map(c => c.id))
     if (game.status === 'setup') game.status = 'active'
-  } else if (round.phase === 'crossing1_open') {
-    return NextResponse.json({ error: 'Crossing 1 still open — resolve it first' }, { status: 400 })
-  } else if (round.results.length === 1 && round.phase !== 'crossing2_open') {
-    // crossing 1 resolved, open crossing 2
-    round.phase = 'crossing2_open'
-    round.phaseDeadline = deadline
   } else {
     return NextResponse.json({ error: 'Cannot open — check current phase' }, { status: 400 })
   }
