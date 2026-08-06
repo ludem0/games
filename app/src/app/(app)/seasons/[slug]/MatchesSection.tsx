@@ -9,7 +9,6 @@ interface Props {
   slug: string
   isAdmin: boolean
   initialMatches: Match[]
-  participants: string[]
 }
 
 interface EditState {
@@ -20,8 +19,6 @@ interface EditState {
 function MatchCard({
   match,
   isAdmin,
-  seasonSlug,
-  participants,
   onToggleVisible,
   onToggleAccessible,
   onToggleRunning,
@@ -30,8 +27,6 @@ function MatchCard({
 }: {
   match: Match
   isAdmin: boolean
-  seasonSlug: string
-  participants: string[]
   onToggleVisible: () => void
   onToggleAccessible: () => void
   onToggleRunning: () => void
@@ -40,32 +35,6 @@ function MatchCard({
 }) {
   const [editing, setEditing] = useState(false)
   const [edit, setEdit] = useState<EditState>({ name: match.name, minigameSlug: match.minigameSlug ?? '' })
-  const [gameName, setGameName] = useState('')
-  const [gameId, setGameId] = useState('')
-  const [creating, setCreating] = useState(false)
-  const [createError, setCreateError] = useState('')
-
-  async function createMinigame(e: React.MouseEvent) {
-    e.preventDefault(); e.stopPropagation()
-    const name = gameName.trim() || edit.name || match.name
-    setCreating(true)
-    setCreateError('')
-    const body: Record<string, unknown> = { name, seasonSlug, participants }
-    if (gameId.trim()) body.id = gameId.trim()
-    const res = await fetch('/api/minigames', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
-    setCreating(false)
-    if (res.ok) {
-      const game = await res.json()
-      setEdit(s => ({ ...s, minigameSlug: game.id }))
-      setGameName('')
-    } else {
-      setCreateError('Ошибка создания')
-    }
-  }
 
   const isMain = match.type === 'main'
   const playerCanClick = !isAdmin && match.accessible && match.visible
@@ -127,43 +96,9 @@ function MatchCard({
             placeholder="Название"
             onClick={e => e.stopPropagation()}
           />
-          {edit.minigameSlug ? (
-            <div onClick={e => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: '0.72rem', opacity: 0.6 }}>Игра:</span>
-              <span className={styles.slugInput} style={{ flex: 1, opacity: 0.8, fontSize: '0.72rem' }}>{edit.minigameSlug}</span>
-              <button
-                className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
-                onClick={e => { e.preventDefault(); e.stopPropagation(); setEdit(s => ({ ...s, minigameSlug: '' })) }}
-                title="Отвязать игру"
-              >✕</button>
-            </div>
-          ) : (
-            <div onClick={e => e.stopPropagation()}>
-              <div style={{ display: 'flex', gap: 6, marginBottom: 4 }}>
-                <input
-                  className={styles.slugInput}
-                  style={{ flex: 1 }}
-                  value={gameName}
-                  onChange={e => setGameName(e.target.value)}
-                  placeholder="Название игры"
-                />
-                <button
-                  className={styles.saveBtn}
-                  style={{ fontSize: '0.72rem', padding: '6px 10px', whiteSpace: 'nowrap' }}
-                  onClick={createMinigame}
-                  disabled={creating}
-                >
-                  {creating ? '...' : 'Создать игру'}
-                </button>
-              </div>
-              <input
-                className={styles.slugInput}
-                style={{ width: '100%', marginBottom: createError ? 4 : 0 }}
-                value={gameId}
-                onChange={e => setGameId(e.target.value)}
-                placeholder="ID игры (необязательно, напр. track_trouble)"
-              />
-              {createError && <div style={{ color: '#e74c3c', fontSize: '0.7rem' }}>{createError}</div>}
+          {isMain && (
+            <div onClick={e => e.stopPropagation()} style={{ fontSize: '0.72rem', opacity: 0.55 }}>
+              Игра создаётся вместе с матчем
             </div>
           )}
           <button
@@ -204,14 +139,14 @@ function MatchCard({
   return <div className={cardClass}>{inner}</div>
 }
 
-export default function MatchesSection({ slug, isAdmin, initialMatches, participants }: Props) {
+export default function MatchesSection({ slug, isAdmin, initialMatches }: Props) {
   const [matches, setMatches] = useState<Match[]>(initialMatches)
 
   async function addMatch(type: 'main' | 'death') {
     const res = await fetch(`/api/seasons/${slug}/matches`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type, name: type === 'main' ? 'Main Match' : 'Death Match' }),
+      body: JSON.stringify({ type }),
     })
     if (res.ok) setMatches((await res.json()).matches)
   }
@@ -275,8 +210,6 @@ export default function MatchesSection({ slug, isAdmin, initialMatches, particip
                   onToggleAccessible={() => updateMatch(m.id, { accessible: !m.accessible })}
                   onToggleRunning={() => toggleRunning(m.id, !m.running)}
                   onDelete={() => deleteMatch(m.id)}
-                  seasonSlug={slug}
-                  participants={participants}
                   onSave={edit => updateMatch(m.id, { name: edit.name, minigameSlug: edit.minigameSlug || undefined })}
                 />
               ))}
@@ -308,8 +241,6 @@ export default function MatchesSection({ slug, isAdmin, initialMatches, particip
                   onToggleAccessible={() => updateMatch(m.id, { accessible: !m.accessible })}
                   onToggleRunning={() => toggleRunning(m.id, !m.running)}
                   onDelete={() => deleteMatch(m.id)}
-                  seasonSlug={slug}
-                  participants={participants}
                   onSave={edit => updateMatch(m.id, { name: edit.name, minigameSlug: edit.minigameSlug || undefined })}
                 />
               ))}

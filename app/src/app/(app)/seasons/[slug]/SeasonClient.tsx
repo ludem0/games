@@ -98,7 +98,6 @@ export default function SeasonClient({
           slug={slug}
           isAdmin={role === 'admin'}
           initialMatches={initialMatches}
-          participants={participants}
         />
 
         {/* Hero */}

@@ -24,8 +24,12 @@ export async function POST(_req: Request, { params }: Params) {
   const topScore = pts[sorted[0]] ?? 0
   const bottomScore = pts[sorted[sorted.length - 1]] ?? 0
 
-  // top 3 psigems
-  const top3 = sorted.slice(0, 3)
+  // a psigem for one of the three highest scores: ties share a place, so four
+  // players can be paid if two of them are level
+  const topScores = [...new Set(participants.map(p => pts[p] ?? 0))]
+    .sort((a, b) => b - a)
+    .slice(0, 3)
+  const top3 = participants.filter(p => topScores.includes(pts[p] ?? 0))
   const psigemGrants: Record<string, number> = {}
   for (const p of top3) psigemGrants[p] = (psigemGrants[p] ?? 0) + 1
 

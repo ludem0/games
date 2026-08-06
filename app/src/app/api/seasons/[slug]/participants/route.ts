@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/jwt'
-import { getParticipants, addParticipant, removeParticipant } from '@/lib/seasons'
+import { getParticipants, addParticipant, removeParticipant, getMatches } from '@/lib/seasons'
+import { syncParticipants } from '@/lib/minigames'
 
 type Params = { params: Promise<{ slug: string }> }
+
+// Season games follow the season roster, so every change reaches them at once.
+function syncSeasonGames(slug: string) {
+  const roster = getParticipants(slug)
+  for (const match of getMatches(slug)) {
+    if (match.minigameSlug) syncParticipants(match.minigameSlug, roster)
+  }
+  return roster
+}
 
 async function getUser(req: NextRequest) {
   const cookie = req.cookies.get('session')?.value
@@ -24,7 +34,7 @@ export async function POST(req: NextRequest, { params }: Params) {
   const { username } = await req.json() as { username?: string }
   if (!username) return NextResponse.json({ error: 'username required' }, { status: 400 })
   addParticipant(slug, username)
-  return NextResponse.json({ participants: getParticipants(slug) })
+  return NextResponse.json({ participants: syncSeasonGames(slug) })
 }
 
 export async function DELETE(req: NextRequest, { params }: Params) {
@@ -34,5 +44,5 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   const { username } = await req.json() as { username?: string }
   if (!username) return NextResponse.json({ error: 'username required' }, { status: 400 })
   removeParticipant(slug, username)
-  return NextResponse.json({ participants: getParticipants(slug) })
+  return NextResponse.json({ participants: syncSeasonGames(slug) })
 }

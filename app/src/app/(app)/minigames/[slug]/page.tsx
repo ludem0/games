@@ -1,7 +1,8 @@
 import { cookies } from 'next/headers'
 import { redirect, notFound } from 'next/navigation'
 import { verifyToken } from '@/lib/auth'
-import { getMinigame } from '@/lib/minigames'
+import { getMinigame, syncParticipants } from '@/lib/minigames'
+import { getParticipants } from '@/lib/seasons'
 import MinigameClient from './MinigameClient'
 
 export default async function MinigamePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -12,8 +13,10 @@ export default async function MinigamePage({ params }: { params: Promise<{ slug:
   if (!user) redirect('/login')
 
   const { slug } = await params
-  const game = getMinigame(slug)
-  if (!game) notFound()
+  const stored = getMinigame(slug)
+  if (!stored) notFound()
+  // the season owns the roster, so a game inside one always reflects it
+  const game = (stored.seasonSlug ? syncParticipants(slug, getParticipants(stored.seasonSlug)) : stored) ?? stored
 
   // strip future round layouts for non-admin
   const filteredGame = user.role !== 'admin' ? {

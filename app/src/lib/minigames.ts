@@ -1,5 +1,6 @@
 import { join } from 'path'
 import { readFileSync, writeFileSync, existsSync } from 'fs'
+import { getDefaultRoundLayouts } from './trackTroubleLayouts'
 
 const MINIGAMES_PATH = join(process.cwd(), 'minigames.json')
 
@@ -126,6 +127,57 @@ export function deleteMinigame(slug: string): void {
   const all = readAll()
   delete all[slug]
   writeAll(all)
+}
+
+// Games belong to a season match, so the slug is derived instead of typed by hand.
+export function seasonGameSlug(seasonSlug: string, matchId: string): string {
+  return `${seasonSlug}-${matchId}`
+}
+
+// Every main match is a round of Track Trouble, laid out and ready to run.
+export function createSeasonGame(
+  slug: string,
+  seasonSlug: string,
+  name: string,
+  participants: string[],
+): MinigameData {
+  const existing = getMinigame(slug)
+  if (existing) return existing
+
+  const layouts = getDefaultRoundLayouts()
+  const game: MinigameData = {
+    id: slug,
+    seasonSlug,
+    name,
+    status: 'setup',
+    participants,
+    rounds: layouts.map((layout, i) => ({ ...createEmptyRound(i + 1), layout })),
+    totalPoints: Object.fromEntries(participants.map(p => [p, 0])),
+    psigemBalance: Object.fromEntries(participants.map(p => [p, 0])),
+    peeks: {},
+    rewardsDistributed: false,
+    createdAt: new Date().toISOString(),
+  }
+  saveMinigame(slug, game)
+  return game
+}
+
+// The season owns the roster, so the game follows it.
+export function syncParticipants(slug: string, participants: string[]): MinigameData | null {
+  const game = getMinigame(slug)
+  if (!game) return null
+  const same = game.participants.length === participants.length
+    && game.participants.every(p => participants.includes(p))
+  if (same) return game
+
+  const updated: MinigameData = {
+    ...game,
+    participants,
+    totalPoints: Object.fromEntries(participants.map(p => [p, game.totalPoints[p] ?? 0])),
+    psigemBalance: Object.fromEntries(participants.map(p => [p, game.psigemBalance[p] ?? 0])),
+  }
+  saveMinigame(slug, updated)
+  return updated
 }
 
 export function createEmptyRound(roundNumber: number): MinecartRound {

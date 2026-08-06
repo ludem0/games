@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { verifyToken } from '@/lib/auth'
-import { getMatches, saveMatches } from '@/lib/seasons'
+import { getMatches, saveMatches, getParticipants } from '@/lib/seasons'
 import type { Match } from '@/lib/seasons'
+import {
+  createSeasonGame, seasonGameSlug, syncParticipants, getMinigame, saveMinigame,
+} from '@/lib/minigames'
 
 async function getRole() {
   const cookieStore = await cookies()
@@ -20,7 +23,20 @@ export async function GET(
   const user = await getRole()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const matches = getMatches(slug)
+  let matches = getMatches(slug)
+
+  // main matches made before games moved into seasons have no game yet: give them one
+  if (user.role === 'admin' && matches.some(m => m.type === 'main' && !m.minigameSlug)) {
+    matches = matches.map(m =>
+      m.type === 'main' && !m.minigameSlug ? { ...m, minigameSlug: seasonGameSlug(slug, m.id) } : m)
+    saveMatches(slug, matches)
+    for (const m of matches) {
+      if (m.type === 'main' && m.minigameSlug) {
+        createSeasonGame(m.minigameSlug, slug, m.name, getParticipants(slug))
+      }
+    }
+  }
+
   const visible = user.role === 'admin'
     ? matches
     : matches.map(m => ({ ...m, name: m.visible ? m.name : '???' }))
@@ -39,13 +55,24 @@ export async function POST(
   const body = await req.json()
   const matches = getMatches(slug)
 
+  const type: 'main' | 'death' = body.type ?? 'main'
+  const id = `m${Date.now()}`
+  const sameType = matches.filter(m => m.type === type).length + 1
+  const defaultName = type === 'main' ? `MM${sameType}: Track Trouble` : `DM${sameType}`
+
   const newMatch: Match = {
-    id: `m${Date.now()}`,
-    type: body.type ?? 'main',
-    name: body.name ?? 'Новый матч',
+    id,
+    type,
+    name: body.name ?? defaultName,
     visible: body.visible ?? true,
     accessible: body.accessible ?? false,
-    minigameSlug: body.minigameSlug,
+    // every main match is a game of its own, so it is created right here and the
+    // slug comes from the season and the match instead of being typed by hand
+    minigameSlug: type === 'main' ? seasonGameSlug(slug, id) : body.minigameSlug,
+  }
+
+  if (type === 'main') {
+    createSeasonGame(seasonGameSlug(slug, id), slug, newMatch.name, getParticipants(slug))
   }
 
   saveMatches(slug, [...matches, newMatch])
@@ -64,6 +91,14 @@ export async function PUT(
   const matches = getMatches(slug)
   const updated = matches.map(m => m.id === body.id ? { ...m, ...body } : m)
   saveMatches(slug, updated)
+
+  // a renamed main match renames its game, and the roster always follows the season
+  const match = updated.find(m => m.id === body.id)
+  if (match?.type === 'main' && match.minigameSlug) {
+    const game = getMinigame(match.minigameSlug)
+    if (game) saveMinigame(match.minigameSlug, { ...game, name: match.name })
+    syncParticipants(match.minigameSlug, getParticipants(slug))
+  }
   return NextResponse.json({ matches: getMatches(slug) })
 }
 
