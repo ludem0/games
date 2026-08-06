@@ -8,7 +8,10 @@ export async function GET(req: NextRequest) {
   const payload = await verifyToken(token)
   if (!payload) return NextResponse.json({ error: 'Невалидный токен' }, { status: 401 })
 
-  return NextResponse.json({ online: getOnline() })
+  // the socket registry knows exactly who is connected; the file is the fallback
+  const fromSockets = (globalThis as { __onlineUsers?: () => string[] }).__onlineUsers
+  const online = fromSockets ? [...new Set([...fromSockets(), ...getOnline()])] : getOnline()
+  return NextResponse.json({ online })
 }
 
 export async function POST(req: NextRequest) {

@@ -349,3 +349,4 @@
   .groups { grid-template-columns: 1fr; }
   .cards { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
 }
+.runningTag { position: absolute; top: 10px; left: 12px; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 1px; padding: 2px 7px; border-radius: 5px; background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.35); }

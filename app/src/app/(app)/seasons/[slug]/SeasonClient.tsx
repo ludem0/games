@@ -11,6 +11,8 @@ import RoundsSection from './RoundsSection'
 import MatchesSection from './MatchesSection'
 import InventorySection from './InventorySection'
 import ChatsSection from './ChatsSection'
+import OnlineSection from './OnlineSection'
+import TransferSection from './TransferSection'
 
 import type { Round, Match } from '@/lib/seasons'
 import styles from './season.module.css'
@@ -34,11 +36,12 @@ interface Props {
   initialRounds: Round[]
   initialPsigems: Record<string, number>
   initialMatches: Match[]
+  frozenBy: string | null
 }
 
 export default function SeasonClient({
   slug, name, status, statusLabel, accent,
-  role, username, initialParticipants, allPlayers, initialRounds, initialPsigems, initialMatches,
+  role, username, initialParticipants, allPlayers, initialRounds, initialPsigems, initialMatches, frozenBy,
 }: Props) {
   const Cube = CUBES[slug] ?? CubeSimply
   const [participants, setParticipants] = useState(initialParticipants)
@@ -159,12 +162,26 @@ export default function SeasonClient({
         {/* Inventory + chats */}
         <div className={styles.twoCol}>
           <div className={styles.colLeft}>
+            <OnlineSection
+              accent={accent}
+              username={username}
+              participants={participants}
+            />
             <InventorySection
               slug={slug}
               accent={accent}
               isAdmin={role === 'admin'}
               username={username}
             />
+            {participants.includes(username) && (
+              <TransferSection
+                slug={slug}
+                accent={accent}
+                username={username}
+                participants={participants}
+                deathMatchRunning={initialMatches.some(m => m.type === 'death' && m.running)}
+              />
+            )}
           </div>
           <div className={styles.colRight}>
             <ChatsSection
@@ -187,6 +204,7 @@ export default function SeasonClient({
               participants={participants}
               initialPsigems={initialPsigems}
               initialRounds={initialRounds}
+              frozenBy={frozenBy}
             />
           </div>
           <div className={styles.colRight}>

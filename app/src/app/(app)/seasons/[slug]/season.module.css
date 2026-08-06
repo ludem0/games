@@ -725,3 +725,29 @@
 .chatError { margin-top: 8px; font-size: 0.8rem; color: #f87171; }
 .chatLive { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px; color: #4ade80; }
 .chatOffline { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.3); }
+
+/* Chats and inventory on small screens */
+.sectionHeader { flex-wrap: wrap; gap: 10px; }
+.chatMeta { overflow: hidden; text-overflow: ellipsis; }
+.chatInput { font-size: 16px; }  /* below 16px iOS zooms the page on focus */
+
+@media (max-width: 640px) {
+  .chatMessages { max-height: 50vh; }
+  .chatMsg { max-width: 88%; }
+  .chatPanel { padding: 10px; }
+  .invMine { gap: 18px; }
+  .invCount { font-size: 1.35rem; }
+}
+
+/* ---- Online + psigem transfer ---- */
+.onlineList { display: flex; flex-wrap: wrap; gap: 8px; }
+.onlineChip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); font-size: 0.82rem; color: rgba(255,255,255,0.7); }
+.onlineDot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; }
+.transferBalance { font-size: 0.8rem; color: #a855f7; font-weight: 700; }
+.transferRow { display: flex; gap: 8px; flex-wrap: wrap; }
+.transferSelect, .transferAmount { padding: 9px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: var(--text); font: inherit; font-size: 16px; }
+.transferSelect { flex: 1; min-width: 140px; }
+.transferAmount { width: 90px; }
+.transferLocked { font-size: 0.85rem; color: #fbbf24; }
+.transferDone { margin-top: 8px; font-size: 0.82rem; color: #4ade80; }
+.frozenNote { margin-bottom: 12px; font-size: 0.8rem; color: #fbbf24; }

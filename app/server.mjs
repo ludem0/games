@@ -61,9 +61,28 @@ server.on('upgrade', async (req, socket, head) => {
   })
 })
 
+// Who is connected right now. Every page holds a socket, so this is the online list.
+function onlineUsers() {
+  const names = new Set()
+  for (const ws of wss.clients) {
+    if (ws.readyState === ws.OPEN && ws.user?.username) names.add(ws.user.username)
+  }
+  return [...names].sort()
+}
+globalThis.__onlineUsers = onlineUsers
+
+function broadcastPresence() {
+  const frame = JSON.stringify({ type: 'presence', online: onlineUsers() })
+  for (const ws of wss.clients) {
+    if (ws.readyState === ws.OPEN) ws.send(frame)
+  }
+}
+
 wss.on('connection', ws => {
   ws.isAlive = true
   ws.on('pong', () => { ws.isAlive = true })
+  ws.on('close', () => broadcastPresence())
+  broadcastPresence()
 
   ws.on('message', data => {
     let msg

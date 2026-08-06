@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/jwt'
-import { getPsigems, savePsigems } from '@/lib/seasons'
+import { getPsigems, savePsigems, getStandingsView } from '@/lib/seasons'
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -14,7 +14,7 @@ export async function GET(req: NextRequest, { params }: Params) {
   const user = await getUser(req)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { slug } = await params
-  return NextResponse.json(getPsigems(slug))
+  return NextResponse.json(getStandingsView(slug, user.role === 'admin').psigems)
 }
 
 export async function PUT(req: NextRequest, { params }: Params) {

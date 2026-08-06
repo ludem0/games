@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useSocket } from '@/components/SocketProvider'
 import styles from './season.module.css'
 
 interface ChatSummary {
@@ -29,6 +30,7 @@ const FALLBACK_POLL_MS = 15000
 const RECONNECT_MS = 3000
 
 export default function ChatsSection({ slug, accent, isAdmin, username, participants }: Props) {
+  const { send: sendFrame, addHandler, connected } = useSocket()
   const [chats, setChats] = useState<ChatSummary[]>([])
   const [openId, setOpenId] = useState<string | null>(null)
   const [chat, setChat] = useState<Chat | null>(null)
@@ -38,9 +40,8 @@ export default function ChatsSection({ slug, accent, isAdmin, username, particip
   const [newMembers, setNewMembers] = useState<string[]>([])
   const [addOpen, setAddOpen] = useState(false)
   const [error, setError] = useState('')
-  const [live, setLive] = useState(false)
-  const bottomRef = useRef<HTMLDivElement>(null)
-  const socketRef = useRef<WebSocket | null>(null)
+  const listRef = useRef<HTMLDivElement>(null)
+  const stickToBottom = useRef(true)
   const openIdRef = useRef<string | null>(null)
 
   // a failing route may answer with an HTML error page, so never assume JSON
@@ -76,60 +77,33 @@ export default function ChatsSection({ slug, accent, isAdmin, username, particip
     return () => clearInterval(t)
   }, [openId, loadChat])
 
-  // live updates: the server pushes the chat as soon as anyone writes into it
-  useEffect(() => {
-    let socket: WebSocket | null = null
-    let retry: ReturnType<typeof setTimeout> | null = null
-    let closed = false
-
-    function connect() {
-      const proto = window.location.protocol === 'https:' ? 'wss' : 'ws'
-      socket = new WebSocket(`${proto}://${window.location.host}/api/chat-socket`)
-      socketRef.current = socket
-
-      socket.onopen = () => {
-        setLive(true)
-        if (openIdRef.current) {
-          socket?.send(JSON.stringify({ type: 'subscribe', seasonSlug: slug, chatId: openIdRef.current }))
-        }
-      }
-      socket.onmessage = event => {
-        const msg = JSON.parse(event.data)
-        if (msg.type === 'chat' && msg.chat.id === openIdRef.current) setChat(msg.chat)
-        if (msg.type === 'chats-changed') loadList()
-      }
-      socket.onclose = () => {
-        setLive(false)
-        socketRef.current = null
-        if (!closed) retry = setTimeout(connect, RECONNECT_MS)
-      }
-      socket.onerror = () => socket?.close()
+  // live updates ride the shared socket
+  useEffect(() => addHandler(frame => {
+    if (frame.type === 'chat') {
+      const chat = frame.chat as Chat
+      if (chat.id === openIdRef.current) setChat(chat)
     }
-
-    connect()
-    return () => {
-      closed = true
-      if (retry) clearTimeout(retry)
-      socket?.close()
-    }
-  }, [slug, loadList])
+    if (frame.type === 'chats-changed') loadList()
+  }), [addHandler, loadList])
 
   // tell the server which chat is on screen
   useEffect(() => {
     openIdRef.current = openId
-    const socket = socketRef.current
-    if (socket?.readyState !== WebSocket.OPEN) return
-    if (openId) socket.send(JSON.stringify({ type: 'subscribe', seasonSlug: slug, chatId: openId }))
-    return () => {
-      if (openId && socketRef.current?.readyState === WebSocket.OPEN) {
-        socketRef.current.send(JSON.stringify({ type: 'unsubscribe', seasonSlug: slug, chatId: openId }))
-      }
-    }
-  }, [openId, slug])
+    if (!openId) return
+    sendFrame({ type: 'subscribe', seasonSlug: slug, chatId: openId })
+    return () => { sendFrame({ type: 'unsubscribe', seasonSlug: slug, chatId: openId }) }
+  }, [openId, slug, sendFrame, connected])
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ block: 'end' })
+    const el = listRef.current
+    if (el && stickToBottom.current) el.scrollTop = el.scrollHeight
   }, [chat?.messages.length])
+
+  function onListScroll() {
+    const el = listRef.current
+    if (!el) return
+    stickToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 60
+  }
 
   async function createChat() {
     setError('')
@@ -180,7 +154,7 @@ export default function ChatsSection({ slug, accent, isAdmin, username, particip
     <div className={styles.sectionCard}>
       <div className={styles.sectionHeader}>
         <span className={styles.sectionLabel}>ЧАТЫ</span>
-        <span className={live ? styles.chatLive : styles.chatOffline}>{live ? 'на связи' : 'переподключение'}</span>
+        <span className={connected ? styles.chatLive : styles.chatOffline}>{connected ? 'на связи' : 'переподключение'}</span>
         <button className={styles.btnOutline} onClick={() => setCreating(v => !v)}>
           {creating ? 'Отмена' : '+ Новый чат'}
         </button>
@@ -243,7 +217,7 @@ export default function ChatsSection({ slug, accent, isAdmin, username, particip
             )}
           </div>
 
-          <div className={styles.chatMessages}>
+          <div className={styles.chatMessages} ref={listRef} onScroll={onListScroll}>
             {chat.messages.length === 0 && <p className={styles.noContent}>Сообщений нет</p>}
             {chat.messages.map(m => (
               m.author === '' ? (
@@ -258,7 +232,6 @@ export default function ChatsSection({ slug, accent, isAdmin, username, particip
                 </div>
               )
             ))}
-            <div ref={bottomRef} />
           </div>
 
           <div className={styles.chatSend}>

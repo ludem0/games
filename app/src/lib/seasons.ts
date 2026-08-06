@@ -65,6 +65,9 @@ export interface Match {
   visible: boolean
   accessible: boolean
   minigameSlug?: string
+  running?: boolean                          // admin started it and has not ended it
+  frozenPsigems?: Record<string, number>     // standings captured when it started
+  frozenRounds?: Round[]
 }
 
 export interface SeasonData {
@@ -189,4 +192,51 @@ export function getMatches(slug: string): Match[] {
 export function saveMatches(slug: string, matches: Match[]): void {
   const season = getSeason(slug)
   saveSeason(slug, { ...season, matches })
+}
+
+// A running match freezes the standings: while it lasts, players keep seeing the
+// snapshot taken when it started. The admin always sees the live data.
+export function getRunningMatch(slug: string, type?: 'main' | 'death'): Match | null {
+  const running = getMatches(slug).filter(m => m.running)
+  const match = type ? running.find(m => m.type === type) : running[0]
+  return match ?? null
+}
+
+export function startMatch(slug: string, id: string): Match | null {
+  const season = getSeason(slug)
+  const matches = (season.matches ?? []).map(m =>
+    m.id === id
+      ? { ...m, running: true, frozenPsigems: { ...season.psigems }, frozenRounds: season.rounds }
+      : m)
+  saveSeason(slug, { ...season, matches })
+  return matches.find(m => m.id === id) ?? null
+}
+
+export function stopMatch(slug: string, id: string): Match | null {
+  const season = getSeason(slug)
+  const matches = (season.matches ?? []).map(m => {
+    if (m.id !== id) return m
+    const { frozenPsigems: _p, frozenRounds: _r, ...rest } = m
+    return { ...rest, running: false }
+  })
+  saveSeason(slug, { ...season, matches })
+  return matches.find(m => m.id === id) ?? null
+}
+
+// What the leaderboard should be built from for this viewer.
+export function getStandingsView(slug: string, isAdmin: boolean): {
+  psigems: Record<string, number>
+  rounds: Round[]
+  frozenBy: string | null
+} {
+  const season = getSeason(slug)
+  const running = (season.matches ?? []).find(m => m.running)
+  if (isAdmin || !running || !running.frozenPsigems) {
+    return { psigems: season.psigems, rounds: season.rounds, frozenBy: null }
+  }
+  return {
+    psigems: running.frozenPsigems,
+    rounds: running.frozenRounds ?? season.rounds,
+    frozenBy: running.visible ? running.name : 'матч',
+  }
 }

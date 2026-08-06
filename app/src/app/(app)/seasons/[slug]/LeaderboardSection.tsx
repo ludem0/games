@@ -26,9 +26,10 @@ interface Props {
   participants: string[]
   initialPsigems: Record<string, number>
   initialRounds: Round[]
+  frozenBy: string | null
 }
 
-export default function LeaderboardSection({ slug, accent, isAdmin, participants, initialPsigems, initialRounds }: Props) {
+export default function LeaderboardSection({ slug, accent, isAdmin, participants, initialPsigems, initialRounds, frozenBy }: Props) {
   const [psigems, setPsigems] = useState<Record<string, number>>(initialPsigems)
   const [rounds, setRounds] = useState<Round[]>(initialRounds)
   const avatarUrls = useAvatarUrls(participants)
@@ -174,6 +175,12 @@ export default function LeaderboardSection({ slug, accent, isAdmin, participants
           </div>
         )}
       </div>
+
+      {frozenBy && (
+        <p className={styles.frozenNote}>
+          ❄ Таблица заморожена на время матча «{frozenBy}». Здесь показано положение до его начала.
+        </p>
+      )}
 
       <div className={styles.rankList}>
         {(editing ? participants : sorted).map((name, i) => {

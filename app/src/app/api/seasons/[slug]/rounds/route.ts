@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/jwt'
-import { getRounds, saveRounds } from '@/lib/seasons'
+import { getRounds, saveRounds, getStandingsView } from '@/lib/seasons'
 import type { Round } from '@/lib/seasons'
 
 type Params = { params: Promise<{ slug: string }> }
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest, { params }: Params) {
   const user = await getUser(req)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { slug } = await params
-  return NextResponse.json(getRounds(slug))
+  return NextResponse.json(getStandingsView(slug, user.role === 'admin').rounds)
 }
 
 export async function POST(req: NextRequest, { params }: Params) {

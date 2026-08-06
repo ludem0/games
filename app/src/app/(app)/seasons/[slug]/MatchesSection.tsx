@@ -24,6 +24,7 @@ function MatchCard({
   participants,
   onToggleVisible,
   onToggleAccessible,
+  onToggleRunning,
   onDelete,
   onSave,
 }: {
@@ -33,6 +34,7 @@ function MatchCard({
   participants: string[]
   onToggleVisible: () => void
   onToggleAccessible: () => void
+  onToggleRunning: () => void
   onDelete: () => void
   onSave: (edit: EditState) => void
 }) {
@@ -98,12 +100,19 @@ function MatchCard({
             title={match.accessible ? 'Закрыть доступ' : 'Открыть доступ'}
           >{match.accessible ? '🔓' : '🔒'}</button>
           <button
+            className={styles.iconBtn}
+            onClick={e => { e.preventDefault(); e.stopPropagation(); onToggleRunning() }}
+            title={match.running ? 'Завершить матч' : 'Начать матч'}
+          >{match.running ? '⏹' : '▶'}</button>
+          <button
             className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
             onClick={e => { e.preventDefault(); e.stopPropagation(); onDelete() }}
             title="Удалить"
           >✕</button>
         </div>
       )}
+
+      {match.running && <span className={styles.runningTag}>идёт</span>}
 
       <div className={`${styles.cardIconWrap} ${isMain ? styles.cardIconMain : styles.cardIconDeath}`}>
         {icon}
@@ -218,6 +227,15 @@ export default function MatchesSection({ slug, isAdmin, initialMatches, particip
     if (res.ok) setMatches((await res.json()).matches)
   }
 
+  async function toggleRunning(id: string, running: boolean) {
+    const res = await fetch(`/api/seasons/${slug}/matches/${id}/run`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ running }),
+    })
+    if (res.ok) setMatches((await res.json()).matches)
+  }
+
   async function deleteMatch(id: string) {
     const res = await fetch(`/api/seasons/${slug}/matches?id=${id}`, { method: 'DELETE' })
     if (res.ok) setMatches((await res.json()).matches)
@@ -255,6 +273,7 @@ export default function MatchesSection({ slug, isAdmin, initialMatches, particip
                   isAdmin={isAdmin}
                   onToggleVisible={() => updateMatch(m.id, { visible: !m.visible })}
                   onToggleAccessible={() => updateMatch(m.id, { accessible: !m.accessible })}
+                  onToggleRunning={() => toggleRunning(m.id, !m.running)}
                   onDelete={() => deleteMatch(m.id)}
                   seasonSlug={slug}
                   participants={participants}
@@ -287,6 +306,7 @@ export default function MatchesSection({ slug, isAdmin, initialMatches, particip
                   isAdmin={isAdmin}
                   onToggleVisible={() => updateMatch(m.id, { visible: !m.visible })}
                   onToggleAccessible={() => updateMatch(m.id, { accessible: !m.accessible })}
+                  onToggleRunning={() => toggleRunning(m.id, !m.running)}
                   onDelete={() => deleteMatch(m.id)}
                   seasonSlug={slug}
                   participants={participants}

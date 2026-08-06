@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 import { redirect, notFound } from 'next/navigation'
 import { verifyToken, getUsers } from '@/lib/auth'
-import { getParticipants, getRounds, getPsigems, getMatches } from '@/lib/seasons'
+import { getParticipants, getMatches, getStandingsView } from '@/lib/seasons'
 import { SEASONS_CONFIG } from '@/lib/seasonsConfig'
 import SeasonClient from './SeasonClient'
 
@@ -17,9 +17,9 @@ export default async function SeasonPage({ params }: { params: Promise<{ slug: s
   if (!season) notFound()
 
   const participants = getParticipants(slug)
-  const rounds = getRounds(slug)
-  const psigems = getPsigems(slug)
   const matches = getMatches(slug)
+  // players keep seeing the standings as they were when the running match started
+  const { rounds, psigems, frozenBy } = getStandingsView(slug, user.role === 'admin')
   const allPlayers = getUsers()
     .filter(u => u.role === 'player')
     .map(u => u.username)
@@ -38,6 +38,7 @@ export default async function SeasonPage({ params }: { params: Promise<{ slug: s
       initialRounds={rounds}
       initialPsigems={psigems}
       initialMatches={matches}
+      frozenBy={frozenBy}
     />
   )
 }

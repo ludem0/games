@@ -247,3 +247,16 @@
 .resFinal { max-width: 420px; }
 .resBest { background: rgba(34,197,94,0.18) !important; color: #86efac !important; }
 .resWorst { background: rgba(239,68,68,0.18) !important; color: #fca5a5 !important; }
+
+/* Layout canvas: these classes were referenced but never defined, so the SVG fell
+   back to the browser default box instead of filling its column. */
+.svgWrap { width: 100%; display: flex; justify-content: center; }
+.ttCanvas { width: 100%; max-width: 620px; height: auto; }
+
+@media (max-width: 640px) {
+  .tabs { padding: 12px 12px 0; overflow-x: auto; }
+  .content { padding: 16px 12px 40px; }
+  .resTable { font-size: 0.78rem; }
+  .resTable th, .resTable td { padding: 6px 8px; }
+  .resScoreHead, .resTotalHead { width: 56px; }
+}
