@@ -260,3 +260,7 @@
   .resTable th, .resTable td { padding: 6px 8px; }
   .resScoreHead, .resTotalHead { width: 56px; }
 }
+.adminActions { display: flex; gap: 10px; flex-wrap: wrap; }
+.resetBtn { padding: 10px 18px; border-radius: 8px; border: 1px solid rgba(239,68,68,0.35); background: rgba(239,68,68,0.08); color: #fca5a5; font: inherit; font-weight: 600; cursor: pointer; }
+.resetBtn:hover { border-color: rgba(239,68,68,0.6); }
+.resetBtn:disabled { opacity: 0.4; cursor: default; }

@@ -166,6 +166,8 @@ export function createSeasonGame(
 export function syncParticipants(slug: string, participants: string[]): MinigameData | null {
   const game = getMinigame(slug)
   if (!game) return null
+  // an empty roster means the season has none yet, not that the game lost its players
+  if (participants.length === 0) return game
   const same = game.participants.length === participants.length
     && game.participants.every(p => participants.includes(p))
   if (same) return game

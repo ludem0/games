@@ -54,6 +54,16 @@ export default function ResultsSection({ game, role, username }: Props) {
   const bestScore = game.totalPoints[standings[0]] ?? 0
   const worstScore = game.totalPoints[standings[standings.length - 1]] ?? 0
 
+  const [resetting, setResetting] = useState(false)
+
+  async function handleReset() {
+    if (!confirm('Начать игру заново? Все ходы, очки и псигемы этой игры будут стёрты.')) return
+    setResetting(true)
+    const res = await fetch(`/api/minigames/${game.id}/reset`, { method: 'POST' })
+    setResetting(false)
+    if (res.ok) location.reload()
+  }
+
   async function handleDistribute() {
     if (!confirm('Распределить финальные награды? Это действие необратимо.')) return
     setDistributing(true)
@@ -133,10 +143,17 @@ export default function ResultsSection({ game, role, username }: Props) {
         </table>
       </div>
 
-      {role === 'admin' && game.status === 'finished' && !game.rewardsDistributed && (
-        <button className={styles.distributeBtn} onClick={handleDistribute} disabled={distributing}>
-          {distributing ? 'Распределяю...' : '🏆 Распределить финальные награды'}
-        </button>
+      {role === 'admin' && (
+        <div className={styles.adminActions}>
+          {game.status === 'finished' && !game.rewardsDistributed && (
+            <button className={styles.distributeBtn} onClick={handleDistribute} disabled={distributing}>
+              {distributing ? 'Распределяю...' : '🏆 Распределить финальные награды'}
+            </button>
+          )}
+          <button className={styles.resetBtn} onClick={handleReset} disabled={resetting}>
+            {resetting ? 'Сбрасываю...' : '↻ Начать игру заново'}
+          </button>
+        </div>
       )}
 
       {distributeResult && (
