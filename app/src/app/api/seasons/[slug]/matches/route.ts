@@ -6,6 +6,7 @@ import type { Match } from '@/lib/seasons'
 import {
   createSeasonGame, seasonGameSlug, syncParticipants, getMinigame, saveMinigame,
 } from '@/lib/minigames'
+import { createGame as createLetterbox } from '@/lib/letterbox'
 
 async function getRole() {
   const cookieStore = await cookies()
@@ -58,7 +59,7 @@ export async function POST(
   const type: 'main' | 'death' = body.type ?? 'main'
   const id = `m${Date.now()}`
   const sameType = matches.filter(m => m.type === type).length + 1
-  const defaultName = type === 'main' ? `MM${sameType}: Track Trouble` : `DM${sameType}`
+  const defaultName = type === 'main' ? `MM${sameType}: Track Trouble` : `DM${sameType}: Letterbox`
 
   const newMatch: Match = {
     id,
@@ -68,11 +69,14 @@ export async function POST(
     accessible: body.accessible ?? false,
     // every main match is a game of its own, so it is created right here and the
     // slug comes from the season and the match instead of being typed by hand
-    minigameSlug: type === 'main' ? seasonGameSlug(slug, id) : body.minigameSlug,
+    minigameSlug: seasonGameSlug(slug, id),
   }
 
+  // a main match is a game of Track Trouble, a death match is a game of Letterbox
   if (type === 'main') {
     createSeasonGame(seasonGameSlug(slug, id), slug, newMatch.name, getParticipants(slug))
+  } else {
+    createLetterbox(seasonGameSlug(slug, id), slug, newMatch.name, id)
   }
 
   saveMatches(slug, [...matches, newMatch])

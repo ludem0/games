@@ -6,6 +6,7 @@ services:
       - ./seasons.json:/app/seasons.json
       - ./minigames.json:/app/minigames.json
       - ./chats.json:/app/chats.json
+      - ./letterbox.json:/app/letterbox.json
       - ./avatars:/app/public/avatars
     env_file: .env
     networks:

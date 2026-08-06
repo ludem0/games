@@ -128,9 +128,12 @@ function MatchCard({
     </>
   )
 
+  // main matches open Track Trouble, death matches open Letterbox
+  const gameHref = `${isMain ? '/minigames' : '/letterbox'}/${match.minigameSlug}`
+
   if (match.minigameSlug && (playerCanClick || isAdmin)) {
     return (
-      <Link href={`/minigames/${match.minigameSlug}`} className={cardClass} style={{ textDecoration: 'none' }}>
+      <Link href={gameHref} className={cardClass} style={{ textDecoration: 'none' }}>
         {inner}
       </Link>
     )
