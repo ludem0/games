@@ -7,6 +7,7 @@ services:
       - ./minigames.json:/app/minigames.json
       - ./chats.json:/app/chats.json
       - ./letterbox.json:/app/letterbox.json
+      - ./doubleteam.json:/app/doubleteam.json
       - ./avatars:/app/public/avatars
     env_file: .env
     networks:

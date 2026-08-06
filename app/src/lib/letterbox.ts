@@ -76,6 +76,16 @@ export function saveGame(game: LetterboxGame): void {
   writeAll(all)
 }
 
+/** Identity letters handed out in this season's deathmatches, keyed by player. */
+export function identityLettersFor(seasonSlug: string): Record<string, string> {
+  const letters: Record<string, string> = {}
+  for (const game of Object.values(readAll())) {
+    if (game.seasonSlug !== seasonSlug) continue
+    Object.assign(letters, game.observerLetters)
+  }
+  return letters
+}
+
 export function createGame(slug: string, seasonSlug: string, name: string, matchId: string | null): LetterboxGame {
   const existing = getGame(slug)
   if (existing) return existing

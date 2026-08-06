@@ -65,6 +65,7 @@ export interface Match {
   visible: boolean
   accessible: boolean
   minigameSlug?: string
+  game?: 'track_trouble' | 'double_team' | 'letterbox'
   running?: boolean                          // admin started it and has not ended it
   frozenPsigems?: Record<string, number>     // standings captured when it started
   frozenRounds?: Round[]

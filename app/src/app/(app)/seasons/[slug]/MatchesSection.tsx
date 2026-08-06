@@ -128,8 +128,9 @@ function MatchCard({
     </>
   )
 
-  // main matches open Track Trouble, death matches open Letterbox
-  const gameHref = `${isMain ? '/minigames' : '/letterbox'}/${match.minigameSlug}`
+  // each game has its own page
+  const GAME_PATHS = { track_trouble: '/minigames', double_team: '/doubleteam', letterbox: '/letterbox' }
+  const gameHref = `${GAME_PATHS[match.game ?? (isMain ? 'track_trouble' : 'letterbox')]}/${match.minigameSlug}`
 
   if (match.minigameSlug && (playerCanClick || isAdmin)) {
     return (
@@ -145,11 +146,11 @@ function MatchCard({
 export default function MatchesSection({ slug, isAdmin, initialMatches }: Props) {
   const [matches, setMatches] = useState<Match[]>(initialMatches)
 
-  async function addMatch(type: 'main' | 'death') {
+  async function addMatch(type: 'main' | 'death', game?: 'track_trouble' | 'double_team') {
     const res = await fetch(`/api/seasons/${slug}/matches`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type }),
+      body: JSON.stringify({ type, game }),
     })
     if (res.ok) setMatches((await res.json()).matches)
   }
@@ -197,7 +198,10 @@ export default function MatchesSection({ slug, isAdmin, initialMatches }: Props)
               Main Matches
             </span>
             {isAdmin && (
-              <button className={styles.addBtn} onClick={() => addMatch('main')}>+ Добавить</button>
+              <>
+                <button className={styles.addBtn} onClick={() => addMatch('main', 'track_trouble')}>+ Track Trouble</button>
+                <button className={styles.addBtn} onClick={() => addMatch('main', 'double_team')}>+ Double Team</button>
+              </>
             )}
           </div>
           {mainMatches.length === 0 ? (

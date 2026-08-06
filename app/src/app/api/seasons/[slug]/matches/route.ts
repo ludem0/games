@@ -7,6 +7,7 @@ import {
   createSeasonGame, seasonGameSlug, syncParticipants, getMinigame, saveMinigame,
 } from '@/lib/minigames'
 import { createGame as createLetterbox } from '@/lib/letterbox'
+import { createGame as createDoubleTeam } from '@/lib/doubleTeam'
 
 async function getRole() {
   const cookieStore = await cookies()
@@ -33,7 +34,9 @@ export async function GET(
     saveMatches(slug, matches)
     for (const m of matches) {
       if (m.type === 'main' && m.minigameSlug) {
-        createSeasonGame(m.minigameSlug, slug, m.name, getParticipants(slug))
+        if ((m.game ?? 'track_trouble') === 'track_trouble') {
+          createSeasonGame(m.minigameSlug, slug, m.name, getParticipants(slug))
+        }
       }
     }
   }
@@ -59,25 +62,29 @@ export async function POST(
   const type: 'main' | 'death' = body.type ?? 'main'
   const id = `m${Date.now()}`
   const sameType = matches.filter(m => m.type === type).length + 1
-  const defaultName = type === 'main' ? `MM${sameType}: Track Trouble` : `DM${sameType}: Letterbox`
+
+  // a death match is always Letterbox; a main match names which game it is
+  const game: NonNullable<Match['game']> =
+    type === 'death' ? 'letterbox' : body.game === 'double_team' ? 'double_team' : 'track_trouble'
+  const GAME_NAMES = { track_trouble: 'Track Trouble', double_team: 'Double Team', letterbox: 'Letterbox' }
+  const defaultName = `${type === 'main' ? 'MM' : 'DM'}${sameType}: ${GAME_NAMES[game]}`
 
   const newMatch: Match = {
     id,
     type,
+    game,
     name: body.name ?? defaultName,
     visible: body.visible ?? true,
     accessible: body.accessible ?? false,
-    // every main match is a game of its own, so it is created right here and the
-    // slug comes from the season and the match instead of being typed by hand
+    // the game is created right here and the slug comes from the season and the
+    // match instead of being typed by hand
     minigameSlug: seasonGameSlug(slug, id),
   }
 
-  // a main match is a game of Track Trouble, a death match is a game of Letterbox
-  if (type === 'main') {
-    createSeasonGame(seasonGameSlug(slug, id), slug, newMatch.name, getParticipants(slug))
-  } else {
-    createLetterbox(seasonGameSlug(slug, id), slug, newMatch.name, id)
-  }
+  const gameSlug = seasonGameSlug(slug, id)
+  if (game === 'track_trouble') createSeasonGame(gameSlug, slug, newMatch.name, getParticipants(slug))
+  else if (game === 'double_team') createDoubleTeam(gameSlug, slug, newMatch.name, id)
+  else createLetterbox(gameSlug, slug, newMatch.name, id)
 
   saveMatches(slug, [...matches, newMatch])
   return NextResponse.json({ matches: getMatches(slug) })
