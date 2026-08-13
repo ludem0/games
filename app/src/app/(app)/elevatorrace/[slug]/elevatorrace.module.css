@@ -1,0 +1,87 @@
+.page { min-height: 100vh; background: #0b0b12; color: #e9e9f0; }
+
+.navbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px; border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.back { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.85rem; }
+.back:hover { color: #fff; }
+.navTitle { font-weight: 700; }
+.navUser { font-size: 0.8rem; color: rgba(255,255,255,0.4); }
+
+.content { max-width: 980px; margin: 0 auto; padding: 24px 16px 60px; display: flex; flex-direction: column; gap: 16px; }
+
+.statusRow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.phaseTag {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;
+  padding: 4px 10px; border-radius: 999px;
+  background: rgba(56,189,248,0.15); color: #7dd3fc; border: 1px solid rgba(56,189,248,0.35);
+}
+.roles { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+.deadline { margin-left: auto; font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+.clock { font-variant-numeric: tabular-nums; font-weight: 700; color: #4ade80; }
+.clockLow { font-variant-numeric: tabular-nums; font-weight: 700; color: #f87171; }
+
+.card {
+  padding: 18px; border-radius: 14px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.cardTitle { font-weight: 700; font-size: 0.95rem; }
+.hint { font-size: 0.8rem; color: rgba(255,255,255,0.45); }
+.error { font-size: 0.85rem; color: #f87171; }
+
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.input {
+  padding: 9px 12px; border-radius: 8px; font: inherit; font-size: 16px;
+  border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); color: #e9e9f0;
+}
+.btn, .btnPrimary, .btnDanger {
+  padding: 9px 16px; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #e9e9f0;
+}
+.btn:hover, .btnPrimary:hover, .btnDanger:hover { border-color: rgba(255,255,255,0.35); }
+.btnPrimary { background: #38bdf8; border-color: #38bdf8; color: #0b0b12; align-self: flex-start; }
+.btnDanger { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.35); color: #fca5a5; align-self: flex-start; }
+.btn:disabled, .btnPrimary:disabled, .btnDanger:disabled { opacity: 0.35; cursor: default; }
+
+/* the board, bottom row last */
+.board { display: flex; flex-direction: column; gap: 4px; }
+.boardRow { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+.square {
+  position: relative; aspect-ratio: 5 / 4; border-radius: 6px; padding: 3px 4px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  font-size: 0.62rem; color: rgba(255,255,255,0.35);
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.squareCut { opacity: 0.25; }
+.squarePurple { border-left: 3px solid #a855f7; }
+.up { color: #60a5fa; font-weight: 700; }
+.down { color: #f87171; font-weight: 700; }
+.pawns { display: flex; flex-wrap: wrap; gap: 2px; }
+.pawn {
+  font-size: 0.6rem; font-weight: 800; padding: 1px 4px; border-radius: 4px;
+  background: rgba(56,189,248,0.25); color: #e9e9f0;
+}
+.pawnMe { background: #38bdf8; color: #0b0b12; }
+
+.tableWrap { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.table th, .table td { padding: 7px 10px; border-bottom: 1px solid rgba(255,255,255,0.07); text-align: left; }
+.table th { color: rgba(255,255,255,0.45); font-weight: 600; }
+.me { color: #7dd3fc; font-weight: 700; }
+
+.roll {
+  padding: 12px 14px; border-radius: 10px; font-size: 0.95rem;
+  background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3);
+}
+.rollValue { font-size: 1.4rem; font-weight: 800; }
+
+.log { display: flex; flex-direction: column; gap: 6px; max-height: 300px; overflow-y: auto; }
+.logRow { display: flex; gap: 10px; font-size: 0.82rem; }
+.logTime { color: rgba(255,255,255,0.3); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 720px) {
+  .deadline { margin-left: 0; }
+  .square { font-size: 0.5rem; }
+}
