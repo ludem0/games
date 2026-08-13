@@ -8,6 +8,7 @@ import {
 } from '@/lib/minigames'
 import { createGame as createLetterbox } from '@/lib/letterbox'
 import { createGame as createDoubleTeam } from '@/lib/doubleTeam'
+import { createGame as createUltimate } from '@/lib/ultimate'
 
 async function getRole() {
   const cookieStore = await cookies()
@@ -63,10 +64,14 @@ export async function POST(
   const id = `m${Date.now()}`
   const sameType = matches.filter(m => m.type === type).length + 1
 
-  // a death match is always Letterbox; a main match names which game it is
-  const game: NonNullable<Match['game']> =
-    type === 'death' ? 'letterbox' : body.game === 'double_team' ? 'double_team' : 'track_trouble'
-  const GAME_NAMES = { track_trouble: 'Track Trouble', double_team: 'Double Team', letterbox: 'Letterbox' }
+  // both kinds of match now name their game, and each kind has its own default
+  const game: NonNullable<Match['game']> = type === 'death'
+    ? (body.game === 'ultimate_ttt' ? 'ultimate_ttt' : 'letterbox')
+    : (body.game === 'double_team' ? 'double_team' : 'track_trouble')
+  const GAME_NAMES = {
+    track_trouble: 'Track Trouble', double_team: 'Double Team',
+    letterbox: 'Letterbox', ultimate_ttt: 'Ultimate Tic Tac Toe',
+  }
   const defaultName = `${type === 'main' ? 'MM' : 'DM'}${sameType}: ${GAME_NAMES[game]}`
 
   const newMatch: Match = {
@@ -84,6 +89,7 @@ export async function POST(
   const gameSlug = seasonGameSlug(slug, id)
   if (game === 'track_trouble') createSeasonGame(gameSlug, slug, newMatch.name, getParticipants(slug))
   else if (game === 'double_team') createDoubleTeam(gameSlug, slug, newMatch.name, id)
+  else if (game === 'ultimate_ttt') createUltimate(gameSlug, slug, newMatch.name, id)
   else createLetterbox(gameSlug, slug, newMatch.name, id)
 
   saveMatches(slug, [...matches, newMatch])

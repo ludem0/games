@@ -1,0 +1,105 @@
+.page { min-height: 100vh; background: #0b0b12; color: #e9e9f0; }
+
+.navbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px; border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.back { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.85rem; }
+.back:hover { color: #fff; }
+.navTitle { font-weight: 700; }
+.navUser { font-size: 0.8rem; color: rgba(255,255,255,0.4); }
+
+.content { max-width: 900px; margin: 0 auto; padding: 24px 16px 60px; display: flex; flex-direction: column; gap: 16px; }
+
+.statusRow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.phaseTag {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;
+  padding: 4px 10px; border-radius: 999px;
+  background: rgba(139,92,246,0.15); color: #c4b5fd; border: 1px solid rgba(139,92,246,0.35);
+}
+.roles { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+.deadline { margin-left: auto; font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+.clock { font-variant-numeric: tabular-nums; font-weight: 700; color: #4ade80; }
+.clockLow { font-variant-numeric: tabular-nums; font-weight: 700; color: #f87171; }
+
+.winner {
+  padding: 14px 18px; border-radius: 12px; font-size: 1.05rem;
+  background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.35); color: #86efac;
+}
+
+.card {
+  padding: 18px; border-radius: 14px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.cardTitle { font-weight: 700; font-size: 0.95rem; }
+.hint { font-size: 0.8rem; color: rgba(255,255,255,0.45); }
+.waiting { font-size: 0.9rem; color: rgba(255,255,255,0.45); text-align: center; padding: 10px; }
+.error { font-size: 0.85rem; color: #f87171; }
+
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.input {
+  padding: 9px 12px; border-radius: 8px; font: inherit; font-size: 16px;
+  border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); color: #e9e9f0;
+}
+.btn, .btnPrimary, .btnDanger {
+  padding: 9px 16px; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #e9e9f0;
+}
+.btn:hover, .btnPrimary:hover, .btnDanger:hover { border-color: rgba(255,255,255,0.35); }
+.btnPrimary { background: #8b5cf6; border-color: #8b5cf6; color: #0b0b12; align-self: flex-start; }
+.btnDanger { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.35); color: #fca5a5; align-self: flex-start; }
+.btn:disabled, .btnPrimary:disabled, .btnDanger:disabled { opacity: 0.35; cursor: default; }
+
+/* the 9x9 board: nine local boards, each a 3x3 of cells */
+.global {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  width: min(100%, 560px); margin: 0 auto; aspect-ratio: 1;
+}
+.local {
+  position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px;
+  padding: 5px; border-radius: 10px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09);
+}
+/* where the next move has to land */
+.localActive { border-color: #8b5cf6; box-shadow: 0 0 0 2px rgba(139,92,246,0.28); background: rgba(139,92,246,0.07); }
+.localClosed { opacity: 0.75; }
+
+.cell {
+  display: flex; align-items: center; justify-content: center;
+  aspect-ratio: 1; border-radius: 5px; padding: 0;
+  font: inherit; font-weight: 800; font-size: clamp(0.7rem, 2.2vw, 1.05rem);
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07);
+  color: #e9e9f0; cursor: default;
+}
+.cellPlayable { cursor: pointer; background: rgba(139,92,246,0.14); border-color: rgba(139,92,246,0.4); }
+.cellPlayable:hover { background: rgba(139,92,246,0.3); }
+.markX { color: #60a5fa; }
+.markO { color: #fbbf24; }
+/* the last move, so a returning player can see what just happened */
+.cellLast { box-shadow: inset 0 0 0 2px rgba(255,255,255,0.5); }
+
+/* the giant mark stamped over a won local board */
+.stamp {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: clamp(2.4rem, 10vw, 4rem); font-weight: 900; pointer-events: none;
+  border-radius: 10px; background: rgba(11,11,18,0.72);
+}
+.stampDraw { color: rgba(255,255,255,0.35); font-size: clamp(1rem, 4vw, 1.6rem); }
+
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+.tally { display: flex; gap: 18px; flex-wrap: wrap; font-size: 0.9rem; }
+.games { display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.82rem; }
+.gameChip {
+  padding: 5px 10px; border-radius: 999px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+}
+
+.log { display: flex; flex-direction: column; gap: 6px; max-height: 300px; overflow-y: auto; }
+.logRow { display: flex; gap: 10px; font-size: 0.82rem; }
+.logTime { color: rgba(255,255,255,0.3); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 720px) {
+  .deadline { margin-left: 0; }
+  .global { gap: 6px; }
+}

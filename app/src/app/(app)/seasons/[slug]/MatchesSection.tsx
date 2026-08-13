@@ -129,7 +129,10 @@ function MatchCard({
   )
 
   // each game has its own page
-  const GAME_PATHS = { track_trouble: '/minigames', double_team: '/doubleteam', letterbox: '/letterbox' }
+  const GAME_PATHS = {
+    track_trouble: '/minigames', double_team: '/doubleteam',
+    letterbox: '/letterbox', ultimate_ttt: '/ultimate',
+  }
   const gameHref = `${GAME_PATHS[match.game ?? (isMain ? 'track_trouble' : 'letterbox')]}/${match.minigameSlug}`
 
   if (match.minigameSlug && (playerCanClick || isAdmin)) {
@@ -146,7 +149,7 @@ function MatchCard({
 export default function MatchesSection({ slug, isAdmin, initialMatches }: Props) {
   const [matches, setMatches] = useState<Match[]>(initialMatches)
 
-  async function addMatch(type: 'main' | 'death', game?: 'track_trouble' | 'double_team') {
+  async function addMatch(type: 'main' | 'death', game?: Match['game']) {
     const res = await fetch(`/api/seasons/${slug}/matches`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -232,7 +235,10 @@ export default function MatchesSection({ slug, isAdmin, initialMatches }: Props)
               Death Matches
             </span>
             {isAdmin && (
-              <button className={styles.addBtn} onClick={() => addMatch('death')}>+ Добавить</button>
+              <>
+                <button className={styles.addBtn} onClick={() => addMatch('death', 'letterbox')}>+ Letterbox</button>
+                <button className={styles.addBtn} onClick={() => addMatch('death', 'ultimate_ttt')}>+ Ultimate Tic Tac Toe</button>
+              </>
             )}
           </div>
           {deathMatches.length === 0 ? (
