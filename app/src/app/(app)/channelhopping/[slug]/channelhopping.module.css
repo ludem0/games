@@ -1,0 +1,83 @@
+.page { min-height: 100vh; background: #0b0b12; color: #e9e9f0; }
+
+.navbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px; border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.back { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.85rem; }
+.back:hover { color: #fff; }
+.navTitle { font-weight: 700; }
+.navUser { font-size: 0.8rem; color: rgba(255,255,255,0.4); }
+
+.content { max-width: 1100px; margin: 0 auto; padding: 20px 16px 60px; display: flex; flex-direction: column; gap: 14px; }
+
+.statusRow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.phaseTag {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;
+  padding: 4px 10px; border-radius: 999px;
+  background: rgba(244,114,182,0.15); color: #f9a8d4; border: 1px solid rgba(244,114,182,0.35);
+}
+.score { font-size: 0.95rem; display: flex; gap: 14px; }
+.scoreMe { color: #f9a8d4; font-weight: 700; }
+.deadline { margin-left: auto; font-size: 1.1rem; font-variant-numeric: tabular-nums; font-weight: 800; }
+.deadlineLow { color: #f87171; }
+
+.card {
+  padding: 16px; border-radius: 14px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.cardTitle { font-weight: 700; font-size: 0.9rem; letter-spacing: 0.5px; }
+.hint { font-size: 0.8rem; color: rgba(255,255,255,0.45); }
+.error { font-size: 0.85rem; color: #f87171; }
+.prompt { font-size: 1.05rem; font-weight: 600; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; align-items: start; }
+
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.input {
+  padding: 9px 12px; border-radius: 8px; font: inherit; font-size: 16px; flex: 1; min-width: 120px;
+  border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); color: #e9e9f0;
+}
+.btn, .btnPrimary, .btnDanger {
+  padding: 9px 16px; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #e9e9f0;
+}
+.btnPrimary { background: #f472b6; border-color: #f472b6; color: #0b0b12; align-self: flex-start; }
+.btnDanger { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.35); color: #fca5a5; align-self: flex-start; }
+.btn:disabled, .btnPrimary:disabled, .btnDanger:disabled { opacity: 0.35; cursor: default; }
+
+.verdict { font-size: 0.82rem; padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,0.05); }
+.verdictGood { background: rgba(74,222,128,0.14); color: #86efac; }
+.verdictBad { background: rgba(239,68,68,0.12); color: #fca5a5; }
+
+/* gyul hap board */
+.board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; max-width: 280px; }
+.hapCard {
+  aspect-ratio: 1; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  border: 2px solid rgba(255,255,255,0.15); position: relative; font-size: 0.6rem;
+}
+.bgWhite { background: #f8fafc; }
+.bgBlack { background: #0f172a; }
+.bgGrey { background: #94a3b8; }
+.index { position: absolute; top: 2px; left: 4px; color: rgba(120,120,140,0.9); font-weight: 700; }
+
+.tiles { display: flex; gap: 6px; flex-wrap: wrap; }
+.tile {
+  width: 34px; height: 44px; border-radius: 6px; font-weight: 800; cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.2); font-family: inherit; font-size: 0.95rem;
+}
+.tileBlack { background: #16161f; color: #e9e9f0; }
+.tileWhite { background: #ededf5; color: #16161f; }
+.tile:disabled { opacity: 0.35; cursor: default; }
+
+.tableWrap { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.table th, .table td { padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.07); text-align: left; }
+.table th { color: rgba(255,255,255,0.45); font-weight: 600; }
+
+.log { display: flex; flex-direction: column; gap: 5px; max-height: 240px; overflow-y: auto; font-size: 0.8rem; }
+
+@media (max-width: 720px) {
+  .deadline { margin-left: 0; }
+}
