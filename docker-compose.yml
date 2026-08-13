@@ -10,6 +10,7 @@ services:
       - ./doubleteam.json:/app/doubleteam.json
       - ./ultimate.json:/app/ultimate.json
       - ./swapping.json:/app/swapping.json
+      - ./kingscourt.json:/app/kingscourt.json
       - ./avatars:/app/public/avatars
     env_file: .env
     networks:

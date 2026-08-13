@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/jwt'
 import { getParticipants, getPsigems, savePsigems, getRunningMatch } from '@/lib/seasons'
+import { isTradeFrozen } from '@/lib/kingsCourt'
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -18,6 +19,11 @@ export async function POST(req: NextRequest, { params }: Params) {
   // nothing changes hands while a death match is on
   if (getRunningMatch(slug, 'death')) {
     return NextResponse.json({ error: 'Идёт Death Match, передача закрыта' }, { status: 409 })
+  }
+  // King's Court freezes trading between the king joining the court and the EC
+  if (isTradeFrozen(slug)) {
+    return NextResponse.json(
+      { error: 'King\'s Court: обмен закрыт, пока не назван кандидат на выбывание' }, { status: 409 })
   }
 
   const { to, amount } = await req.json() as { to?: string; amount?: number }
