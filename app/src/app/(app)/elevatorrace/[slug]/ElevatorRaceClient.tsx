@@ -5,6 +5,7 @@ import Link from 'next/link'
 import type { Role } from '@/lib/types'
 import type { ErView, RollerKind, RollValue } from '@/lib/elevatorRace'
 import RulesCard from '@/components/RulesCard'
+import { powersIn, powerById, COLUMNS as POWER_COLUMNS } from '@/lib/racePowers'
 import { ELEVATOR_RACE_RULES } from './rules'
 import styles from './elevatorrace.module.css'
 
@@ -54,6 +55,8 @@ export default function ElevatorRaceClient({ slug, initialView, username, role }
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [claim, setClaim] = useState('')
+  const [bidPower, setBidPower] = useState('')
+  const [bidAmount, setBidAmount] = useState('0')
   const [elevatorText, setElevatorText] = useState(
     initialView.elevators.map(e => `${e.from}-${e.to}`).join(', '))
   const logEnd = useRef<HTMLDivElement>(null)
@@ -140,8 +143,113 @@ export default function ElevatorRaceClient({ slug, initialView, username, role }
           </div>
         )}
 
+        {/* the draft */}
+        {view.phase === 'draft' && view.draft && (
+          <div className={styles.card}>
+            <div className={styles.cardTitle}>
+              {view.draft.cycle <= POWER_COLUMNS.length
+                ? `Торги за силы: цикл ${view.draft.cycle} из ${POWER_COLUMNS.length}`
+                : 'Силы разобраны: настройте роллеры'}
+            </div>
+
+            {view.draft.cycle <= POWER_COLUMNS.length && view.inRace && (
+              <>
+                <p className={styles.hint}>
+                  Ставки закрытые. Единственный претендент получает силу бесплатно, иначе платит тот,
+                  кто поставил больше, а проигравшие спускаются по колонке до ближайшей свободной силы.
+                </p>
+                <div className={styles.row}>
+                  <select className={styles.input} value={bidPower} onChange={e => setBidPower(e.target.value)}>
+                    <option value="">Сила</option>
+                    {powersIn(POWER_COLUMNS[view.draft.cycle - 1]).map(power => (
+                      <option key={power.id} value={power.id}>{power.name}</option>
+                    ))}
+                  </select>
+                  <input className={styles.input} type="number" min={0} style={{ width: 90 }}
+                    value={bidAmount} onChange={e => setBidAmount(e.target.value)} />
+                  <button className={styles.btnPrimary} disabled={busy || !bidPower}
+                    onClick={() => act('bid', { power: bidPower, amount: Number(bidAmount) })}>
+                    Поставить
+                  </button>
+                </div>
+                {view.draft.bid && (
+                  <p className={styles.hint}>
+                    Ваша ставка: {powerById(view.draft.bid.power)?.name} за {view.draft.bid.amount} Ψ
+                  </p>
+                )}
+                <div className={styles.tableWrap}>
+                  <table className={styles.table}>
+                    <thead><tr><th>Сила</th><th>Что делает</th><th>Считает</th></tr></thead>
+                    <tbody>
+                      {powersIn(POWER_COLUMNS[view.draft.cycle - 1]).map(power => (
+                        <tr key={power.id}>
+                          <td>{power.name}</td>
+                          <td>{power.text}</td>
+                          <td>{power.automatic ? 'движок' : 'ведущий'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+
+            {view.myPowers.length > 0 && (
+              <p className={styles.hint}>
+                Ваши силы: {view.myPowers.map(id => powerById(id)?.name ?? id).join(', ')}
+              </p>
+            )}
+            {view.draft.notes.length > 0 && (
+              <p className={styles.hint}>{view.draft.notes.join(' · ')}</p>
+            )}
+          </div>
+        )}
+
+        {/* roller settings that come with the Edit powers */}
+        {view.phase === 'draft' && view.inRace && view.myPowers.length > 0 && (
+          <div className={styles.card}>
+            <div className={styles.cardTitle}>Настройки роллеров</div>
+            {view.myPowers.includes('coin_edit') && (
+              <div className={styles.row}>
+                <span>Монета вместо 1:</span>
+                {[2, 3, 4, 5, 6, 7, 8].map(n => (
+                  <button key={n} className={styles.btn} disabled={busy}
+                    onClick={() => act('config', { config: { coinFace: n } })}>{n}</button>
+                ))}
+                <span className={styles.hint}>сейчас {view.myConfig.coinFace ?? 1}</span>
+              </div>
+            )}
+            {view.myPowers.includes('dice_edit') && (
+              <div className={styles.row}>
+                <span>Пятая грань кубика:</span>
+                {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
+                  <button key={n} className={styles.btn} disabled={busy}
+                    onClick={() => act('config', { config: { diceFifth: n } })}>{n}</button>
+                ))}
+                <span className={styles.hint}>сейчас {view.myConfig.diceFifth ?? 'нет'}</span>
+              </div>
+            )}
+            {(view.myPowers.includes('less') || view.myPowers.includes('more')) && (
+              <div className={styles.row}>
+                <span>{view.myPowers.includes('less') ? 'Убрать роллер:' : 'Лишняя копия:'}</span>
+                {(['coin', 'spinner', 'dice', 'lotto'] as RollerKind[]).map(r => (
+                  <button key={r} className={styles.btn} disabled={busy}
+                    onClick={() => act('config', view.myPowers.includes('less')
+                      ? { config: { removedRoller: r } }
+                      : { config: { extraRoller: r } })}>
+                    {ROLLER_LABEL[r].split(' ')[0]}
+                  </button>
+                ))}
+              </div>
+            )}
+            <p className={styles.hint}>
+              Спиннер, лото, отрицательные числа, Dash и Single ведущий заводит вместе с вами.
+            </p>
+          </div>
+        )}
+
         {/* the board */}
-        {view.phase !== 'setup' && (
+        {view.phase !== 'setup' && view.phase !== 'draft' && (
           <div className={styles.card}>
             <div className={styles.cardTitle}>Доска</div>
             <div className={styles.board}>
@@ -247,7 +355,7 @@ export default function ElevatorRaceClient({ slug, initialView, username, role }
         )}
 
         {/* standings */}
-        {view.phase !== 'setup' && (
+        {view.phase !== 'setup' && view.phase !== 'draft' && (
           <div className={styles.card}>
             <div className={styles.cardTitle}>Положение</div>
             <div className={styles.tableWrap}>
@@ -255,7 +363,7 @@ export default function ElevatorRaceClient({ slug, initialView, username, role }
                 <thead>
                   <tr>
                     <th>Игрок</th><th>Клетка</th><th>Жизни</th><th>Роллеров</th>
-                    <th>Заявка</th><th>Вызвали</th><th>Финиш</th>
+                    <th>Заявка</th><th>Вызвали</th><th>Силы</th><th>Финиш</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -267,6 +375,7 @@ export default function ElevatorRaceClient({ slug, initialView, username, role }
                       <td>{s.handSize}</td>
                       <td>{s.claim == null ? '' : String(s.claim)}</td>
                       <td>{s.challengedBy.join(', ')}</td>
+                      <td>{(view.powersOf[s.player] ?? []).map(id => powerById(id)?.name ?? id).join(', ')}</td>
                       <td>{s.finishPlace ?? ''}</td>
                     </tr>
                   ))}
@@ -307,6 +416,11 @@ export default function ElevatorRaceClient({ slug, initialView, username, role }
                 <button className={styles.btn} disabled={busy} onClick={() => act('close')}>
                   Закрыть фазу сейчас
                 </button>
+                {view.phase === 'draft' && (
+                  <button className={styles.btnPrimary} disabled={busy} onClick={() => act('gorace')}>
+                    Закончить торги и стартовать
+                  </button>
+                )}
               </div>
             )}
             <button className={styles.btnDanger} disabled={busy}

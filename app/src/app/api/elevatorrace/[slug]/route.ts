@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/jwt'
-import { getParticipants, addBalances, spend } from '@/lib/seasons'
+import { getParticipants, addBalances, spend, getPsigems } from '@/lib/seasons'
 import {
   getGame, saveGame, applyClock, viewFor, currentTurn, racing,
-  start, submitRoll, submitClaim, submitChallenge, closeRollPhase, resolveTurn,
-  buyLife, payoutFor, resetGame, rowOf,
-  ROLLERS, FINISH, LIFE_COST,
-  type ElevatorRaceGame, type Charge, type RollerKind, type RollValue,
+  start, startDraft, placeBid, closeDraftCycle, submitRoll, submitClaim, submitChallenge,
+  closeRollPhase, resolveTurn, buyLife, payoutFor, resetGame, rowOf, has,
+  ROLLERS, FINISH, LIFE_COST, DRAFT_CYCLES,
+  type ElevatorRaceGame, type Charge, type RollerKind, type RollValue, type ErConfig,
 } from '@/lib/elevatorRace'
+import { powerById, COLUMNS as POWER_COLUMNS } from '@/lib/racePowers'
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -41,7 +42,7 @@ export async function GET(req: NextRequest, { params }: Params) {
   if (!game) return bad('Not found', 404)
 
   const before = JSON.stringify(game)
-  const ticked = applyClock(game, chargerFor(game.seasonSlug))
+  const ticked = applyClock(game, chargerFor(game.seasonSlug), Date.now(), getPsigems(game.seasonSlug))
   settle(ticked)
   if (JSON.stringify(ticked) !== before) saveGame(ticked)
 
@@ -56,7 +57,8 @@ export async function POST(req: NextRequest, { params }: Params) {
   const stored = getGame(slug)
   if (!stored) return bad('Not found', 404)
   const charge = chargerFor(stored.seasonSlug)
-  const game = applyClock(stored, charge)
+  const totals = getPsigems(stored.seasonSlug)
+  const game = applyClock(stored, charge, Date.now(), totals)
 
   const isAdmin = user.role === 'admin'
   const me = user.username
@@ -64,6 +66,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     action: string
     roller?: RollerKind; claim?: RollValue; target?: string
     elevators?: { from: number; to: number }[]
+    power?: string; amount?: number; config?: ErConfig; face?: number
   }
 
   const done = (g: ElevatorRaceGame) => {
@@ -80,7 +83,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       if (game.phase !== 'setup') return bad('Гонка уже идёт')
       const roster = getParticipants(game.seasonSlug)
       if (roster.length < 3) return bad('Нужно хотя бы три участника')
-      return done(start(game, roster))
+      return done(startDraft(game, roster))
     }
 
     case 'elevators': {
@@ -98,8 +101,41 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     case 'close': {
       if (!isAdmin) return bad('Forbidden', 403)
+      if (game.phase === 'draft') return done(closeDraftCycle(game, totals, charge))
       if (!turn || turn.closedAt) return bad('Ход не идёт')
       return done(turn.phase === 'roll' ? closeRollPhase(game, charge) : resolveTurn(game, charge))
+    }
+
+    // ---- the draft ----
+    case 'bid': {
+      if (game.phase !== 'draft' || !game.draft) return bad('Торги не идут')
+      if (!game.players[me]) return bad('Вы не в гонке')
+      if (game.draft.cycle > DRAFT_CYCLES) return bad('Торги закончены, идёт выбор настроек')
+      const power = powerById(body.power ?? '')
+      if (!power) return bad('Такой силы нет')
+      const column = POWER_COLUMNS[game.draft.cycle - 1]
+      if (power.column !== column) return bad('В этом цикле разыгрывается другая колонка')
+      if (game.players[me].powers.some(id => powerById(id)?.column === column)) {
+        return bad('Из этой колонки у вас уже есть сила')
+      }
+      const amount = Math.floor(Number(body.amount ?? 0))
+      if (!Number.isFinite(amount) || amount < 0) return bad('Ставка не может быть отрицательной')
+      if (amount > (totals[me] ?? 0)) return bad('Столько псигемов у вас нет')
+      return done(placeBid(game, me, power.id, amount))
+    }
+
+    case 'config': {
+      if (game.phase !== 'draft' || !game.draft) return bad('Настройки задаются до старта')
+      if (!game.players[me]) return bad('Вы не в гонке')
+      game.players[me].config = { ...game.players[me].config, ...(body.config ?? {}) }
+      return done(game)
+    }
+
+    case 'gorace': {
+      if (!isAdmin) return bad('Forbidden', 403)
+      if (game.phase !== 'draft') return bad('Гонка уже идёт')
+      game.draft = null
+      return done(start(game, Object.keys(game.players)))
     }
 
     case 'reset': {
@@ -115,6 +151,14 @@ export async function POST(req: NextRequest, { params }: Params) {
       const roller = body.roller
       if (!roller || !ROLLERS.includes(roller)) return bad('Неизвестный роллер')
       if (!game.players[me].hand.includes(roller)) return bad('Этот роллер уже сброшен')
+
+      // Spinner Plus names its own result instead of throwing
+      if (roller === 'spinner' && has(game.players[me], 'spinner_plus') && body.face != null) {
+        const faces = game.players[me].config.spinnerFaces ?? [1, 3, 5]
+        if (!faces.includes(body.face)) return bad('Такого числа на вашем спиннере нет')
+        submitRoll(game, me, roller, charge, body.face)
+        return done(game)
+      }
       submitRoll(game, me, roller, charge)
       return done(game)
     }
@@ -124,8 +168,15 @@ export async function POST(req: NextRequest, { params }: Params) {
       if (!racing(game).includes(me)) return bad('Вы не в гонке')
       if (!turn.entries[me]?.roller) return bad('Сначала бросьте роллер')
       const claim = body.claim
-      const legal = claim === 'bust' || (typeof claim === 'number' && Number.isInteger(claim) && claim >= 0 && claim <= 8)
-      if (!legal) return bad('Заявить можно число от 0 до 8 или bust')
+      const player = game.players[me]
+      const low = has(player, 'negative') ? -16 : 0
+      const high = has(player, 'double') || has(player, 'dash') ? 16 : 8
+      const legal = claim === 'bust' ||
+        (typeof claim === 'number' && Number.isInteger(claim) && claim >= low && claim <= high)
+      if (!legal) return bad(`Заявить можно число от ${low} до ${high} или bust`)
+      if (has(player, 'double') && turn.entries[me]?.value != null && claim !== turn.entries[me].value) {
+        return bad('С силой Double лгать нельзя')
+      }
       return done(submitClaim(game, me, claim as RollValue))
     }
 
