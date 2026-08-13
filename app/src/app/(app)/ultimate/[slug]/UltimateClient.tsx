@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import type { Role } from '@/lib/types'
 import type { UtView, UtRound, Mark } from '@/lib/ultimate'
+import RulesCard from '@/components/RulesCard'
+import { ULTIMATE_RULES } from './rules'
 import styles from './ultimate.module.css'
 
 const POLL_MS = 2000
@@ -276,6 +278,8 @@ export default function UltimateClient({ slug, initialView, username, role, rost
         )}
 
         {error && <p className={styles.error}>{error}</p>}
+
+        <RulesCard sections={ULTIMATE_RULES} />
 
         <div className={styles.card}>
           <div className={styles.cardTitle}>Ход игры</div>

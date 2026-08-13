@@ -65,7 +65,7 @@ export interface Match {
   visible: boolean
   accessible: boolean
   minigameSlug?: string
-  game?: 'track_trouble' | 'double_team' | 'letterbox' | 'ultimate_ttt'
+  game?: 'track_trouble' | 'double_team' | 'letterbox' | 'ultimate_ttt' | 'swapping_bw'
   running?: boolean                          // admin started it and has not ended it
   frozenPsigems?: Record<string, number>     // standings captured when it started
   frozenRounds?: Round[]
@@ -77,6 +77,10 @@ export interface SeasonData {
   rounds: Round[]
   psigems: Record<string, number>
   opals?: Record<string, number>
+  /** tokens of life handed out by King's Court */
+  tol?: Record<string, number>
+  /** clear opals from the Elevator Race, which only make an opal puzzle easier */
+  clearOpals?: Record<string, number>
   matches?: Match[]
 }
 
@@ -97,6 +101,8 @@ function readAll(): Record<string, SeasonData> {
           rounds: (v.rounds as Round[]) ?? [],
           psigems: (v.psigems as Record<string, number>) ?? {},
           opals: (v.opals as Record<string, number>) ?? {},
+          tol: (v.tol as Record<string, number>) ?? {},
+          clearOpals: (v.clearOpals as Record<string, number>) ?? {},
           matches: (v.matches as Match[]) ?? [],
         }
       }
@@ -184,6 +190,33 @@ export function getOpals(slug: string): Record<string, number> {
 export function saveOpals(slug: string, opals: Record<string, number>): void {
   const season = getSeason(slug)
   saveSeason(slug, { ...season, opals })
+}
+
+/** Everything a player can hold. Games move these themselves. */
+export type Currency = 'psigems' | 'opals' | 'tol' | 'clearOpals'
+
+export function getBalance(slug: string, field: Currency): Record<string, number> {
+  return getSeason(slug)[field] ?? {}
+}
+
+/** Apply several changes at once, never letting a balance go below zero. */
+export function addBalances(slug: string, field: Currency, deltas: Record<string, number>): void {
+  const season = getSeason(slug)
+  const current = season[field] ?? {}
+  const next = { ...current }
+  for (const [username, delta] of Object.entries(deltas)) {
+    next[username] = Math.max(0, (current[username] ?? 0) + delta)
+  }
+  saveSeason(slug, { ...season, [field]: next })
+}
+
+/** Take the price if the player can pay it; false means they could not. */
+export function spend(slug: string, username: string, field: Currency, amount: number): boolean {
+  const season = getSeason(slug)
+  const current = season[field] ?? {}
+  if ((current[username] ?? 0) < amount) return false
+  saveSeason(slug, { ...season, [field]: { ...current, [username]: (current[username] ?? 0) - amount } })
+  return true
 }
 
 export function getMatches(slug: string): Match[] {

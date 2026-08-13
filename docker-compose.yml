@@ -9,6 +9,7 @@ services:
       - ./letterbox.json:/app/letterbox.json
       - ./doubleteam.json:/app/doubleteam.json
       - ./ultimate.json:/app/ultimate.json
+      - ./swapping.json:/app/swapping.json
       - ./avatars:/app/public/avatars
     env_file: .env
     networks:

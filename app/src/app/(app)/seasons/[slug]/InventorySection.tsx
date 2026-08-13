@@ -7,7 +7,18 @@ interface Entry {
   username: string
   psigems: number
   opals: number
+  tol: number
+  clearOpals: number
 }
+
+type Field = 'psigems' | 'opals' | 'tol' | 'clearOpals'
+
+const ITEMS: { field: Field; icon: string; color: string; name: string }[] = [
+  { field: 'psigems', icon: 'Ψ', color: '#a855f7', name: 'псигемы' },
+  { field: 'opals', icon: '◈', color: '#38bdf8', name: 'опалы' },
+  { field: 'tol', icon: '🛡', color: '#4ade80', name: 'жетоны неуязвимости' },
+  { field: 'clearOpals', icon: '◇', color: '#e2e8f0', name: 'прозрачные опалы' },
+]
 
 interface Props {
   slug: string
@@ -27,7 +38,7 @@ export default function InventorySection({ slug, accent, isAdmin, username }: Pr
 
   useEffect(() => { load() }, [load])
 
-  async function change(target: string, field: 'psigems' | 'opals', delta: number) {
+  async function change(target: string, field: Field, delta: number) {
     const entry = entries.find(e => e.username === target)
     if (!entry) return
     setSaving(`${target}:${field}`)
@@ -54,16 +65,13 @@ export default function InventorySection({ slug, accent, isAdmin, username }: Pr
       {!isAdmin && (
         mine ? (
           <div className={styles.invMine}>
-            <div className={styles.invItem}>
-              <span className={styles.invIcon} style={{ color: '#a855f7' }}>Ψ</span>
-              <span className={styles.invCount}>{mine.psigems}</span>
-              <span className={styles.invName}>псигемы</span>
-            </div>
-            <div className={styles.invItem}>
-              <span className={styles.invIcon} style={{ color: '#38bdf8' }}>◈</span>
-              <span className={styles.invCount}>{mine.opals}</span>
-              <span className={styles.invName}>опалы</span>
-            </div>
+            {ITEMS.map(item => (
+              <div key={item.field} className={styles.invItem}>
+                <span className={styles.invIcon} style={{ color: item.color }}>{item.icon}</span>
+                <span className={styles.invCount}>{mine[item.field]}</span>
+                <span className={styles.invName}>{item.name}</span>
+              </div>
+            ))}
           </div>
         ) : <p className={styles.noContent}>Вас нет в этом сезоне</p>
       )}
@@ -75,15 +83,14 @@ export default function InventorySection({ slug, accent, isAdmin, username }: Pr
               <thead>
                 <tr>
                   <th style={{ textAlign: 'left' }}>Игрок</th>
-                  <th>Ψ псигемы</th>
-                  <th>◈ опалы</th>
+                  {ITEMS.map(item => <th key={item.field}>{item.icon} {item.name}</th>)}
                 </tr>
               </thead>
               <tbody>
                 {entries.map(e => (
                   <tr key={e.username}>
                     <td className={styles.invPlayer}>{e.username}</td>
-                    {(['psigems', 'opals'] as const).map(field => (
+                    {ITEMS.map(({ field }) => (
                       <td key={field}>
                         <div className={styles.invEditor}>
                           <button className={styles.invBtn} disabled={saving !== ''}

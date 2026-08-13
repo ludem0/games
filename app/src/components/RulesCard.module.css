@@ -1,0 +1,19 @@
+.card {
+  padding: 0; border-radius: 14px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+  overflow: hidden;
+}
+.summary {
+  padding: 16px 18px; font-weight: 700; font-size: 0.95rem; cursor: pointer;
+  list-style: none; display: flex; align-items: center; gap: 10px;
+}
+.summary::-webkit-details-marker { display: none; }
+.summary::before { content: '▸'; color: rgba(255,255,255,0.4); }
+.card[open] .summary::before { content: '▾'; }
+.body { padding: 0 18px 18px; display: flex; flex-direction: column; gap: 14px; }
+
+.section { display: flex; flex-direction: column; gap: 6px; }
+.sectionTitle { font-size: 0.85rem; font-weight: 700; color: #c4b5fd; }
+.list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
+.list li { font-size: 0.85rem; line-height: 1.5; color: rgba(255,255,255,0.75); }
+.list strong { color: #e9e9f0; }
