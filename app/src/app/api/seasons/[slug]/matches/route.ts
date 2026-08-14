@@ -16,6 +16,7 @@ import { createGame as createChannelHopping } from '@/lib/channelHopping'
 import { createGame as createPathing } from '@/lib/pathing'
 import { createGame as createDominoBw } from '@/lib/dominoBw'
 import { createGame as createChambers } from '@/lib/puzzleChambers'
+import { createGame as createRooms } from '@/lib/modularRooms'
 
 async function getRole() {
   const cookieStore = await cookies()
@@ -73,7 +74,7 @@ export async function POST(
 
   // both kinds of match now name their game, and each kind has its own default
   const DEATH_GAMES = ['letterbox', 'ultimate_ttt', 'swapping_bw', 'channel_hopping', 'pathing_dab', 'domino_bw'] as const
-  const MAIN_GAMES = ['track_trouble', 'double_team', 'kings_court', 'elevator_race', 'puzzle_chambers'] as const
+  const MAIN_GAMES = ['track_trouble', 'double_team', 'kings_court', 'elevator_race', 'puzzle_chambers', 'modular_rooms'] as const
   const allowed: readonly string[] = type === 'death' ? DEATH_GAMES : MAIN_GAMES
   const game: NonNullable<Match['game']> = allowed.includes(body.game ?? '')
     ? body.game as NonNullable<Match['game']>
@@ -84,7 +85,7 @@ export async function POST(
     swapping_bw: 'Swapping Black and White', kings_court: "King's Court",
     elevator_race: 'Doubting Middle Elevator Race', channel_hopping: 'Channel Hopping',
     pathing_dab: 'Pathing Dots and Boxes', domino_bw: 'Domino Black and White',
-    puzzle_chambers: 'Puzzle Sum Chambers',
+    puzzle_chambers: 'Puzzle Sum Chambers', modular_rooms: 'Three Modular Rooms',
   }
   const defaultName = `${type === 'main' ? 'MM' : 'DM'}${sameType}: ${GAME_NAMES[game]}`
 
@@ -111,6 +112,7 @@ export async function POST(
   else if (game === 'pathing_dab') createPathing(gameSlug, slug, newMatch.name, id)
   else if (game === 'domino_bw') createDominoBw(gameSlug, slug, newMatch.name, id)
   else if (game === 'puzzle_chambers') createChambers(gameSlug, slug, newMatch.name, id)
+  else if (game === 'modular_rooms') createRooms(gameSlug, slug, newMatch.name, id)
   else createLetterbox(gameSlug, slug, newMatch.name, id)
 
   saveMatches(slug, [...matches, newMatch])

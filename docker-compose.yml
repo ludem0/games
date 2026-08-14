@@ -16,6 +16,7 @@ services:
       - ./pathing.json:/app/pathing.json
       - ./dominobw.json:/app/dominobw.json
       - ./puzzlechambers.json:/app/puzzlechambers.json
+      - ./modularrooms.json:/app/modularrooms.json
       - ./avatars:/app/public/avatars
     env_file: .env
     networks:
