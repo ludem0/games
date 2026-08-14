@@ -14,6 +14,7 @@ import { createGame as createKingsCourt } from '@/lib/kingsCourt'
 import { createGame as createElevatorRace } from '@/lib/elevatorRace'
 import { createGame as createChannelHopping } from '@/lib/channelHopping'
 import { createGame as createPathing } from '@/lib/pathing'
+import { createGame as createDominoBw } from '@/lib/dominoBw'
 
 async function getRole() {
   const cookieStore = await cookies()
@@ -70,7 +71,7 @@ export async function POST(
   const sameType = matches.filter(m => m.type === type).length + 1
 
   // both kinds of match now name their game, and each kind has its own default
-  const DEATH_GAMES = ['letterbox', 'ultimate_ttt', 'swapping_bw', 'channel_hopping', 'pathing_dab'] as const
+  const DEATH_GAMES = ['letterbox', 'ultimate_ttt', 'swapping_bw', 'channel_hopping', 'pathing_dab', 'domino_bw'] as const
   const MAIN_GAMES = ['track_trouble', 'double_team', 'kings_court', 'elevator_race'] as const
   const allowed: readonly string[] = type === 'death' ? DEATH_GAMES : MAIN_GAMES
   const game: NonNullable<Match['game']> = allowed.includes(body.game ?? '')
@@ -81,7 +82,7 @@ export async function POST(
     letterbox: 'Letterbox', ultimate_ttt: 'Ultimate Tic Tac Toe',
     swapping_bw: 'Swapping Black and White', kings_court: "King's Court",
     elevator_race: 'Doubting Middle Elevator Race', channel_hopping: 'Channel Hopping',
-    pathing_dab: 'Pathing Dots and Boxes',
+    pathing_dab: 'Pathing Dots and Boxes', domino_bw: 'Domino Black and White',
   }
   const defaultName = `${type === 'main' ? 'MM' : 'DM'}${sameType}: ${GAME_NAMES[game]}`
 
@@ -106,6 +107,7 @@ export async function POST(
   else if (game === 'elevator_race') createElevatorRace(gameSlug, slug, newMatch.name, id)
   else if (game === 'channel_hopping') createChannelHopping(gameSlug, slug, newMatch.name, id)
   else if (game === 'pathing_dab') createPathing(gameSlug, slug, newMatch.name, id)
+  else if (game === 'domino_bw') createDominoBw(gameSlug, slug, newMatch.name, id)
   else createLetterbox(gameSlug, slug, newMatch.name, id)
 
   saveMatches(slug, [...matches, newMatch])

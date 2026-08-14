@@ -133,7 +133,7 @@ function MatchCard({
     track_trouble: '/minigames', double_team: '/doubleteam',
     letterbox: '/letterbox', ultimate_ttt: '/ultimate', swapping_bw: '/swapping',
     kings_court: '/kingscourt', elevator_race: '/elevatorrace',
-    channel_hopping: '/channelhopping', pathing_dab: '/pathing',
+    channel_hopping: '/channelhopping', pathing_dab: '/pathing', domino_bw: '/dominobw',
   }
   const gameHref = `${GAME_PATHS[match.game ?? (isMain ? 'track_trouble' : 'letterbox')]}/${match.minigameSlug}`
 
@@ -245,6 +245,7 @@ export default function MatchesSection({ slug, isAdmin, initialMatches }: Props)
                 <button className={styles.addBtn} onClick={() => addMatch('death', 'swapping_bw')}>+ Swapping Black and White</button>
                 <button className={styles.addBtn} onClick={() => addMatch('death', 'channel_hopping')}>+ Channel Hopping</button>
                 <button className={styles.addBtn} onClick={() => addMatch('death', 'pathing_dab')}>+ Pathing Dots and Boxes</button>
+                <button className={styles.addBtn} onClick={() => addMatch('death', 'domino_bw')}>+ Domino Black and White</button>
               </>
             )}
           </div>
