@@ -17,6 +17,7 @@ services:
       - ./dominobw.json:/app/dominobw.json
       - ./puzzlechambers.json:/app/puzzlechambers.json
       - ./modularrooms.json:/app/modularrooms.json
+      - ./fieldtactics.json:/app/fieldtactics.json
       - ./avatars:/app/public/avatars
     env_file: .env
     networks:

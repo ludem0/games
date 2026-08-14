@@ -1,0 +1,88 @@
+.page { min-height: 100vh; background: #0b0b12; color: #e9e9f0; }
+
+.navbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px; border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.back { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.85rem; }
+.back:hover { color: #fff; }
+.navTitle { font-weight: 700; }
+.navUser { font-size: 0.8rem; color: rgba(255,255,255,0.4); }
+
+.content { max-width: 900px; margin: 0 auto; padding: 24px 16px 60px; display: flex; flex-direction: column; gap: 16px; }
+
+.statusRow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.phaseTag {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;
+  padding: 4px 10px; border-radius: 999px;
+  background: rgba(56,189,248,0.15); color: #7dd3fc; border: 1px solid rgba(56,189,248,0.35);
+}
+.roles { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+.deadline { margin-left: auto; font-size: 0.85rem; }
+.clock { font-variant-numeric: tabular-nums; font-weight: 700; color: #4ade80; }
+.clockLow { font-variant-numeric: tabular-nums; font-weight: 700; color: #f87171; }
+
+.winner {
+  padding: 14px 18px; border-radius: 12px; font-size: 1.05rem;
+  background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.35); color: #86efac;
+}
+
+.card {
+  padding: 18px; border-radius: 14px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.cardTitle { font-weight: 700; font-size: 0.95rem; }
+.hint { font-size: 0.8rem; color: rgba(255,255,255,0.45); }
+.error { font-size: 0.85rem; color: #f87171; }
+
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.input {
+  padding: 9px 12px; border-radius: 8px; font: inherit; font-size: 16px;
+  border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); color: #e9e9f0;
+}
+.btn, .btnPrimary, .btnDanger {
+  padding: 9px 16px; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #e9e9f0;
+}
+.btnPrimary { background: #38bdf8; border-color: #38bdf8; color: #0b0b12; align-self: flex-start; }
+.btnDanger { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.35); color: #fca5a5; align-self: flex-start; }
+.btn:disabled, .btnPrimary:disabled, .btnDanger:disabled { opacity: 0.35; cursor: default; }
+
+/* the field: six columns, eight rows, river between four and five */
+.field { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; max-width: 420px; }
+.cell {
+  aspect-ratio: 1; border-radius: 6px; font: inherit; font-size: 0.6rem; font-weight: 700;
+  border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.4); position: relative; cursor: default; padding: 2px;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+}
+.redBase { background: rgba(229,152,155,0.18); }
+.blueBase { background: rgba(154,183,224,0.18); }
+.riverEdgeTop { border-top: 3px solid rgba(56,189,248,0.5); }
+.riverEdgeBottom { border-bottom: 3px solid rgba(56,189,248,0.5); }
+.bridge { border-color: rgba(250,204,21,0.6); }
+.red { background: #c05e63; color: #fff; }
+.blue { background: #4d7cbd; color: #fff; }
+.hidden { opacity: 0.9; }
+.selectable { cursor: pointer; outline: 2px solid rgba(255,255,255,0.35); }
+.chosen { outline: 2px solid #fff; }
+.target { background: rgba(74,222,128,0.35); cursor: pointer; }
+
+.tray { display: flex; gap: 5px; flex-wrap: wrap; }
+.trayPiece {
+  padding: 6px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; cursor: pointer;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #e9e9f0;
+}
+.trayChosen { border-color: #fff; background: rgba(255,255,255,0.16); }
+.trayPlaced { opacity: 0.35; }
+
+.counts { display: flex; gap: 18px; flex-wrap: wrap; font-size: 0.9rem; }
+.log { display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto; }
+.logRow { display: flex; gap: 10px; font-size: 0.82rem; }
+.logTime { color: rgba(255,255,255,0.3); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 720px) {
+  .boards { grid-template-columns: 1fr; }
+  .deadline { margin-left: 0; }
+}
