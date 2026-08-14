@@ -18,6 +18,7 @@ services:
       - ./puzzlechambers.json:/app/puzzlechambers.json
       - ./modularrooms.json:/app/modularrooms.json
       - ./fieldtactics.json:/app/fieldtactics.json
+      - ./lockedout.json:/app/lockedout.json
       - ./avatars:/app/public/avatars
     env_file: .env
     networks:
