@@ -133,7 +133,7 @@ function MatchCard({
     track_trouble: '/minigames', double_team: '/doubleteam',
     letterbox: '/letterbox', ultimate_ttt: '/ultimate', swapping_bw: '/swapping',
     kings_court: '/kingscourt', elevator_race: '/elevatorrace',
-    channel_hopping: '/channelhopping', pathing_dab: '/pathing', domino_bw: '/dominobw', puzzle_chambers: '/puzzlechambers', modular_rooms: '/modularrooms', field_tactics: '/fieldtactics', locked_out: '/lockedout',
+    channel_hopping: '/channelhopping', pathing_dab: '/pathing', domino_bw: '/dominobw', puzzle_chambers: '/puzzlechambers', modular_rooms: '/modularrooms', field_tactics: '/fieldtactics', locked_out: '/lockedout', number_janggi: '/numberjanggi',
   }
   const gameHref = `${GAME_PATHS[match.game ?? (isMain ? 'track_trouble' : 'letterbox')]}/${match.minigameSlug}`
 
@@ -250,6 +250,7 @@ export default function MatchesSection({ slug, isAdmin, initialMatches }: Props)
                 <button className={styles.addBtn} onClick={() => addMatch('death', 'pathing_dab')}>+ Pathing Dots and Boxes</button>
                 <button className={styles.addBtn} onClick={() => addMatch('death', 'domino_bw')}>+ Domino Black and White</button>
                 <button className={styles.addBtn} onClick={() => addMatch('death', 'field_tactics')}>+ Field Tactics</button>
+                <button className={styles.addBtn} onClick={() => addMatch('death', 'number_janggi')}>+ Number Janggi</button>
               </>
             )}
           </div>

@@ -19,6 +19,7 @@ services:
       - ./modularrooms.json:/app/modularrooms.json
       - ./fieldtactics.json:/app/fieldtactics.json
       - ./lockedout.json:/app/lockedout.json
+      - ./numberjanggi.json:/app/numberjanggi.json
       - ./avatars:/app/public/avatars
     env_file: .env
     networks:
