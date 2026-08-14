@@ -15,6 +15,7 @@ services:
       - ./channelhopping.json:/app/channelhopping.json
       - ./pathing.json:/app/pathing.json
       - ./dominobw.json:/app/dominobw.json
+      - ./puzzlechambers.json:/app/puzzlechambers.json
       - ./avatars:/app/public/avatars
     env_file: .env
     networks:

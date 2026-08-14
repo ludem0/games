@@ -133,7 +133,7 @@ function MatchCard({
     track_trouble: '/minigames', double_team: '/doubleteam',
     letterbox: '/letterbox', ultimate_ttt: '/ultimate', swapping_bw: '/swapping',
     kings_court: '/kingscourt', elevator_race: '/elevatorrace',
-    channel_hopping: '/channelhopping', pathing_dab: '/pathing', domino_bw: '/dominobw',
+    channel_hopping: '/channelhopping', pathing_dab: '/pathing', domino_bw: '/dominobw', puzzle_chambers: '/puzzlechambers',
   }
   const gameHref = `${GAME_PATHS[match.game ?? (isMain ? 'track_trouble' : 'letterbox')]}/${match.minigameSlug}`
 
@@ -208,6 +208,7 @@ export default function MatchesSection({ slug, isAdmin, initialMatches }: Props)
                 <button className={styles.addBtn} onClick={() => addMatch('main', 'double_team')}>+ Double Team</button>
                 <button className={styles.addBtn} onClick={() => addMatch('main', 'kings_court')}>+ King&apos;s Court</button>
                 <button className={styles.addBtn} onClick={() => addMatch('main', 'elevator_race')}>+ Elevator Race</button>
+                <button className={styles.addBtn} onClick={() => addMatch('main', 'puzzle_chambers')}>+ Puzzle Sum Chambers</button>
               </>
             )}
           </div>
