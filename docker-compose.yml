@@ -22,6 +22,7 @@ services:
       - ./numberjanggi.json:/app/numberjanggi.json
       - ./thecube.json:/app/thecube.json
       - ./possession.json:/app/possession.json
+      - ./totemic.json:/app/totemic.json
       - ./avatars:/app/public/avatars
     env_file: .env
     networks:

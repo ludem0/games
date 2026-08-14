@@ -133,7 +133,7 @@ function MatchCard({
     track_trouble: '/minigames', double_team: '/doubleteam',
     letterbox: '/letterbox', ultimate_ttt: '/ultimate', swapping_bw: '/swapping',
     kings_court: '/kingscourt', elevator_race: '/elevatorrace',
-    channel_hopping: '/channelhopping', pathing_dab: '/pathing', domino_bw: '/dominobw', puzzle_chambers: '/puzzlechambers', modular_rooms: '/modularrooms', field_tactics: '/fieldtactics', locked_out: '/lockedout', number_janggi: '/numberjanggi', the_cube: '/thecube', possession: '/possession',
+    channel_hopping: '/channelhopping', pathing_dab: '/pathing', domino_bw: '/dominobw', puzzle_chambers: '/puzzlechambers', modular_rooms: '/modularrooms', field_tactics: '/fieldtactics', locked_out: '/lockedout', number_janggi: '/numberjanggi', the_cube: '/thecube', possession: '/possession', totemic: '/totemic',
   }
   const gameHref = `${GAME_PATHS[match.game ?? (isMain ? 'track_trouble' : 'letterbox')]}/${match.minigameSlug}`
 
@@ -213,6 +213,7 @@ export default function MatchesSection({ slug, isAdmin, initialMatches }: Props)
                 <button className={styles.addBtn} onClick={() => addMatch('main', 'locked_out')}>+ Locked Out!</button>
                 <button className={styles.addBtn} onClick={() => addMatch('main', 'the_cube')}>+ The Cube</button>
                 <button className={styles.addBtn} onClick={() => addMatch('main', 'possession')}>+ Five Fold Possession</button>
+                <button className={styles.addBtn} onClick={() => addMatch('main', 'totemic')}>+ Totemic Might</button>
               </>
             )}
           </div>
