@@ -25,6 +25,7 @@ services:
       - ./totemic.json:/app/totemic.json
       - ./conveyor.json:/app/conveyor.json
       - ./tugofwar.json:/app/tugofwar.json
+      - ./element.json:/app/element.json
       - ./avatars:/app/public/avatars
     env_file: .env
     networks:
