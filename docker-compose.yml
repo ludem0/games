@@ -23,6 +23,7 @@ services:
       - ./thecube.json:/app/thecube.json
       - ./possession.json:/app/possession.json
       - ./totemic.json:/app/totemic.json
+      - ./conveyor.json:/app/conveyor.json
       - ./avatars:/app/public/avatars
     env_file: .env
     networks:
