@@ -13,6 +13,7 @@ services:
       - ./kingscourt.json:/app/kingscourt.json
       - ./elevatorrace.json:/app/elevatorrace.json
       - ./channelhopping.json:/app/channelhopping.json
+      - ./pathing.json:/app/pathing.json
       - ./avatars:/app/public/avatars
     env_file: .env
     networks:
