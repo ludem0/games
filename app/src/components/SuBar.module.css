@@ -1,0 +1,35 @@
+.pill, .bar {
+  position: fixed; left: 14px; bottom: 14px; z-index: 900;
+  font-size: 0.8rem; color: #e9e9f0;
+}
+
+.pill {
+  padding: 7px 12px; border-radius: 999px; cursor: pointer;
+  background: rgba(20,20,30,0.92); border: 1px solid rgba(250,204,21,0.5);
+  color: #fde68a; backdrop-filter: blur(6px);
+}
+.pill:hover { border-color: #facc15; }
+
+.bar {
+  display: flex; flex-direction: column; gap: 8px;
+  min-width: 220px; padding: 12px 14px; border-radius: 12px;
+  background: rgba(20,20,30,0.96); border: 1px solid rgba(250,204,21,0.45);
+  backdrop-filter: blur(6px);
+}
+.head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.title { font-weight: 700; color: #fde68a; }
+.close {
+  background: transparent; border: none; cursor: pointer;
+  color: rgba(255,255,255,0.5); font-size: 0.9rem; line-height: 1;
+}
+.close:hover { color: #fff; }
+
+.select {
+  padding: 7px 10px; border-radius: 8px; font-size: 0.85rem;
+  background: #15151f; color: #e9e9f0; border: 1px solid rgba(255,255,255,0.14);
+}
+.back {
+  padding: 7px 10px; border-radius: 8px; font-size: 0.82rem; cursor: pointer;
+  background: transparent; color: #fde68a; border: 1px solid rgba(250,204,21,0.4);
+}
+.back:disabled { opacity: 0.4; cursor: not-allowed; }

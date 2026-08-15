@@ -3,10 +3,11 @@ import { verifyToken } from '@/lib/jwt'
 import { getParticipants } from '@/lib/seasons'
 import {
   getGame, saveGame, applyClock, viewFor, resetGame, duelists,
-  setRoles, startDraft, draftPick, place,
+  setRoles, startDraft, draftPick, place, autoDraft,
   type DomainGame,
 } from '@/lib/domain'
 import { BOARD_H, BOARD_W } from '@/lib/domainShapes'
+import { testToolsOn } from '@/lib/testTools'
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -91,6 +92,13 @@ export async function POST(req: NextRequest, { params }: Params) {
       if (![x, y, rot].every(Number.isFinite)) return bad('Координаты испорчены')
       if (x < 0 || x > BOARD_W || y < 0 || y > BOARD_H) return bad('Точка вне доски')
       const result = place(game, me, shapeId, Math.round(x), Math.round(y), Math.round(rot))
+      if (result.problem) return bad(result.problem)
+      return done(game)
+    }
+
+    case 'autoDraft': {
+      if (!isAdmin || !testToolsOn()) return bad('Forbidden', 403)
+      const result = autoDraft(game)
       if (result.problem) return bad(result.problem)
       return done(game)
     }

@@ -406,7 +406,14 @@ export default function LabyrinthClient({ slug, initialView, username, role, ros
         </details>
 
         {isAdmin && (
-          <button className={styles.ghost} disabled={busy} onClick={() => act({ action: 'reset' })}>Сбросить матч</button>
+          <div className={styles.handRow}>
+            {(view.phase === 'bid_start' || view.phase === 'bid_order') && (
+              <button className={styles.ghost} disabled={busy} onClick={() => act({ action: 'autoBids' })}>
+                Тест: доставить ставки и закрыть аукцион
+              </button>
+            )}
+            <button className={styles.ghost} disabled={busy} onClick={() => act({ action: 'reset' })}>Сбросить матч</button>
+          </div>
         )}
       </div>
     </div>

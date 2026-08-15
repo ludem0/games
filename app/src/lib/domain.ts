@@ -215,6 +215,24 @@ export function draftPick(game: DomainGame, player: string, shapeId: number): Pr
   return {}
 }
 
+/** Test helper: shares out whatever is left of the pool so placing can be tried. */
+export function autoDraft(game: DomainGame): Problem {
+  if (game.phase !== 'draft') return { problem: 'Разбор фигур не идёт' }
+  log(game, 'draft', 'Остаток пула разобран автоматически.')
+  while (game.phase === 'draft') {
+    const left = poolLeft(game)
+    if (left.length === 0) {
+      beginPlacing(game)
+      break
+    }
+    const id = left[Math.floor(Math.random() * left.length)]
+    const who = game.draftTurn as string
+    game.taken = { ...game.taken, [id]: who }
+    passDraft(game, who)
+  }
+  return {}
+}
+
 /** Whoever drafted the Start piece lays the first shape down. */
 function beginPlacing(game: DomainGame): DomainGame {
   const first = game.taken[START_SHAPE] ?? duelists(game)[0]

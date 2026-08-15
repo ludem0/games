@@ -3,11 +3,12 @@ import { verifyToken } from '@/lib/jwt'
 import { getParticipants, addBalances } from '@/lib/seasons'
 import {
   getGame, saveGame, applyClock, viewFor, resetGame, setPlayers,
-  bidStart, resolveStart, bidOrder, resolveOrder, doShove, doMove, chooseEc,
+  bidStart, resolveStart, bidOrder, resolveOrder, doShove, doMove, chooseEc, autoBids,
   SEATS, MAX_BID,
   type LabyrinthGame, type Field, type Grant,
 } from '@/lib/labyrinth'
 import { COLOURS, ORIENTS, gateById, type Colour, type Orient } from '@/lib/labyrinthBoard'
+import { testToolsOn } from '@/lib/testTools'
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -126,6 +127,13 @@ export async function POST(req: NextRequest, { params }: Params) {
     case 'ec': {
       if (!body.target) return bad('Выберите игрока')
       const result = chooseEc(game, me, body.target)
+      if (result.problem) return bad(result.problem)
+      return done(game)
+    }
+
+    case 'autoBids': {
+      if (!isAdmin || !testToolsOn()) return bad('Forbidden', 403)
+      const result = autoBids(game, grant)
       if (result.problem) return bad(result.problem)
       return done(game)
     }

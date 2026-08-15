@@ -219,6 +219,28 @@ export function resolveOrder(game: LabyrinthGame, grant: Grant): LabyrinthGame {
   return deal(game)
 }
 
+/**
+ * Test helper: bids nothing for anyone still missing, then settles the auction.
+ * Zero bids keep the psigem balances untouched while a match is being tried out.
+ */
+export function autoBids(game: LabyrinthGame, grant: Grant): Problem {
+  if (game.phase === 'bid_start') {
+    for (const player of game.players) {
+      if (!game.startBids[player]) bidStart(game, player, 0, shuffle(COLOURS))
+    }
+    resolveStart(game, grant)
+    return {}
+  }
+  if (game.phase === 'bid_order') {
+    for (const player of game.players) {
+      if (!game.orderBids[player]) bidOrder(game, player, 0, game.players[0])
+    }
+    resolveOrder(game, grant)
+    return {}
+  }
+  return { problem: 'Аукцион не идёт' }
+}
+
 // ---------- dealing and play ----------
 
 function shuffle<T>(items: T[]): T[] {

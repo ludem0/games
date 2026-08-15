@@ -328,7 +328,14 @@ export default function DomainClient({ slug, initialView, username, role, roster
         </details>
 
         {isAdmin && (
-          <button className={styles.ghost} disabled={busy} onClick={() => act({ action: 'reset' })}>Сбросить матч</button>
+          <div className={styles.pool}>
+            {view.phase === 'draft' && (
+              <button className={styles.ghost} disabled={busy} onClick={() => act({ action: 'autoDraft' })}>
+                Тест: разобрать пул автоматически
+              </button>
+            )}
+            <button className={styles.ghost} disabled={busy} onClick={() => act({ action: 'reset' })}>Сбросить матч</button>
+          </div>
         )}
       </div>
     </div>
