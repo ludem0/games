@@ -26,6 +26,8 @@ import { createGame as createTotemic } from '@/lib/totemic'
 import { createGame as createConveyor } from '@/lib/conveyor'
 import { createGame as createTug } from '@/lib/tugOfWar'
 import { createGame as createElement } from '@/lib/element'
+import { createGame as createLabyrinth } from '@/lib/labyrinth'
+import { createGame as createDomain } from '@/lib/domain'
 
 async function getRole() {
   const cookieStore = await cookies()
@@ -82,8 +84,8 @@ export async function POST(
   const sameType = matches.filter(m => m.type === type).length + 1
 
   // both kinds of match now name their game, and each kind has its own default
-  const DEATH_GAMES = ['letterbox', 'ultimate_ttt', 'swapping_bw', 'channel_hopping', 'pathing_dab', 'domino_bw', 'field_tactics', 'number_janggi', 'conveyor', 'tug_of_war', 'element'] as const
-  const MAIN_GAMES = ['track_trouble', 'double_team', 'kings_court', 'elevator_race', 'puzzle_chambers', 'modular_rooms', 'locked_out', 'the_cube', 'possession', 'totemic'] as const
+  const DEATH_GAMES = ['letterbox', 'ultimate_ttt', 'swapping_bw', 'channel_hopping', 'pathing_dab', 'domino_bw', 'field_tactics', 'number_janggi', 'conveyor', 'tug_of_war', 'element', 'domain'] as const
+  const MAIN_GAMES = ['track_trouble', 'double_team', 'kings_court', 'elevator_race', 'puzzle_chambers', 'modular_rooms', 'locked_out', 'the_cube', 'possession', 'totemic', 'labyrinth'] as const
   const allowed: readonly string[] = type === 'death' ? DEATH_GAMES : MAIN_GAMES
   const game: NonNullable<Match['game']> = allowed.includes(body.game ?? '')
     ? body.game as NonNullable<Match['game']>
@@ -99,6 +101,7 @@ export async function POST(
     number_janggi: 'Number Janggi', the_cube: 'The Cube',
     possession: 'Five Fold Possession', totemic: 'Totemic Might',
     conveyor: 'Conveyor', tug_of_war: 'Tug of War', element: 'Element',
+    labyrinth: 'Labyrinth', domain: 'Domain',
   }
   const defaultName = `${type === 'main' ? 'MM' : 'DM'}${sameType}: ${GAME_NAMES[game]}`
 
@@ -135,6 +138,8 @@ export async function POST(
   else if (game === 'conveyor') createConveyor(gameSlug, slug, newMatch.name, id)
   else if (game === 'tug_of_war') createTug(gameSlug, slug, newMatch.name, id)
   else if (game === 'element') createElement(gameSlug, slug, newMatch.name, id)
+  else if (game === 'labyrinth') createLabyrinth(gameSlug, slug, newMatch.name, id)
+  else if (game === 'domain') createDomain(gameSlug, slug, newMatch.name, id)
   else createLetterbox(gameSlug, slug, newMatch.name, id)
 
   saveMatches(slug, [...matches, newMatch])
