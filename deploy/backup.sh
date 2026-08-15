@@ -37,6 +37,7 @@ chmod 644 "$TMP"
 docker cp "$TMP" memories-app-1:/app/games-backup.tar.gz
 docker cp deploy/backup-upload.js memories-app-1:/app/games-backup-upload.js
 docker exec memories-app-1 node /app/games-backup-upload.js /app/games-backup.tar.gz "$KEY"
-docker exec memories-app-1 rm -f /app/games-backup.tar.gz /app/games-backup-upload.js
+# docker cp кладёт файлы root-ом, поэтому и убирать их надо root-ом
+docker exec -u 0 memories-app-1 rm -f /app/games-backup.tar.gz /app/games-backup-upload.js
 
 echo "OK: $KEY ($COUNT файлов)"
