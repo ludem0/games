@@ -32,6 +32,8 @@ if ! tar tzf "$TMP" | grep -q "seasons.json"; then
 fi
 
 # aws-sdk и S3-креды живут в контейнере memories — заливаем через него.
+# mktemp даёт 600, а node в контейнере не root — без chmod он файл не откроет.
+chmod 644 "$TMP"
 docker cp "$TMP" memories-app-1:/app/games-backup.tar.gz
 docker cp deploy/backup-upload.js memories-app-1:/app/games-backup-upload.js
 docker exec memories-app-1 node /app/games-backup-upload.js /app/games-backup.tar.gz "$KEY"
