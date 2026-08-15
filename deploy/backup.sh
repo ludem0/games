@@ -16,20 +16,22 @@ trap 'rm -f "$TMP"' EXIT
 tar czf "$TMP" ./*.json
 
 # Пустой или битый архив хуже отсутствия бэкапа: он создаёт видимость защиты.
+# Список пишем в файл: grep -q обрывает пайп, и tar под pipefail валит скрипт.
 gzip -t "$TMP"
-COUNT=$(tar tzf "$TMP" | wc -l)
+LIST=$(mktemp /tmp/games-backup-list.XXXXXX)
+trap 'rm -f "$TMP" "$LIST"' EXIT
+tar tzf "$TMP" > "$LIST"
+COUNT=$(wc -l < "$LIST")
 if [ "$COUNT" -lt 5 ]; then
   echo "ОТМЕНА: в архиве всего $COUNT файлов" >&2
   exit 1
 fi
-if ! tar tzf "$TMP" | grep -q "users.json"; then
-  echo "ОТМЕНА: в архиве нет users.json" >&2
-  exit 1
-fi
-if ! tar tzf "$TMP" | grep -q "seasons.json"; then
-  echo "ОТМЕНА: в архиве нет seasons.json" >&2
-  exit 1
-fi
+for MUST in users.json seasons.json; do
+  if ! grep -q "$MUST" "$LIST"; then
+    echo "ОТМЕНА: в архиве нет $MUST" >&2
+    exit 1
+  fi
+done
 
 # aws-sdk и S3-креды живут в контейнере memories — заливаем через него.
 # mktemp даёт 600, а node в контейнере не root — без chmod он файл не откроет.
