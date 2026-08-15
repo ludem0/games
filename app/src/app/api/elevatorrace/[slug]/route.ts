@@ -54,6 +54,13 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (!user) return bad('Unauthorized', 401)
   const { slug } = await params
 
+  const body = await req.json() as {
+    action: string
+    roller?: RollerKind; claim?: RollValue; target?: string
+    elevators?: { from: number; to: number }[]
+    power?: string; amount?: number; config?: ErConfig; face?: number
+  }
+
   const stored = getGame(slug)
   if (!stored) return bad('Not found', 404)
   const charge = chargerFor(stored.seasonSlug)
@@ -62,12 +69,6 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   const isAdmin = user.role === 'admin'
   const me = user.username
-  const body = await req.json() as {
-    action: string
-    roller?: RollerKind; claim?: RollValue; target?: string
-    elevators?: { from: number; to: number }[]
-    power?: string; amount?: number; config?: ErConfig; face?: number
-  }
 
   const done = (g: ElevatorRaceGame) => {
     settle(g)

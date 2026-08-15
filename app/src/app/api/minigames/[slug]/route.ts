@@ -40,10 +40,11 @@ export async function PUT(req: Request, { params }: Params) {
   if (!user || user.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { slug } = await params
+  // body first: an await between read and write would let a parallel move slip in
+  const body = await req.json()
   const game = getMinigame(slug)
   if (!game) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  const body = await req.json()
   const updated = { ...game }
   if (body.name) updated.name = body.name
   if (body.status) updated.status = body.status

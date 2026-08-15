@@ -9,6 +9,8 @@ export async function signToken(payload: SessionPayload): Promise<string> {
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
+    // a stolen cookie should not stay a key forever
+    .setExpirationTime('30d')
     .sign(getSecret())
 }
 

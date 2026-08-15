@@ -9,6 +9,7 @@ import {
 } from '@/lib/labyrinth'
 import { COLOURS, ORIENTS, gateById, type Colour, type Orient } from '@/lib/labyrinthBoard'
 import { testToolsOn } from '@/lib/testTools'
+import { emitGameUpdate } from '@/lib/gameBus'
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -40,12 +41,6 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (!user) return bad('Unauthorized', 401)
   const { slug } = await params
 
-  const stored = getGame(slug)
-  if (!stored) return bad('Not found', 404)
-  const game = applyClock(stored)
-
-  const isAdmin = user.role === 'admin'
-  const me = user.username
   const body = await req.json() as {
     action: string
     players?: string[]; tiebreak?: string[]
@@ -53,10 +48,18 @@ export async function POST(req: NextRequest, { params }: Params) {
     gate?: number; orient?: Orient; to?: number
   }
 
+  const stored = getGame(slug)
+  if (!stored) return bad('Not found', 404)
+  const game = applyClock(stored)
+
+  const isAdmin = user.role === 'admin'
+  const me = user.username
+
   const grant: Grant = (field: Field, deltas) => addBalances(game.seasonSlug, field, deltas)
 
   const done = (g: LabyrinthGame) => {
     saveGame(g)
+    emitGameUpdate(slug)
     return NextResponse.json(viewFor(g, me))
   }
 

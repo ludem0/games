@@ -7,6 +7,7 @@ import type { FtView, PieceKind } from '@/lib/fieldTactics'
 import RulesCard from '@/components/RulesCard'
 import { FIELD_TACTICS_RULES } from './rules'
 import styles from './field.module.css'
+import Countdown from '@/components/Countdown'
 
 const POLL_MS = 2000
 const COLS = 6
@@ -31,21 +32,6 @@ interface Props {
 const squareName = (index: number) =>
   `${String.fromCharCode(65 + (index % COLS))}${Math.floor(index / COLS) + 1}`
 
-function Countdown({ deadline }: { deadline: number }) {
-  const [now, setNow] = useState(Date.now())
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 250)
-    return () => clearInterval(t)
-  }, [])
-  const left = Math.max(0, deadline - now)
-  const m = Math.floor(left / 60000)
-  const s = Math.floor((left % 60000) / 1000)
-  return (
-    <span className={left < 30000 ? styles.clockLow : styles.clock}>
-      {m}:{String(s).padStart(2, '0')}
-    </span>
-  )
-}
 
 export default function FieldTacticsClient({ slug, initialView, username, role, roster }: Props) {
   const [view, setView] = useState<FtView>(initialView)

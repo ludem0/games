@@ -121,6 +121,15 @@ bus.on('chat', payload => {
   }
 })
 
+// { slug } — a game changed; every page showing it refetches through its own
+// session, so broadcasting the bare slug leaks nothing.
+bus.on('game', payload => {
+  const frame = JSON.stringify({ type: 'game', slug: payload.slug })
+  for (const ws of wss.clients) {
+    if (ws.readyState === ws.OPEN) ws.send(frame)
+  }
+})
+
 server.listen(port, () => {
   console.log(`> ready on http://localhost:${port} (ws ${SOCKET_PATH})`)
 })

@@ -10,8 +10,10 @@ import {
 } from '@/lib/domainShapes'
 import { BLUE } from '@/lib/domainRaster'
 import RulesCard from '@/components/RulesCard'
+import { useGameChannel } from '@/components/useGameChannel'
 import { DOMAIN_RULES } from './rules'
 import styles from './domain.module.css'
+import Countdown from '@/components/Countdown'
 
 const POLL_MS = 3000
 const FRAME = '#7030a0'
@@ -27,21 +29,6 @@ interface Props {
   roster: string[]
 }
 
-function Countdown({ deadline }: { deadline: number }) {
-  const [now, setNow] = useState(Date.now())
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 250)
-    return () => clearInterval(t)
-  }, [])
-  const left = Math.max(0, deadline - now)
-  const m = Math.floor(left / 60000)
-  const s = Math.floor((left % 60000) / 1000)
-  return (
-    <span className={left < 30000 ? styles.clockLow : styles.clock}>
-      {m}:{String(s).padStart(2, '0')}
-    </span>
-  )
-}
 
 /**
  * Draws one piece. Rings are unioned by drawing them separately, except where a
@@ -105,6 +92,7 @@ export default function DomainClient({ slug, initialView, username, role, roster
     timer.current = setInterval(refresh, POLL_MS)
     return () => { if (timer.current) clearInterval(timer.current) }
   }, [refresh])
+  useGameChannel(slug, refresh)
 
   const act = useCallback(async (payload: Record<string, unknown>) => {
     setBusy(true)

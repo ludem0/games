@@ -49,18 +49,19 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (!user) return bad('Unauthorized', 401)
   const { slug } = await params
 
-  const stored = getGame(slug)
-  if (!stored) return bad('Not found', 404)
-  const game = applyClock(stored)
-
-  const isAdmin = user.role === 'admin'
-  const me = user.username
   const body = await req.json() as {
     action: string
     players?: string[]
     to?: number; rps?: Rps | null
     partner?: string; give?: number; take?: number
   }
+
+  const stored = getGame(slug)
+  if (!stored) return bad('Not found', 404)
+  const game = applyClock(stored)
+
+  const isAdmin = user.role === 'admin'
+  const me = user.username
 
   const done = (g: TheCubeGame) => {
     settle(g)

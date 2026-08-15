@@ -7,6 +7,7 @@ import type { SwView, SwSeat } from '@/lib/swapping'
 import RulesCard from '@/components/RulesCard'
 import { SWAPPING_RULES } from './rules'
 import styles from './swapping.module.css'
+import Countdown from '@/components/Countdown'
 
 const POLL_MS = 2000
 const MAX_GAMES = 3
@@ -19,21 +20,6 @@ interface Props {
   roster: string[]
 }
 
-function Countdown({ deadline }: { deadline: number }) {
-  const [now, setNow] = useState(Date.now())
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 250)
-    return () => clearInterval(t)
-  }, [])
-  const left = Math.max(0, deadline - now)
-  const m = Math.floor(left / 60000)
-  const s = Math.floor((left % 60000) / 1000)
-  return (
-    <span className={left < 30000 ? styles.clockLow : styles.clock}>
-      {m}:{String(s).padStart(2, '0')}
-    </span>
-  )
-}
 
 function tileClass(tile: number | null, extra = ''): string {
   const base = tile == null

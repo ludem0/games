@@ -8,6 +8,16 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
+  // the PWA shell: browsers fetch these before anyone logs in
+  if (
+    pathname === '/manifest.webmanifest' ||
+    pathname === '/icon-192.png' ||
+    pathname === '/icon-512.png' ||
+    pathname === '/apple-touch-icon.png'
+  ) {
+    return NextResponse.next()
+  }
+
   const token = req.cookies.get('session')?.value
   if (!token) return NextResponse.redirect(new URL('/login', req.url))
 

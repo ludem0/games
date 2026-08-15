@@ -7,6 +7,7 @@ import type { KcView, KcRole } from '@/lib/kingsCourt'
 import RulesCard from '@/components/RulesCard'
 import { KINGS_COURT_RULES } from './rules'
 import styles from './kingscourt.module.css'
+import Countdown from '@/components/Countdown'
 
 const POLL_MS = 5000
 
@@ -21,22 +22,6 @@ const ROLE_LABEL: Record<KcRole, string> = { king: 'Король', duke: 'Гер
 const ROLE_CLASS: Record<KcRole, string> = { king: styles.roleKing, duke: styles.roleDuke, noble: styles.roleNoble }
 const TEAM_LABEL: Record<string, string> = { king: 'король', dukes: 'герцоги', nobles: 'дворяне' }
 
-function Countdown({ deadline }: { deadline: string }) {
-  const [now, setNow] = useState(Date.now())
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(t)
-  }, [])
-  const left = Math.max(0, new Date(deadline).getTime() - now)
-  const h = Math.floor(left / 3600000)
-  const m = Math.floor((left % 3600000) / 60000)
-  const s = Math.floor((left % 60000) / 1000)
-  return (
-    <span className={left < 3600000 ? styles.clockLow : styles.clock}>
-      {h}:{String(m).padStart(2, '0')}:{String(s).padStart(2, '0')}
-    </span>
-  )
-}
 
 export default function KingsCourtClient({ slug, initialView, username, role }: Props) {
   const [view, setView] = useState<KcView>(initialView)

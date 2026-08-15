@@ -392,3 +392,22 @@
 }
 .presenceAvatarInitials:first-child { margin-left: 0; }
 .presenceAvatarInitials:hover { transform: scale(1.15) translateY(-2px); z-index: 1; }
+
+/* --- your-move inbox --- */
+.turnsCard {
+  margin: 0 auto 26px; max-width: 720px;
+  padding: 16px 20px; border-radius: 14px;
+  background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.35);
+}
+.turnsTitle {
+  font-size: 0.72rem; text-transform: uppercase; letter-spacing: 2px;
+  color: #fcd34d; margin-bottom: 10px; font-weight: 700;
+}
+.turnsList { display: flex; flex-wrap: wrap; gap: 8px; }
+.turnLink {
+  padding: 8px 14px; border-radius: 9px; text-decoration: none;
+  font-size: 0.9rem; font-weight: 600; color: #fde68a;
+  background: rgba(245,158,11,0.14); border: 1px solid rgba(245,158,11,0.3);
+  transition: background 0.15s;
+}
+.turnLink:hover { background: rgba(245,158,11,0.28); }

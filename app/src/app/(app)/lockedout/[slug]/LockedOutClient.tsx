@@ -7,6 +7,7 @@ import type { LoView, Colour } from '@/lib/lockedOut'
 import RulesCard from '@/components/RulesCard'
 import { LOCKED_OUT_RULES } from './rules'
 import styles from './vault.module.css'
+import Countdown from '@/components/Countdown'
 
 const POLL_MS = 5000
 const DIGITS = [1, 2, 3, 4]
@@ -25,22 +26,6 @@ interface Props {
   roster: string[]
 }
 
-function Countdown({ deadline }: { deadline: string }) {
-  const [now, setNow] = useState(Date.now())
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(t)
-  }, [])
-  const left = Math.max(0, new Date(deadline).getTime() - now)
-  const h = Math.floor(left / 3600000)
-  const m = Math.floor((left % 3600000) / 60000)
-  const s = Math.floor((left % 60000) / 1000)
-  return (
-    <span className={left < 3600000 ? styles.clockLow : styles.clock}>
-      {h}:{String(m).padStart(2, '0')}:{String(s).padStart(2, '0')}
-    </span>
-  )
-}
 
 export default function LockedOutClient({ slug, initialView, username, role, roster }: Props) {
   const [view, setView] = useState<LoView>(initialView)

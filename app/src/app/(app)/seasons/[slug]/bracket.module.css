@@ -1,0 +1,43 @@
+.card {
+  padding: 20px 22px; border-radius: 14px;
+  background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.08);
+}
+.title { font-size: 1rem; font-weight: 700; margin: 0 0 16px; }
+
+.timeline { display: flex; flex-direction: column; }
+.round { display: flex; gap: 14px; }
+.marker { display: flex; flex-direction: column; align-items: center; width: 14px; }
+.dot, .dotFinal {
+  width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 4px;
+  background: rgba(255,255,255,0.25);
+}
+.dotFinal { background: #f59e0b; box-shadow: 0 0 10px rgba(245,158,11,0.6); }
+.line { flex: 1; width: 2px; background: rgba(255,255,255,0.1); margin: 4px 0; }
+
+.body { flex: 1; padding-bottom: 18px; min-width: 0; }
+.roundName {
+  font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.5px;
+  color: rgba(255,255,255,0.45); font-weight: 700; margin-bottom: 6px;
+}
+
+.match { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.mmTag, .dmTag {
+  font-size: 0.62rem; font-weight: 800; padding: 2px 7px; border-radius: 5px; flex-shrink: 0;
+}
+.mmTag { background: rgba(56,189,248,0.15); color: #7dd3fc; }
+.dmTag { background: rgba(248,113,113,0.15); color: #fca5a5; }
+.matchName { font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.row { display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0 0 2px; font-size: 0.8rem; }
+.win { color: #86efac; }
+.lose { color: rgba(255,255,255,0.5); }
+.out { color: #fca5a5; }
+
+.footer {
+  display: flex; flex-direction: column; gap: 6px;
+  margin-top: 6px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08);
+  font-size: 0.85rem;
+}
+.champion { color: #fcd34d; font-weight: 700; }
+.aliveLabel { color: rgba(255,255,255,0.7); }
+.fallen { color: rgba(255,255,255,0.45); font-size: 0.78rem; }

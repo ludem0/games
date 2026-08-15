@@ -7,6 +7,7 @@ import type { UtView, UtRound, Mark } from '@/lib/ultimate'
 import RulesCard from '@/components/RulesCard'
 import { ULTIMATE_RULES } from './rules'
 import styles from './ultimate.module.css'
+import Countdown from '@/components/Countdown'
 
 const POLL_MS = 2000
 const MAX_GAMES = 3
@@ -20,21 +21,6 @@ interface Props {
   psigems: Record<string, number>
 }
 
-function Countdown({ deadline }: { deadline: number }) {
-  const [now, setNow] = useState(Date.now())
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 250)
-    return () => clearInterval(t)
-  }, [])
-  const left = Math.max(0, deadline - now)
-  const m = Math.floor(left / 60000)
-  const s = Math.floor((left % 60000) / 1000)
-  return (
-    <span className={left < 30000 ? styles.clockLow : styles.clock}>
-      {m}:{String(s).padStart(2, '0')}
-    </span>
-  )
-}
 
 function Board({
   round, legal, onPlay,

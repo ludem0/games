@@ -57,6 +57,13 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (!user) return bad('Unauthorized', 401)
   const { slug } = await params
 
+  const body = await req.json() as {
+    action: string
+    players?: string[]; first?: string
+    puzzles?: { number: number; type?: PuzzleType; question: string; answer: string }[]
+    number?: number; text?: string; tower?: string; add?: boolean
+  }
+
   const stored = getGame(slug)
   if (!stored) return bad('Not found', 404)
   const award = awarderFor(stored.seasonSlug)
@@ -64,12 +71,6 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   const isAdmin = user.role === 'admin'
   const me = user.username
-  const body = await req.json() as {
-    action: string
-    players?: string[]; first?: string
-    puzzles?: { number: number; type?: PuzzleType; question: string; answer: string }[]
-    number?: number; text?: string; tower?: string; add?: boolean
-  }
 
   const done = (g: PuzzleChambersGame) => {
     settle(g)

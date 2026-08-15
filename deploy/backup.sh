@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Ночной архив игровых данных в S3.
+#
+# Зачем: users.json + seasons.json + 20 с лишним файлов игр — вся история сезонов.
+# Живут только на этом сервере, в git их нет. Архив весит килобайты, копия
+# стоит ровно ничего.
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+STAMP=$(date -u +%Y-%m-%dT%H-%M-%SZ)
+KEY="backups-games/games-${STAMP}.tar.gz"
+TMP=$(mktemp /tmp/games-backup.XXXXXX.tar.gz)
+trap 'rm -f "$TMP"' EXIT
+
+tar czf "$TMP" ./*.json
+
+# Пустой или битый архив хуже отсутствия бэкапа: он создаёт видимость защиты.
+gzip -t "$TMP"
+COUNT=$(tar tzf "$TMP" | wc -l)
+if [ "$COUNT" -lt 5 ]; then
+  echo "ОТМЕНА: в архиве всего $COUNT файлов" >&2
+  exit 1
+fi
+if ! tar tzf "$TMP" | grep -q "users.json"; then
+  echo "ОТМЕНА: в архиве нет users.json" >&2
+  exit 1
+fi
+if ! tar tzf "$TMP" | grep -q "seasons.json"; then
+  echo "ОТМЕНА: в архиве нет seasons.json" >&2
+  exit 1
+fi
+
+# aws-sdk и S3-креды живут в контейнере memories — заливаем через него.
+docker cp "$TMP" memories-app-1:/app/games-backup.tar.gz
+docker cp deploy/backup-upload.js memories-app-1:/app/games-backup-upload.js
+docker exec memories-app-1 node /app/games-backup-upload.js /app/games-backup.tar.gz "$KEY"
+docker exec memories-app-1 rm -f /app/games-backup.tar.gz /app/games-backup-upload.js
+
+echo "OK: $KEY ($COUNT файлов)"

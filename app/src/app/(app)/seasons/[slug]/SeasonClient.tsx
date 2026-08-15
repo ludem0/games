@@ -13,6 +13,7 @@ import InventorySection from './InventorySection'
 import ChatsSection from './ChatsSection'
 import OnlineSection from './OnlineSection'
 import TransferSection from './TransferSection'
+import BracketSection from './BracketSection'
 
 import type { Round, Match } from '@/lib/seasons'
 import styles from './season.module.css'
@@ -217,6 +218,8 @@ export default function SeasonClient({
             />
           </div>
         </div>
+
+        <BracketSection rounds={initialRounds} participants={participants} />
       </main>
     </div>
   )

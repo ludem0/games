@@ -43,6 +43,21 @@ function PresenceAvatar({ username }: { username: string }) {
     : <div className={styles.presenceAvatarInitials} title={username}>{username.slice(0, 2).toUpperCase()}</div>
 }
 
+interface MyTurn { slug: string; name: string; url: string }
+
+function useMyTurns() {
+  const [turns, setTurns] = useState<MyTurn[]>([])
+  useEffect(() => {
+    const load = () => fetch('/api/me/turns').then(r => r.ok ? r.json() : null).then(d => {
+      if (d?.turns) setTurns(d.turns)
+    }).catch(() => {})
+    load()
+    const id = setInterval(load, 60_000)
+    return () => clearInterval(id)
+  }, [])
+  return turns
+}
+
 const CUBE_MAP: Record<string, React.ComponentType> = { simply: CubeSimply, zero: CubeZero, gambit: CubeGambit }
 
 const SEASONS = Object.entries(SEASONS_CONFIG).map(([id, cfg]) => ({
@@ -67,6 +82,7 @@ export default function MainClient({ username, role }: Props) {
   const badge = BADGE_MAP[role]
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const online = usePresence()
+  const myTurns = useMyTurns()
 
   useEffect(() => {
     fetch('/api/me/avatar')
@@ -108,6 +124,16 @@ export default function MainClient({ username, role }: Props) {
       </nav>
 
       <main className={styles.content}>
+        {myTurns.length > 0 && (
+          <div className={styles.turnsCard}>
+            <div className={styles.turnsTitle}>Ваш ход</div>
+            <div className={styles.turnsList}>
+              {myTurns.map(t => (
+                <Link key={t.slug} href={t.url} className={styles.turnLink}>{t.name} →</Link>
+              ))}
+            </div>
+          </div>
+        )}
         <div className={styles.seasonsLabel}>SEASONS</div>
         <div className={styles.seasonsGrid}>
           {SEASONS.map(({ id, name, Cube, glowColor, status, statusLabel }) => (

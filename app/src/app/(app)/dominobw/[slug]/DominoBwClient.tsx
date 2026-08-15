@@ -7,6 +7,7 @@ import type { DbwView } from '@/lib/dominoBw'
 import RulesCard from '@/components/RulesCard'
 import { DOMINO_BW_RULES } from './rules'
 import styles from './dominobw.module.css'
+import Countdown from '@/components/Countdown'
 
 const POLL_MS = 2000
 const COLUMNS = 9
@@ -30,21 +31,6 @@ function isCell(col: number, row: number): boolean {
 const cellName = (col: number, row: number) =>
   `${String.fromCharCode(65 + col)}${String.fromCharCode(82 + row)}`
 
-function Countdown({ deadline }: { deadline: number }) {
-  const [now, setNow] = useState(Date.now())
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 250)
-    return () => clearInterval(t)
-  }, [])
-  const left = Math.max(0, deadline - now)
-  const m = Math.floor(left / 60000)
-  const s = Math.floor((left % 60000) / 1000)
-  return (
-    <span className={left < 30000 ? styles.clockLow : styles.clock}>
-      {m}:{String(s).padStart(2, '0')}
-    </span>
-  )
-}
 
 export default function DominoBwClient({ slug, initialView, username, role, roster }: Props) {
   const [view, setView] = useState<DbwView>(initialView)

@@ -9,8 +9,10 @@ import {
   SIZE, colOf, rowOf, type Colour, type Orient,
 } from '@/lib/labyrinthBoard'
 import RulesCard from '@/components/RulesCard'
+import { useGameChannel } from '@/components/useGameChannel'
 import { LABYRINTH_RULES } from './rules'
 import styles from './labyrinth.module.css'
+import Countdown from '@/components/Countdown'
 
 const POLL_MS = 4000
 const TILE = 60
@@ -29,22 +31,6 @@ interface Props {
   roster: string[]
 }
 
-function Countdown({ deadline }: { deadline: number }) {
-  const [now, setNow] = useState(Date.now())
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(t)
-  }, [])
-  const left = Math.max(0, deadline - now)
-  const h = Math.floor(left / 3600000)
-  const m = Math.floor((left % 3600000) / 60000)
-  const s = Math.floor((left % 60000) / 1000)
-  return (
-    <span className={left < 3600000 ? styles.clockLow : styles.clock}>
-      {h}:{String(m).padStart(2, '0')}:{String(s).padStart(2, '0')}
-    </span>
-  )
-}
 
 /** One maze tile drawn as a brown square with yellow arms poking out of it. */
 function TileArt({ orient, size = TILE }: { orient: Orient; size?: number }) {
@@ -98,6 +84,7 @@ export default function LabyrinthClient({ slug, initialView, username, role, ros
     timer.current = setInterval(refresh, POLL_MS)
     return () => { if (timer.current) clearInterval(timer.current) }
   }, [refresh])
+  useGameChannel(slug, refresh)
 
   // the active piece changes after every shove, so follow it into the picker
   useEffect(() => { setOrient(view.active) }, [view.active])

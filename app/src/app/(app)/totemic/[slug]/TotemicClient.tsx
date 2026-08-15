@@ -7,6 +7,7 @@ import type { TmView, Wager } from '@/lib/totemic'
 import RulesCard from '@/components/RulesCard'
 import { TOTEMIC_RULES } from './rules'
 import styles from './totem.module.css'
+import Countdown from '@/components/Countdown'
 
 const POLL_MS = 5000
 const WAGERS: { id: Wager; label: string }[] = [
@@ -24,17 +25,6 @@ interface Props {
   roster: string[]
 }
 
-function Countdown({ deadline }: { deadline: string }) {
-  const [now, setNow] = useState(Date.now())
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(t)
-  }, [])
-  const left = Math.max(0, new Date(deadline).getTime() - now)
-  const h = Math.floor(left / 3600000)
-  const m = Math.floor((left % 3600000) / 60000)
-  return <span className={styles.clock}>{h}ч {String(m).padStart(2, '0')}м</span>
-}
 
 export default function TotemicClient({ slug, initialView, username, role, roster }: Props) {
   const [view, setView] = useState<TmView>(initialView)
