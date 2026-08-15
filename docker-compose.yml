@@ -28,6 +28,7 @@ services:
       - ./element.json:/app/element.json
       - ./labyrinth.json:/app/labyrinth.json
       - ./domain.json:/app/domain.json
+      - ./notify.json:/app/notify.json
       - ./avatars:/app/public/avatars
     env_file: .env
     networks:
